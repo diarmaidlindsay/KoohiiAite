@@ -1,20 +1,42 @@
-package com.diarmaidlindsay.koohii;
+package com.diarmaidlindsay.koohii.activity;
 
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.SearchView;
+import com.diarmaidlindsay.koohii.R;
+import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
+import com.diarmaidlindsay.koohii.database.dao.KanjiDataSource;
+
+import java.sql.SQLException;
 
 
-public class KanjiList extends AppCompatActivity {
+public class KanjiListActivity extends AppCompatActivity {
+
+    KanjiDataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kanji_list);
+
+        ListView kanjiList = (ListView)findViewById(R.id.kanjiListView);
+
+        dataSource = new KanjiDataSource(this);
+        try {
+            dataSource.open();
+        } catch (SQLException e) {
+            Log.e("KanjiListActivity", "Couldn't open database");
+        }
+
+        kanjiList.setAdapter(new KanjiListAdapter(dataSource.getAllKanji(), this));
+
+        dataSource.close(); //Open again when needed
     }
 
 
