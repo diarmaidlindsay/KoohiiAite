@@ -1,31 +1,33 @@
 package com.diarmaidlindsay.koohii.activity;
 
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SearchView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
-import com.diarmaidlindsay.koohii.database.dao.KanjiDataSource;
 
-import java.sql.SQLException;
-import java.util.Locale;
+/**
+ *  Koohii Aite uses Heisig Old Edition
+ *  Volume 1 : 5th edition or earlier.
+    Volume 3 : 1st or 2nd edition.
 
+    This is because I use rikaikun Chrome plugin, which gives me old edition Heisig indexes.
+    At some point I should update the application to handle new edition indexes as well.
+    And update rikaikun's kanji.dat as well.
 
+    https://docs.google.com/spreadsheets/d/1Z0BUSie8wh0JqlUejezs3EqauJuF-zKEomOQnqm9J08/edit#gid=0
+ *
+ *  Entry point into the application.
+ */
 public class KanjiListActivity extends AppCompatActivity {
 
-    KanjiDataSource dataSource;
-    KanjiListAdapter adapter;
-    EditText editsearch;
+    private KanjiListAdapter adapter;
+    private EditText editsearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,19 +36,10 @@ public class KanjiListActivity extends AppCompatActivity {
 
         ListView kanjiList = (ListView) findViewById(R.id.kanjiListView);
 
-        try {
-            dataSource = new KanjiDataSource(this);
-            dataSource.open();
-            adapter = new KanjiListAdapter(dataSource.getAllKanji(), this);
-            kanjiList.setAdapter(adapter);
-            dataSource.close(); //Open again when needed
-
-            editsearch = (EditText) findViewById(R.id.search);
-            editsearch.addTextChangedListener(getTextWatcher());
-        } catch (SQLException e) {
-            Log.e("KanjiListActivity", "Couldn't open database");
-            //TODO : Inform the user
-        }
+        adapter = new KanjiListAdapter(this);
+        kanjiList.setAdapter(adapter);
+        editsearch = (EditText) findViewById(R.id.search);
+        editsearch.addTextChangedListener(getTextWatcher());
     }
 
 

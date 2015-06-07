@@ -11,13 +11,13 @@ import java.sql.SQLException;
  */
 public abstract class CommonDataSource {
     SQLiteDatabase database;
-    DatabaseAssetHelper dbHelper;
+    private final DatabaseAssetHelper dbHelper;
 
-    public CommonDataSource(Context context) {
-        dbHelper = new DatabaseAssetHelper(context);
+    CommonDataSource(Context context) {
+        dbHelper = DatabaseAssetHelper.getInstance(context);
     }
 
-    public void open() throws SQLException
+    public void open()
     {
         database = dbHelper.getWritableDatabase();
     }

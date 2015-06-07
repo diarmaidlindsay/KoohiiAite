@@ -4,9 +4,9 @@ package com.diarmaidlindsay.koohii.model;
  * Represent an entry in the Story table
  */
 public class Story {
-    int heisig_id;
-    String story_text;
-    long last_edited; //unix time
+    private int heisig_id; //primary key also foreign key to HeisigKanji table
+    private String story_text;
+    private long last_edited; //unix time
 
     /**
      * Use when reading existing story from the database
@@ -28,10 +28,6 @@ public class Story {
 
     public int getHeisig_id() {
         return heisig_id;
-    }
-
-    public void setHeisig_id(int heisig_id) {
-        this.heisig_id = heisig_id;
     }
 
     public String getStory_text() {
