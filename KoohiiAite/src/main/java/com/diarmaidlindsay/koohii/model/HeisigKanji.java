@@ -1,6 +1,7 @@
 package com.diarmaidlindsay.koohii.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,7 +41,14 @@ public class HeisigKanji {
         return joyo;
     }
 
-    public static String[] getIds(List<HeisigKanji> list)
+    /**
+     * They are stored 1 indexed in the database.
+     * This should be used for display purposes.
+     *
+     * If they are to be used for indexing other tables should
+     * get the 0 Indexed list of ids instead.
+     */
+    public static String[] getIds1Indexed(List<HeisigKanji> list)
     {
         List<String> ids = new ArrayList<>();
 
@@ -52,15 +60,48 @@ public class HeisigKanji {
         return ids.toArray(new String[ids.size()]);
     }
 
-    public static List<HeisigKanji> getObjects(List<Integer> ids, List<HeisigKanji> masterList)
+    public static String[] getIds0Indexed(List<HeisigKanji> list)
+    {
+        List<String> ids = new ArrayList<>();
+
+        for(HeisigKanji hk : list)
+        {
+            ids.add(String.valueOf(hk.getId() - 1));
+        }
+
+        return ids.toArray(new String[ids.size()]);
+    }
+
+    public static List<HeisigKanji> getHeisigKanjiMatchingIds(List<Integer> ids, List<HeisigKanji> masterList)
     {
         List<HeisigKanji> filteredList = new ArrayList<>();
+        Collections.sort(ids);
 
         for(Integer id : ids)
         {
-            filteredList.add(masterList.get(id));
+            //convert to 0 notation when referencing java array
+            filteredList.add(masterList.get(id-1));
         }
 
         return filteredList;
+    }
+
+    /**
+     * Return 4 digit Heisig Frame number for display
+     */
+    public static String getHeisigIdAsString(int heisigId) {
+        String prefixZeros = "";
+
+        if (heisigId < 1000) {
+            prefixZeros += "0";
+            if (heisigId < 100) {
+                prefixZeros += "0";
+                if (heisigId < 10) {
+                    prefixZeros += "0";
+                }
+            }
+        }
+
+        return prefixZeros + heisigId;
     }
 }

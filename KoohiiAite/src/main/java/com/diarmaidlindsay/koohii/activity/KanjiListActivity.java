@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
 
@@ -28,6 +29,7 @@ public class KanjiListActivity extends AppCompatActivity {
 
     private KanjiListAdapter adapter;
     private EditText editsearch;
+    private TextView result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,7 @@ public class KanjiListActivity extends AppCompatActivity {
         kanjiList.setAdapter(adapter);
         editsearch = (EditText) findViewById(R.id.search);
         editsearch.addTextChangedListener(getTextWatcher());
+        result = (TextView) findViewById(R.id.result);
     }
 
 
@@ -82,6 +85,7 @@ public class KanjiListActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String text = editsearch.getText().toString();
                 adapter.filter(text);
+                result.setText(adapter.getCount() + " items displayed");
             }
         };
     }
