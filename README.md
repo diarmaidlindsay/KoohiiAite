@@ -8,7 +8,7 @@ easily be confused.
 
 James Heisig created a method for learning to recognise kanji by breaking them down into "keywords" and "primitives",
 and using these to create kanji "stories". He documented this method in his bestselling book
-"Remembering the Kanji", which has since went undergone numerous revisions.
+"Remembering the Kanji", which has since undergone numerous revisions.
 
 Of course, a student is free to create kanji stories of their own which assist them in memorisation. A website
 called kanji.koohii.com exists to help students share kanji stories, even relabel keywords and primitives.
