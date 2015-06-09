@@ -1,70 +1,60 @@
-<GridLayout
-
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:columnCount="3"
-        android:rowCount="3"
         android:id="@+id/list_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:focusable="false"
-        android:layout_gravity="fill_horizontal"
-        android:paddingEnd="10sp"
-        android:paddingStart="10sp"
-        android:textAlignment="gravity"
-        android:useDefaultMargins="false"
-        android:padding="10sp">
+        android:orientation="horizontal">
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/unSet"
-            android:id="@+id/kanji_list_item"
-            android:paddingLeft="0dp"
-            android:paddingRight="10dp"
-            android:paddingEnd="0dp"
-            android:textSize="36sp"
-            android:layout_rowSpan="3"
-            android:layout_columnSpan="1"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:linksClickable="true"/>
+        <TextView
+                android:id="@+id/kanji_list_item"
+                android:text="@string/unSet"
+                android:paddingRight="10dp"
+                android:textSize="36sp"
+                android:maxLines="1"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/unSet"
-            android:id="@+id/heisig_id_list_item"
-            android:paddingLeft="0dp"
-            android:paddingRight="10dp"
-            android:paddingEnd="0dp"
-            android:textColor="#ff2f4f4f"
-            android:textSize="24sp"
-            android:layout_rowSpan="1"
-            android:layout_columnSpan="1"
-            android:maxLines="1"/>
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/unSet"
-            android:id="@+id/keyword_list_item"
-            android:textColor="#ff287235"
-            android:layout_rowSpan="1"
-            android:layout_columnSpan="1"
-            android:maxLines="1"/>
+                <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/unSet"
-            android:id="@+id/primitives_list_item"
-            android:layout_rowSpan="2"
-            android:layout_columnSpan="2"
-            android:layout_gravity="fill_horizontal"/>
+                        <TextView
+                                android:id="@+id/heisig_id_list_item"
+                                android:textAppearance="?android:attr/textAppearanceLarge"
+                                android:text="@string/unSet"
+                                android:paddingRight="10dp"
+                                android:textColor="#ff2f4f4f"
+                                android:maxLines="1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
 
-</GridLayout>
+                        <TextView
+                                android:id="@+id/keyword_list_item"
+                                android:textAppearance="?android:attr/textAppearanceMedium"
+                                android:text="@string/unSet"
+                                android:textColor="#ff287235"
+                                android:maxLines="1"
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <TextView
+                        android:id="@+id/primitives_list_item"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="@string/unSet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+</LinearLayout>

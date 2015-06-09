@@ -87,7 +87,7 @@ public class KanjiListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.list_item_kanji, null);
+            convertView = layoutInflater.inflate(R.layout.list_item_kanji, parent, false);
             viewHolder = new ViewHolderItem();
             viewHolder.heisig = (TextView) convertView.findViewById(R.id.heisig_id_list_item);
             viewHolder.kanji = (TextView) convertView.findViewById(R.id.kanji_list_item);
