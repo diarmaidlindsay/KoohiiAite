@@ -1,6 +1,7 @@
 package com.diarmaidlindsay.koohii.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
+import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
 import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
 import com.diarmaidlindsay.koohii.database.dao.HeisigToPrimitiveDataSource;
 import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
@@ -24,7 +26,7 @@ import java.util.*;
  */
 public class KanjiListAdapter extends BaseAdapter {
     private ViewHolderItem viewHolder;
-    private Context context;
+    private Context mContext;
 
     private List<HeisigKanji> masterList; //list of all HeisigKanjis
     private List<Keyword> keywordList; //list of all Keywords
@@ -47,16 +49,16 @@ public class KanjiListAdapter extends BaseAdapter {
     }
 
     public KanjiListAdapter(Context context) {
-        this.context = context;
+        this.mContext = context;
         layoutInflater = LayoutInflater.from(context);
         initialiseDatasets();
         filter("");
     }
 
     private void initialiseDatasets() {
-        KeywordDataSource keywordDataSource = new KeywordDataSource(context);
-        HeisigKanjiDataSource heisigKanjiDataSource = new HeisigKanjiDataSource(context);
-        PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(context);
+        KeywordDataSource keywordDataSource = new KeywordDataSource(mContext);
+        HeisigKanjiDataSource heisigKanjiDataSource = new HeisigKanjiDataSource(mContext);
+        PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(mContext);
         heisigKanjiDataSource.open();
         keywordDataSource.open();
         primitiveDataSource.open();
@@ -101,7 +103,7 @@ public class KanjiListAdapter extends BaseAdapter {
 
         HeisigKanji theKanji = (HeisigKanji) getItem(position);
 
-        int heisigId = theKanji.getId();
+        final int heisigId = theKanji.getId();
 
         List<Integer> primitiveIds =
                 HeisigToPrimitive.getPrimitiveIdsForHeisigId(filteredHeisigToPrimitiveList, heisigId);
@@ -118,32 +120,28 @@ public class KanjiListAdapter extends BaseAdapter {
             }
         }
 
+        final String kanji = theKanji.getKanji();
+        final String keyword = keywordList.get(heisigId - 1).getKeywordText(); //convert to 0-index
+
         viewHolder.heisig.setText(HeisigKanji.getHeisigIdAsString(heisigId));
-        viewHolder.kanji.setText(theKanji.getKanji());
-        viewHolder.keyword.setText(keywordList.get(heisigId - 1).getKeywordText());
+        viewHolder.kanji.setText(kanji);
+        viewHolder.keyword.setText(keyword);
         viewHolder.primitives.setText(primitiveText.toString());
         int bgColor = theKanji.isJoyo() ?
                 Color.parseColor("#F5D76E") : Color.parseColor("#FFFFFF");
 
         convertView.setBackgroundColor(bgColor);
         // Listen for ListView Item Click
-//        view.setOnClickListener(new OnClickListener() {
-//
-//            @Override
-//            public void onClick(View arg0) {
-//                // Send single item click data to SingleItemView Class
-//                Intent intent = new Intent(mContext, SingleItemView.class);
-//                // Pass all data rank
-//                intent.putExtra("rank",(worldpopulationlist.get(position).getRank()));
-//                // Pass all data country
-//                intent.putExtra("country",(worldpopulationlist.get(position).getCountry()));
-//                // Pass all data population
-//                intent.putExtra("population",(worldpopulationlist.get(position).getPopulation()));
-//                // Pass all data flag
-//                // Start SingleItemView Class
-//                mContext.startActivity(intent);
-//            }
-//        });
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                Intent intent = new Intent(mContext, KanjiDetailActivity.class);
+                intent.putExtra("heisigId", heisigId);
+                intent.putExtra("keyword", keyword);
+                intent.putExtra("kanji", kanji);
+                mContext.startActivity(intent);
+            }
+        });
 
         return convertView;
     }
@@ -184,7 +182,7 @@ public class KanjiListAdapter extends BaseAdapter {
      * Is it better to just cache them all?
      */
     private void updatePrimitiveList() {
-        HeisigToPrimitiveDataSource heisigToPrimitiveDataSource = new HeisigToPrimitiveDataSource(context);
+        HeisigToPrimitiveDataSource heisigToPrimitiveDataSource = new HeisigToPrimitiveDataSource(mContext);
         heisigToPrimitiveDataSource.open();
         String[] heisigIds = HeisigKanji.getIds1Indexed(filteredHeisigKanjiList);
         filteredHeisigToPrimitiveList =
@@ -236,7 +234,7 @@ public class KanjiListAdapter extends BaseAdapter {
             List<Integer> primitiveIds =
                 Primitive.getPrimitiveIdsContaining(filterText, primitiveList);
 
-            HeisigToPrimitiveDataSource dataSource = new HeisigToPrimitiveDataSource(context);
+            HeisigToPrimitiveDataSource dataSource = new HeisigToPrimitiveDataSource(mContext);
             dataSource.open();
             List<Integer> heisigIds =
                     dataSource.getHeisigIdsMatching(primitiveIds.toArray(new Integer[primitiveIds.size()]));
