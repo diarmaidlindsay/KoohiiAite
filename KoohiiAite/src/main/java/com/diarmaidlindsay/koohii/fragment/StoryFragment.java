@@ -19,9 +19,9 @@ public class StoryFragment extends Fragment {
     private TextView textViewKanji;
     private TextView textViewKeyword;
 
-    public StoryFragment()
-    {
-
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
     }
 
     @Override
@@ -32,10 +32,15 @@ public class StoryFragment extends Fragment {
         textViewKanji = (TextView) view.findViewById(R.id.kanji_detail);
         textViewKeyword = (TextView) view.findViewById(R.id.keyword_detail);
 
+        Bundle args = getArguments();
+        String heisigId = HeisigKanji.getHeisigIdAsString(args.getInt("heisigId", 0));
+        String kanji = args.getString("kanji");
+        String keyword = args.getString("keyword");
+
         // Load the results into the TextViews
-        textViewHeisigId.setText(HeisigKanji.getHeisigIdAsString(3));
-        textViewKanji.setText("G");
-        textViewKeyword.setText("KW");
+        textViewHeisigId.setText(heisigId);
+        textViewKanji.setText(kanji);
+        textViewKeyword.setText(keyword);
 
         return view;
     }

@@ -1,5 +1,7 @@
 package com.diarmaidlindsay.koohii.adapter;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -11,10 +13,16 @@ import com.diarmaidlindsay.koohii.fragment.StoryFragment;
  * Invoked when user clicks a list item in the KanjiListActivity
  */
 public class KanjiDetailAdapter extends FragmentPagerAdapter {
+    StoryFragment fragmentStory;
+    DictionaryFragment dictionaryFragment;
+    KoohiiFragment koohiiFragment;
+
+    Bundle arguments;
     private final int NUM_ITEMS = 3;
 
-    public KanjiDetailAdapter(FragmentManager fragmentManager) {
+    public KanjiDetailAdapter(FragmentManager fragmentManager, Intent intent) {
         super(fragmentManager);
+        arguments = intent.getExtras();
     }
 
     // Returns total number of pages
@@ -28,7 +36,11 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return new StoryFragment();
+                if(fragmentStory == null) {
+                    fragmentStory = new StoryFragment();
+                    fragmentStory.setArguments(arguments);
+                }
+                return fragmentStory;
             case 1:
                 return new DictionaryFragment();
             case 2:

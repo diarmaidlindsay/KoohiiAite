@@ -7,5 +7,9 @@
     <string name="unSet">unSet</string>
     <string name="default_results_text">All Kanji displayed</string>
     <string name="title_activity_kanji_detail">KanjiDetailActivity</string>
+    <string name="story_fragment_kanji_label">Kanji</string>
+    <string name="story_fragment_heisigid_label">Heisig Frame #</string>
+    <string name="story_fragment_keyword_label">Keyword</string>
+    <string name="story_fragment_story_label">Story</string>
 
 </resources>

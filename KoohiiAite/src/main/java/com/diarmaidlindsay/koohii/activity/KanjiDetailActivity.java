@@ -16,24 +16,15 @@ import com.diarmaidlindsay.koohii.adapter.KanjiDetailAdapter;
  */
 public class KanjiDetailActivity extends AppCompatActivity {
 
-    private int heisigId;
-    private String kanji;
-    private String keyword;
-
     FragmentPagerAdapter adapterViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent i = getIntent();
-        heisigId = i.getIntExtra("heisigId", 0);
-        kanji = i.getStringExtra("kanji");
-        keyword = i.getStringExtra("keyword");
-
         setContentView(R.layout.activity_kanji_detail);
         ViewPager vPager = (ViewPager) findViewById(R.id.vpPager);
-        adapterViewPager = new KanjiDetailAdapter(getSupportFragmentManager());
+        adapterViewPager = new KanjiDetailAdapter(getSupportFragmentManager(), getIntent());
         vPager.setAdapter(adapterViewPager);
     }
 
