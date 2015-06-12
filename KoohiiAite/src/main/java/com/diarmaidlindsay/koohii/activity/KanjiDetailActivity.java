@@ -2,42 +2,40 @@ package com.diarmaidlindsay.koohii.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
-import com.diarmaidlindsay.koohii.model.HeisigKanji;
+import com.diarmaidlindsay.koohii.adapter.KanjiDetailAdapter;
 
+/**
+ * Display details of the heisig_id passed in
+ * using Pager
+ */
 public class KanjiDetailActivity extends AppCompatActivity {
 
     private int heisigId;
     private String kanji;
     private String keyword;
 
-    private TextView textViewHeisigId;
-    private TextView textViewKanji;
-    private TextView textViewKeyword;
+    FragmentPagerAdapter adapterViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_kanji_detail);
+
         Intent i = getIntent();
         heisigId = i.getIntExtra("heisigId", 0);
         kanji = i.getStringExtra("kanji");
         keyword = i.getStringExtra("keyword");
 
-        textViewHeisigId = (TextView) findViewById(R.id.heisig_id_detail);
-        textViewKanji = (TextView) findViewById(R.id.kanji_detail);
-        textViewKeyword = (TextView) findViewById(R.id.keyword_detail);
-
-        // Load the results into the TextViews
-        textViewHeisigId.setText(HeisigKanji.getHeisigIdAsString(heisigId));
-        textViewKanji.setText(kanji);
-        textViewKeyword.setText(keyword);
+        setContentView(R.layout.activity_kanji_detail);
+        ViewPager vPager = (ViewPager) findViewById(R.id.vpPager);
+        adapterViewPager = new KanjiDetailAdapter(getSupportFragmentManager());
+        vPager.setAdapter(adapterViewPager);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
