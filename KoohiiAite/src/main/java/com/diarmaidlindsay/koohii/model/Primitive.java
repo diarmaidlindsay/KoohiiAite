@@ -55,4 +55,17 @@ public class Primitive {
 
         return primitiveIds;
     }
+
+    public static int getPrimitiveIdWhichMatches(String primitiveText, List<Primitive> primitives)
+    {
+        for(Primitive primitive : primitives)
+        {
+            if(primitive.getPrimitiveText().equals(primitiveText))
+            {
+                return primitive.getId();
+            }
+        }
+
+        return -1;
+    }
 }

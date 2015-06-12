@@ -161,15 +161,16 @@ public class KanjiListAdapter extends BaseAdapter {
             filterOnPrimitives(filterText);
         }
 
-        updateFilteredList();
+        updateFilteredList(filterText);
         updatePrimitiveList();
         notifyDataSetChanged();
     }
 
-    private void updateFilteredList() {
+    private void updateFilteredList(String filterText) {
         filteredHeisigKanjiList.clear();
 
-        if (filteredHeisigKanjiSet.size() == 0) {
+        if (filterText.length() == 0) {
+            //if nothing is entered in search, display all
             filteredHeisigKanjiList.addAll(masterList);
 
         } else {
@@ -179,15 +180,16 @@ public class KanjiListAdapter extends BaseAdapter {
 
     /**
      * Called every time there is a filter operation.
-     * Is it better to just cache them all?
      */
     private void updatePrimitiveList() {
-        HeisigToPrimitiveDataSource heisigToPrimitiveDataSource = new HeisigToPrimitiveDataSource(mContext);
-        heisigToPrimitiveDataSource.open();
-        String[] heisigIds = HeisigKanji.getIds1Indexed(filteredHeisigKanjiList);
-        filteredHeisigToPrimitiveList =
-                heisigToPrimitiveDataSource.getHeisigToPrimitiveMatching(heisigIds);
-        heisigToPrimitiveDataSource.close();
+        if(filteredHeisigKanjiList.size() > 0) {
+            HeisigToPrimitiveDataSource heisigToPrimitiveDataSource = new HeisigToPrimitiveDataSource(mContext);
+            heisigToPrimitiveDataSource.open();
+            String[] heisigIds = HeisigKanji.getIds1Indexed(filteredHeisigKanjiList);
+            filteredHeisigToPrimitiveList =
+                    heisigToPrimitiveDataSource.getHeisigToPrimitiveMatching(heisigIds);
+            heisigToPrimitiveDataSource.close();
+        }
     }
 
     /**
@@ -231,16 +233,76 @@ public class KanjiListAdapter extends BaseAdapter {
     {
         if(filterText.length()>0)
         {
-            List<Integer> primitiveIds =
-                Primitive.getPrimitiveIdsContaining(filterText, primitiveList);
-
             HeisigToPrimitiveDataSource dataSource = new HeisigToPrimitiveDataSource(mContext);
-            dataSource.open();
-            List<Integer> heisigIds =
-                    dataSource.getHeisigIdsMatching(primitiveIds.toArray(new Integer[primitiveIds.size()]));
-            dataSource.close();
+            List<Integer> heisigIds;
+
+            //ie sun,moon
+            if(filterText.contains(","))
+            {
+                //if comma seperated primitive list, we're searching for many exact matches
+                String[] primitiveSearchStrings = filterText.split(",");
+                List<Integer> primitiveMatches = new ArrayList<>();
+                //find primitive id which exactly matches string input
+                for(String primitiveString : primitiveSearchStrings)
+                {
+                    primitiveString = primitiveString.trim();
+                    int primitiveIdMatched =
+                            Primitive.getPrimitiveIdWhichMatches(primitiveString, primitiveList);
+                    if(primitiveIdMatched == -1)
+                    {
+                        //no exact match found for primitive string
+                        return;
+                    }
+                    primitiveMatches.add(primitiveIdMatched);
+                }
+
+                List<List<Integer>> heisigIdsForPrimitiveIds = new ArrayList<>();
+
+                //we've found the primitive ids matching the strings the user entered
+                //which kanjis contain all these primitives?
+                dataSource.open();
+
+                for(Integer match : primitiveMatches)
+                {
+                    heisigIdsForPrimitiveIds.add(
+                            dataSource.getHeisigIdsMatching(new Integer[]{match}));
+                }
+                dataSource.close();
+                //only retain the intersection of these matches, kanji which contain ALL these primitives
+                heisigIds = intersection(heisigIdsForPrimitiveIds);
+            }
+            else{
+                //if no comma, assume we're fuzzy searching for 1 primitive
+                //ie night -> night, nightbreak
+                List<Integer> primitiveIds =
+                        Primitive.getPrimitiveIdsContaining(filterText, primitiveList);
+                dataSource.open();
+                heisigIds =
+                        dataSource.getHeisigIdsMatching(primitiveIds.toArray(new Integer[primitiveIds.size()]));
+                dataSource.close();
+            }
+
+            if(heisigIds.size() == 0)
+            {
+                return;
+            }
 
             filteredHeisigKanjiSet.addAll(heisigIds);
         }
+    }
+
+    public List<Integer> intersection(List<List<Integer>> matches) {
+        List<Integer> intersection = new ArrayList<>();
+        if(matches.size() > 0)
+        {
+            intersection.addAll(matches.get(0));
+
+            for(List<Integer> list :  matches)
+            {
+                intersection.retainAll(list);
+            }
+        }
+
+        return intersection;
     }
 }

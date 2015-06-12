@@ -1,6 +1,7 @@
 package com.diarmaidlindsay.koohii.activity;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -83,10 +84,22 @@ public class KanjiListActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                String text = editsearch.getText().toString();
-                adapter.filter(text);
-                result.setText(adapter.getCount() + " items displayed");
+                mHandler.removeCallbacks(mFilterTask);
+                //Delay after user input to smooth the user experience
+                mHandler.postDelayed(mFilterTask, 1000);
             }
+
+            Runnable mFilterTask = new Runnable() {
+
+                @Override
+                public void run() {
+                    String text = editsearch.getText().toString();
+                    adapter.filter(text);
+                    result.setText(adapter.getCount() + " items displayed");
+                }
+            };
+
+            private Handler mHandler = new Handler();
         };
     }
 }
