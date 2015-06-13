@@ -2,7 +2,6 @@ package com.diarmaidlindsay.koohii.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -127,10 +126,9 @@ public class KanjiListAdapter extends BaseAdapter {
         viewHolder.kanji.setText(kanji);
         viewHolder.keyword.setText(keyword);
         viewHolder.primitives.setText(primitiveText.toString());
-        int bgColor = theKanji.isJoyo() ?
-                Color.parseColor("#F5D76E") : Color.parseColor("#FFFFFF");
-
-        convertView.setBackgroundColor(bgColor);
+//        int bgColor = theKanji.isJoyo() ?
+//                Color.parseColor("#F5D76E") : Color.parseColor("#FFFFFF");
+//        convertView.setBackgroundColor(bgColor);
         // Listen for ListView Item Click
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override

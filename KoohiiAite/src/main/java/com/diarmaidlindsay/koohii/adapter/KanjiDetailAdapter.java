@@ -13,7 +13,7 @@ import com.diarmaidlindsay.koohii.fragment.StoryFragment;
  * Invoked when user clicks a list item in the KanjiListActivity
  */
 public class KanjiDetailAdapter extends FragmentPagerAdapter {
-    StoryFragment fragmentStory;
+    StoryFragment storyFragment;
     DictionaryFragment dictionaryFragment;
     KoohiiFragment koohiiFragment;
 
@@ -36,13 +36,17 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                if(fragmentStory == null) {
-                    fragmentStory = new StoryFragment();
-                    fragmentStory.setArguments(arguments);
+                if(storyFragment == null) {
+                    storyFragment = new StoryFragment();
+                    storyFragment.setArguments(arguments);
                 }
-                return fragmentStory;
+                return storyFragment;
             case 1:
-                return new DictionaryFragment();
+                if(dictionaryFragment == null) {
+                    dictionaryFragment = new DictionaryFragment();
+                    dictionaryFragment.setArguments(arguments);
+                }
+                return dictionaryFragment;
             case 2:
                 return new KoohiiFragment();
             default:

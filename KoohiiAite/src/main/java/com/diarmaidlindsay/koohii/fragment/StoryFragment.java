@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
+import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.model.HeisigKanji;
+import com.diarmaidlindsay.koohii.model.Story;
 
 /**
  * For display of the Story related to the heisig id
@@ -15,33 +17,39 @@ import com.diarmaidlindsay.koohii.model.HeisigKanji;
  * Follow links from stories to other Kanji detail pages.
  */
 public class StoryFragment extends Fragment {
-    private TextView textViewHeisigId;
-    private TextView textViewKanji;
-    private TextView textViewKeyword;
-
-    @Override
-    public void setArguments(Bundle args) {
-        super.setArguments(args);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail_story, container, false);
 
-        textViewHeisigId = (TextView) view.findViewById(R.id.heisig_id_detail);
-        textViewKanji = (TextView) view.findViewById(R.id.kanji_detail);
-        textViewKeyword = (TextView) view.findViewById(R.id.keyword_detail);
+        TextView textViewHeisigId = (TextView) view.findViewById(R.id.heisig_id_detail);
+        TextView textViewKanji = (TextView) view.findViewById(R.id.kanji_detail);
+        TextView textViewKeyword = (TextView) view.findViewById(R.id.keyword_detail);
+        TextView textViewStory = (TextView) view.findViewById(R.id.story_detail);
 
         Bundle args = getArguments();
-        String heisigId = HeisigKanji.getHeisigIdAsString(args.getInt("heisigId", 0));
+        int heisigIdInt = args.getInt("heisigId", 0);
+
+        String heisigId = HeisigKanji.getHeisigIdAsString(heisigIdInt);
         String kanji = args.getString("kanji");
         String keyword = args.getString("keyword");
+        String storyText = getStoryFromDatabase(heisigIdInt);
 
         // Load the results into the TextViews
         textViewHeisigId.setText(heisigId);
         textViewKanji.setText(kanji);
         textViewKeyword.setText(keyword);
+        textViewStory.setText(storyText);
 
         return view;
+    }
+
+    private String getStoryFromDatabase(int heisigId)
+    {
+        StoryDataSource dataSource = new StoryDataSource(getActivity());
+        dataSource.open();
+        Story story = dataSource.getStoryForHeisigKanjiId(heisigId);
+        dataSource.close();
+
+        return story == null ? "" : story.getStory_text();
     }
 }

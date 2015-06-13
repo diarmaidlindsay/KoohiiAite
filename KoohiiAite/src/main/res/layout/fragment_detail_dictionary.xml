@@ -1,10 +1,9 @@
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
               android:padding="10sp"
-              android:id="@+id/story_fragment_layout">
+              android:id="@+id/dictionary_fragment_layout">
     <TextView
             android:text="@string/fragment_kanji_label"
             style="@style/DetailTitle"/>
@@ -16,30 +15,48 @@
             android:id="@+id/kanji_detail"/>
 
     <TextView
-            android:text="@string/story_fragment_heisigid_label"
+            android:text="@string/dictionary_fragment_frequency_label"
             style="@style/DetailTitle"/>
 
     <TextView
             style="@style/DetailItem"
             android:text="@string/unSet"
-            android:id="@+id/heisig_id_detail"/>
+            android:id="@+id/frequency_detail"/>
 
     <TextView
-            android:text="@string/story_fragment_keyword_label"
+            android:text="@string/dictionary_fragment_onyomi_label"
             style="@style/DetailTitle"/>
 
     <TextView
             style="@style/DetailItem"
             android:text="@string/unSet"
-            android:id="@+id/keyword_detail"/>
+            android:id="@+id/onyomi_detail"/>
 
     <TextView
-            android:text="@string/story_fragment_story_label"
+            android:text="@string/dictionary_fragment_kunyomi_label"
             style="@style/DetailTitle"/>
 
     <TextView
             style="@style/DetailItem"
-            android:gravity="start"
             android:text="@string/unSet"
-            android:id="@+id/story_detail"/>
+            android:id="@+id/kunyomi_detail"/>
+
+    <TextView
+            android:text="@string/dictionary_fragment_meanings_label"
+            style="@style/DetailTitle"/>
+
+    <TextView
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/meanings_detail"/>
+
+    <TextView
+            android:text="@string/dictionary_fragment_sample_words_label"
+            style="@style/DetailTitle"/>
+
+    <TextView
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/sample_words_detail"/>
+
 </LinearLayout>

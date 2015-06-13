@@ -7,9 +7,14 @@
     <string name="unSet">unSet</string>
     <string name="default_results_text">All Kanji displayed</string>
     <string name="title_activity_kanji_detail">KanjiDetailActivity</string>
-    <string name="story_fragment_kanji_label">Kanji</string>
+    <string name="fragment_kanji_label">Kanji</string>
     <string name="story_fragment_heisigid_label">Heisig Frame #</string>
     <string name="story_fragment_keyword_label">Keyword</string>
     <string name="story_fragment_story_label">Story</string>
+    <string name="dictionary_fragment_onyomi_label">音読み (On-Yomi)</string>
+    <string name="dictionary_fragment_kunyomi_label">訓読み (Kun-Yomi)</string>
+    <string name="dictionary_fragment_meanings_label">Meanings</string>
+    <string name="dictionary_fragment_sample_words_label">Sample Words</string>
+    <string name="dictionary_fragment_frequency_label">Frequency</string>
 
 </resources>

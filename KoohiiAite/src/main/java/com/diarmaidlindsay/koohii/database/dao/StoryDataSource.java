@@ -44,18 +44,26 @@ public class StoryDataSource extends CommonDataSource {
      * This is straightforward since both tables have 1 to 1 relationship
      * on their pks.
      * @param id heisig_kanji id
+     * @return null if no results found
      */
     public Story getStoryForHeisigKanjiId(int id)
     {
         Cursor cursor = database.query(DatabaseAssetHelper.TABLE_STORY,
                 allColumns, COLUMN_ID + " = " + id, null, null, null, null);
+
+        if(cursor.getCount() == 0)
+        {
+            cursor.close();
+            return null;
+        }
+
         cursor.moveToFirst();
         Story story = cursorToStory(cursor);
         cursor.close();
         return story;
     }
 
-    public Story cursorToStory(Cursor cursor)
+    private Story cursorToStory(Cursor cursor)
     {
         return new Story(cursor.getInt(0), cursor.getString(1), cursor.getLong(2));
     }

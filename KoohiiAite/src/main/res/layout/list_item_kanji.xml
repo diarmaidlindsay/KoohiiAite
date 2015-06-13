@@ -10,6 +10,7 @@
                 android:id="@+id/kanji_list_item"
                 android:text="@string/unSet"
                 android:paddingRight="10dp"
+                android:textColor="#3E3200"
                 android:textSize="36sp"
                 android:maxLines="1"
                 android:layout_gravity="center_vertical"
@@ -31,7 +32,7 @@
                                 android:textAppearance="?android:attr/textAppearanceLarge"
                                 android:text="@string/unSet"
                                 android:paddingRight="10dp"
-                                android:textColor="#ff2f4f4f"
+                                android:textColor="#6A5500"
                                 android:maxLines="1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
@@ -40,7 +41,7 @@
                                 android:id="@+id/keyword_list_item"
                                 android:textAppearance="?android:attr/textAppearanceMedium"
                                 android:text="@string/unSet"
-                                android:textColor="#ff287235"
+                                android:textColor="#977A08"
                                 android:maxLines="1"
                                 android:layout_gravity="center_vertical"
                                 android:layout_width="wrap_content"
@@ -52,6 +53,7 @@
                         android:id="@+id/primitives_list_item"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="@string/unSet"
+                        android:textColor="#6A5500"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
