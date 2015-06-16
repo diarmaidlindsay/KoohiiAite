@@ -21,6 +21,8 @@ public class DatabaseAssetHelper extends SQLiteAssetHelper {
     public static final String TABLE_READING = "reading";
     public static final String TABLE_STORY = "story";
     public static final String TABLE_KEYWORD = "keyword";
+    public static final String TABLE_SAMPLE_WORD = "sample_words";
+    public static final String TABLE_FREQUENCY = "kanji_frequency";
 
     public static synchronized DatabaseAssetHelper getInstance(Context context) {
 

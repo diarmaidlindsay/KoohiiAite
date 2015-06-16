@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import com.diarmaidlindsay.koohii.fragment.DictionaryFragment;
 import com.diarmaidlindsay.koohii.fragment.KoohiiFragment;
+import com.diarmaidlindsay.koohii.fragment.SampleWordsFragment;
 import com.diarmaidlindsay.koohii.fragment.StoryFragment;
 
 /**
@@ -15,10 +16,11 @@ import com.diarmaidlindsay.koohii.fragment.StoryFragment;
 public class KanjiDetailAdapter extends FragmentPagerAdapter {
     StoryFragment storyFragment;
     DictionaryFragment dictionaryFragment;
+    SampleWordsFragment sampleWordsFragment;
     KoohiiFragment koohiiFragment;
 
     Bundle arguments;
-    private final int NUM_ITEMS = 3;
+    private final int NUM_ITEMS = 4;
 
     public KanjiDetailAdapter(FragmentManager fragmentManager, Intent intent) {
         super(fragmentManager);
@@ -48,6 +50,12 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
                 }
                 return dictionaryFragment;
             case 2:
+                if(sampleWordsFragment == null) {
+                    sampleWordsFragment = new SampleWordsFragment();
+                    sampleWordsFragment.setArguments(arguments);
+                }
+                return sampleWordsFragment;
+            case 3:
                 return new KoohiiFragment();
             default:
                 return null;
@@ -63,6 +71,8 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
             case 1:
                 return "Dictionary";
             case 2:
+                return "Sample Words";
+            case 3:
                 return "Koohii";
             default:
                 return "Undefined";

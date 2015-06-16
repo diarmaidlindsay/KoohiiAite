@@ -50,13 +50,4 @@
             android:text="@string/unSet"
             android:id="@+id/meanings_detail"/>
 
-    <TextView
-            android:text="@string/dictionary_fragment_sample_words_label"
-            style="@style/DetailTitle"/>
-
-    <TextView
-            style="@style/DetailItem"
-            android:text="@string/unSet"
-            android:id="@+id/sample_words_detail"/>
-
 </LinearLayout>

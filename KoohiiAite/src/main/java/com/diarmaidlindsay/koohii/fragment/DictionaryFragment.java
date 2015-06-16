@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
+import com.diarmaidlindsay.koohii.database.dao.FrequencyDataSource;
 import com.diarmaidlindsay.koohii.database.dao.MeaningDataSource;
 import com.diarmaidlindsay.koohii.database.dao.ReadingDataSource;
 import com.diarmaidlindsay.koohii.model.Meaning;
@@ -28,12 +29,11 @@ public class DictionaryFragment extends Fragment {
         TextView textViewOnYomi = (TextView) view.findViewById(R.id.onyomi_detail);
         TextView textViewKunYomi = (TextView) view.findViewById(R.id.kunyomi_detail);
         TextView textViewMeanings = (TextView) view.findViewById(R.id.meanings_detail);
-        TextView textViewSampleWords = (TextView) view.findViewById(R.id.sample_words_detail);
 
         Bundle args = getArguments();
         int heisigIdInt = args.getInt("heisigId", 0);
         String kanji = args.getString("kanji");
-        String frequency = "";
+        String frequency = getFrequencyFromDatabase(heisigIdInt);
         String onYomi = getReadingFromDatabase(heisigIdInt, 0);
         String kunYomi = getReadingFromDatabase(heisigIdInt, 1);
         String meaning = getMeaningFromDatabase(heisigIdInt);
@@ -44,8 +44,7 @@ public class DictionaryFragment extends Fragment {
         textViewOnYomi.setText(onYomi); //reading
         textViewKunYomi.setText(kunYomi); //reading
         textViewMeanings.setText(meaning); //meaning
-        textViewSampleWords.setText("");
-        
+
         return view;
     }
 
@@ -80,5 +79,15 @@ public class DictionaryFragment extends Fragment {
             meaningString = meaningString.substring(0, meaningString.length()-2);
         }
         return meaningString;
+    }
+
+    public String getFrequencyFromDatabase(int heisigId)
+    {
+        FrequencyDataSource dataSource = new FrequencyDataSource(getActivity());
+        dataSource.open();
+        int frequency = dataSource.getFrequencyFor(heisigId);
+        dataSource.close();
+
+        return frequency == 999999 ? "-" : String.valueOf(frequency);
     }
 }
