@@ -3,12 +3,14 @@ package com.diarmaidlindsay.koohii.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
+import com.diarmaidlindsay.koohii.activity.KanjiListActivity;
 import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
 import com.diarmaidlindsay.koohii.database.dao.HeisigToPrimitiveDataSource;
 import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
@@ -126,13 +128,15 @@ public class KanjiListAdapter extends BaseAdapter {
         viewHolder.kanji.setText(kanji);
         viewHolder.keyword.setText(keyword);
         viewHolder.primitives.setText(primitiveText.toString());
-//        int bgColor = theKanji.isJoyo() ?
-//                Color.parseColor("#F5D76E") : Color.parseColor("#FFFFFF");
-//        convertView.setBackgroundColor(bgColor);
         // Listen for ListView Item Click
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                //collapse search box and hide keyboard
+                if(mContext instanceof KanjiListActivity){
+                    ((KanjiListActivity)mContext).collapseSearchView();
+                }
+
                 Intent intent = new Intent(mContext, KanjiDetailActivity.class);
                 intent.putExtra("heisigId", heisigId);
                 intent.putExtra("keyword", keyword);

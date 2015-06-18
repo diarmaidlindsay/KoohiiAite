@@ -4,12 +4,6 @@
               android:orientation="vertical"
               android:background="#EBBC01">
 
-    <EditText
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:id="@+id/search"
-            android:hint="@string/search_hint"/>
-
     <TextView
             android:text="@string/default_results_text"
             android:id="@+id/result"

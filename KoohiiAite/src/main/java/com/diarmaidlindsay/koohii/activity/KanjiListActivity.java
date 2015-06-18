@@ -1,13 +1,14 @@
 package com.diarmaidlindsay.koohii.activity;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
@@ -29,7 +30,8 @@ import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
 public class KanjiListActivity extends AppCompatActivity {
 
     private KanjiListAdapter adapter;
-    private EditText editsearch;
+    private MenuItem searchItem;
+    private SearchView searchView;
     private TextView result;
 
     @Override
@@ -41,8 +43,6 @@ public class KanjiListActivity extends AppCompatActivity {
 
         adapter = new KanjiListAdapter(this);
         kanjiList.setAdapter(adapter);
-        editsearch = (EditText) findViewById(R.id.search);
-        editsearch.addTextChangedListener(getTextWatcher());
         result = (TextView) findViewById(R.id.result);
     }
 
@@ -51,7 +51,16 @@ public class KanjiListActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_kanji_list, menu);
-        return true;
+
+        SearchManager searchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
+        searchItem = menu.findItem(R.id.search);
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setSearchableInfo(searchManager.
+                getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(getTextListener());
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -69,31 +78,30 @@ public class KanjiListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private TextWatcher getTextWatcher()
+    private SearchView.OnQueryTextListener getTextListener()
     {
-        return new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        return new SearchView.OnQueryTextListener() {
+            private String text;
 
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //don't do anything when search submitted, it's handled by text changed event
+                return false;
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
+            public boolean onQueryTextChange(String newText) {
+                text = newText;
                 mHandler.removeCallbacks(mFilterTask);
                 //Delay after user input to smooth the user experience
                 mHandler.postDelayed(mFilterTask, 1000);
+                return true;
             }
 
             Runnable mFilterTask = new Runnable() {
 
                 @Override
                 public void run() {
-                    String text = editsearch.getText().toString();
                     adapter.filter(text);
                     result.setText(adapter.getCount() + " items displayed");
                 }
@@ -101,5 +109,16 @@ public class KanjiListActivity extends AppCompatActivity {
 
             private Handler mHandler = new Handler();
         };
+    }
+
+    /**
+     * Hide soft keyboard then collapse search view.
+     */
+    public void collapseSearchView()
+    {
+        //if you don't hide soft keyboard, you get a blank space where the keyboard was momentarily when returning to list view
+        InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        searchItem.collapseActionView();
     }
 }
