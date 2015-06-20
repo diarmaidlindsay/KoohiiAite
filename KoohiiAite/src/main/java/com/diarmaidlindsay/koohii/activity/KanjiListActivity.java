@@ -3,12 +3,9 @@ package com.diarmaidlindsay.koohii.activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.BaseColumns;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -18,12 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
-import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
-import com.diarmaidlindsay.koohii.database.dao.PrimitiveDataSource;
-import com.diarmaidlindsay.koohii.model.Keyword;
-import com.diarmaidlindsay.koohii.model.Primitive;
-
-import java.util.*;
+import com.diarmaidlindsay.koohii.adapter.SuggestionsAdapter;
 
 /**
  *  Koohii Aite uses Heisig Old Edition
@@ -41,36 +33,22 @@ import java.util.*;
 public class KanjiListActivity extends AppCompatActivity {
 
     private KanjiListAdapter kanjiListAdapter;
-    private CursorAdapter suggestionAdapter;
+    private SuggestionsAdapter suggestionAdapter;
     private MenuItem searchItem;
     private SearchView searchView;
     private TextView result;
-
-    private List<Keyword> allKeywords;
-    private List<Primitive> allPrimitives;
-    private List<String> suggestionsList;
+    private ListView kanjiList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kanji_list);
 
-        ListView kanjiList = (ListView) findViewById(R.id.kanjiListView);
-
+        kanjiList = (ListView) findViewById(R.id.kanjiListView);
         suggestionAdapter = getCursorAdapter();
         kanjiListAdapter = new KanjiListAdapter(this);
         kanjiList.setAdapter(kanjiListAdapter);
         result = (TextView) findViewById(R.id.result);
-
-        PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(this);
-        KeywordDataSource keywordDataSource = new KeywordDataSource(this);
-        primitiveDataSource.open();
-        keywordDataSource.open();
-        allKeywords = keywordDataSource.getAllKeywords();
-        allPrimitives = primitiveDataSource.getAllPrimitives();
-        suggestionsList = new ArrayList<>();
-        keywordDataSource.close();
-        primitiveDataSource.close();
     }
 
 
@@ -92,53 +70,17 @@ public class KanjiListActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private CursorAdapter getCursorAdapter()
+    private SuggestionsAdapter getCursorAdapter()
     {
         final String[] from = new String[] {"keywordPrimitive"};
         final int[] to = new int[] {R.id.suggestion_item};
 
-        return new SimpleCursorAdapter(this,
+        return new SuggestionsAdapter(this,
                 R.layout.list_item_suggestion,
                 null,
                 from,
                 to,
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-    }
-
-    private void populateSuggestions(String query)
-    {
-//        if(query.length() < 2)
-//        {
-//            suggestionsList.clear();
-//            return;
-//        }
-        query = query.toLowerCase();
-        Set<String> suggestionsSet = new HashSet<>();
-        final MatrixCursor cursor = new MatrixCursor(new String[]{ BaseColumns._ID, "keywordPrimitive" });
-
-        //have to search everything if no fallback searches
-//        if(suggestionsList.size() == 0) {
-            for (Primitive primitive : allPrimitives) {
-                if (primitive.getPrimitiveText().toLowerCase().contains(query)) {
-                    suggestionsSet.add(primitive.getPrimitiveText());
-                }
-            }
-
-            for (Keyword keyword : allKeywords) {
-                if (keyword.getKeywordText().toLowerCase().contains(query)) {
-                    suggestionsSet.add(keyword.getKeywordText());
-                }
-            }
-//        }
-        suggestionsList = new ArrayList<>(suggestionsSet);
-        Collections.sort(suggestionsList, new SortIgnoreCase());
-
-        for(int i = 0; i < suggestionsList.size(); i++)
-        {
-            cursor.addRow(new Object[]{i, suggestionsList.get(i)});
-        }
-
-        suggestionAdapter.changeCursor(cursor);
     }
 
     @Override
@@ -166,6 +108,10 @@ public class KanjiListActivity extends AppCompatActivity {
         {
             return query;
         }
+        else if(query.endsWith(","))
+        {
+            return "";
+        }
 
         String[] parts = query.split(",");
 
@@ -181,15 +127,16 @@ public class KanjiListActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 text = query;
                 mHandler.removeCallbacks(mFilterTask);
-                //Delay after user input to smooth the user experience
                 mHandler.postDelayed(mFilterTask, 0);
+                hideKeyboard();
+                kanjiList.requestFocus();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 text = newText;
-                populateSuggestions(getLastPart(text));
+                suggestionAdapter.populateSuggestions(getLastPart(text));
                 mHandler.removeCallbacks(mFilterTask);
                 //Delay after user input to smooth the user experience
                 mHandler.postDelayed(mFilterTask, 1000);
@@ -238,22 +185,19 @@ public class KanjiListActivity extends AppCompatActivity {
         };
     }
 
+    private void hideKeyboard()
+    {
+        InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
     /**
      * Hide soft keyboard then collapse search view.
      */
     public void collapseSearchView()
     {
         //if you don't hide soft keyboard, you get a blank space where the keyboard was momentarily when returning to list view
-        InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        hideKeyboard();
         searchItem.collapseActionView();
-    }
-
-    public class SortIgnoreCase implements Comparator<Object> {
-        public int compare(Object o1, Object o2) {
-            String s1 = (String) o1;
-            String s2 = (String) o2;
-            return s1.toLowerCase().compareTo(s2.toLowerCase());
-        }
     }
 }
