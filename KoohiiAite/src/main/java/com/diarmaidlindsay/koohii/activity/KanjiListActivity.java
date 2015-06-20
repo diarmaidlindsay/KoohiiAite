@@ -2,8 +2,13 @@ package com.diarmaidlindsay.koohii.activity;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.BaseColumns;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -13,6 +18,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
+import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
+import com.diarmaidlindsay.koohii.database.dao.PrimitiveDataSource;
+import com.diarmaidlindsay.koohii.model.Keyword;
+import com.diarmaidlindsay.koohii.model.Primitive;
+
+import java.util.*;
 
 /**
  *  Koohii Aite uses Heisig Old Edition
@@ -29,10 +40,15 @@ import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
  */
 public class KanjiListActivity extends AppCompatActivity {
 
-    private KanjiListAdapter adapter;
+    private KanjiListAdapter kanjiListAdapter;
+    private CursorAdapter suggestionAdapter;
     private MenuItem searchItem;
     private SearchView searchView;
     private TextView result;
+
+    private List<Keyword> allKeywords;
+    private List<Primitive> allPrimitives;
+    private List<String> suggestionsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +57,20 @@ public class KanjiListActivity extends AppCompatActivity {
 
         ListView kanjiList = (ListView) findViewById(R.id.kanjiListView);
 
-        adapter = new KanjiListAdapter(this);
-        kanjiList.setAdapter(adapter);
+        suggestionAdapter = getCursorAdapter();
+        kanjiListAdapter = new KanjiListAdapter(this);
+        kanjiList.setAdapter(kanjiListAdapter);
         result = (TextView) findViewById(R.id.result);
+
+        PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(this);
+        KeywordDataSource keywordDataSource = new KeywordDataSource(this);
+        primitiveDataSource.open();
+        keywordDataSource.open();
+        allKeywords = keywordDataSource.getAllKeywords();
+        allPrimitives = primitiveDataSource.getAllPrimitives();
+        suggestionsList = new ArrayList<>();
+        keywordDataSource.close();
+        primitiveDataSource.close();
     }
 
 
@@ -59,8 +86,59 @@ public class KanjiListActivity extends AppCompatActivity {
         searchView.setSearchableInfo(searchManager.
                 getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(getTextListener());
+        searchView.setOnSuggestionListener(getSuggestionListener());
+        searchView.setSuggestionsAdapter(suggestionAdapter);
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private CursorAdapter getCursorAdapter()
+    {
+        final String[] from = new String[] {"keywordPrimitive"};
+        final int[] to = new int[] {R.id.suggestion_item};
+
+        return new SimpleCursorAdapter(this,
+                R.layout.list_item_suggestion,
+                null,
+                from,
+                to,
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+    }
+
+    private void populateSuggestions(String query)
+    {
+//        if(query.length() < 2)
+//        {
+//            suggestionsList.clear();
+//            return;
+//        }
+        query = query.toLowerCase();
+        Set<String> suggestionsSet = new HashSet<>();
+        final MatrixCursor cursor = new MatrixCursor(new String[]{ BaseColumns._ID, "keywordPrimitive" });
+
+        //have to search everything if no fallback searches
+//        if(suggestionsList.size() == 0) {
+            for (Primitive primitive : allPrimitives) {
+                if (primitive.getPrimitiveText().toLowerCase().contains(query)) {
+                    suggestionsSet.add(primitive.getPrimitiveText());
+                }
+            }
+
+            for (Keyword keyword : allKeywords) {
+                if (keyword.getKeywordText().toLowerCase().contains(query)) {
+                    suggestionsSet.add(keyword.getKeywordText());
+                }
+            }
+//        }
+        suggestionsList = new ArrayList<>(suggestionsSet);
+        Collections.sort(suggestionsList, new SortIgnoreCase());
+
+        for(int i = 0; i < suggestionsList.size(); i++)
+        {
+            cursor.addRow(new Object[]{i, suggestionsList.get(i)});
+        }
+
+        suggestionAdapter.changeCursor(cursor);
     }
 
     @Override
@@ -78,6 +156,22 @@ public class KanjiListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * If there's a comma, we're only interested in last part after comma
+     * for suggestions
+     */
+    private String getLastPart(String query)
+    {
+        if(query.lastIndexOf(",") == -1)
+        {
+            return query;
+        }
+
+        String[] parts = query.split(",");
+
+        return parts[parts.length-1];
+    }
+
     private SearchView.OnQueryTextListener getTextListener()
     {
         return new SearchView.OnQueryTextListener() {
@@ -85,13 +179,17 @@ public class KanjiListActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //don't do anything when search submitted, it's handled by text changed event
-                return false;
+                text = query;
+                mHandler.removeCallbacks(mFilterTask);
+                //Delay after user input to smooth the user experience
+                mHandler.postDelayed(mFilterTask, 0);
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 text = newText;
+                populateSuggestions(getLastPart(text));
                 mHandler.removeCallbacks(mFilterTask);
                 //Delay after user input to smooth the user experience
                 mHandler.postDelayed(mFilterTask, 1000);
@@ -102,12 +200,41 @@ public class KanjiListActivity extends AppCompatActivity {
 
                 @Override
                 public void run() {
-                    adapter.filter(text);
-                    result.setText(adapter.getCount() + " items displayed");
+                    kanjiListAdapter.filter(text);
+                    result.setText(kanjiListAdapter.getCount() + " items displayed");
                 }
             };
 
             private Handler mHandler = new Handler();
+        };
+    }
+
+    private SearchView.OnSuggestionListener getSuggestionListener()
+    {
+        return new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                Cursor cursor = (Cursor) searchView.getSuggestionsAdapter().getItem(position);
+                String choice = cursor.getString(1);
+                //if there's a comma in the search query, it means multiple terms
+                //in that case we don't want to replace the whole query
+                String query = searchView.getQuery().toString();
+                query = query.replace(getLastPart(query), choice);
+                searchView.setQuery(query, false);
+//                searchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                Cursor cursor = (Cursor) searchView.getSuggestionsAdapter().getItem(position);
+                String choice = cursor.getString(1);
+                String query = searchView.getQuery().toString();
+                query = query.replace(getLastPart(query), choice);
+                searchView.setQuery(query, false);
+//                searchView.clearFocus();
+                return true;
+            }
         };
     }
 
@@ -120,5 +247,13 @@ public class KanjiListActivity extends AppCompatActivity {
         InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         searchItem.collapseActionView();
+    }
+
+    public class SortIgnoreCase implements Comparator<Object> {
+        public int compare(Object o1, Object o2) {
+            String s1 = (String) o1;
+            String s2 = (String) o2;
+            return s1.toLowerCase().compareTo(s2.toLowerCase());
+        }
     }
 }

@@ -41,13 +41,15 @@ public class Primitive {
         return primitiveText;
     }
 
-    public static List<Integer> getPrimitiveIdsContaining(String primitiveText, List<Primitive> primitives)
+    public static List<Integer> getPrimitiveIdsContaining(String primitiveTextQuery, List<Primitive> primitives, boolean ignoreCase)
     {
         List<Integer> primitiveIds = new ArrayList<>();
+        primitiveTextQuery = ignoreCase ? primitiveTextQuery.toLowerCase() : primitiveTextQuery;
 
         for(Primitive primitive : primitives)
         {
-            if(primitive.getPrimitiveText().contains(primitiveText))
+            String primitiveListText = ignoreCase ? primitive.getPrimitiveText().toLowerCase() : primitive.getPrimitiveText();
+            if(primitiveListText.contains(primitiveTextQuery))
             {
                 primitiveIds.add(primitive.getId());
             }
@@ -56,11 +58,14 @@ public class Primitive {
         return primitiveIds;
     }
 
-    public static int getPrimitiveIdWhichMatches(String primitiveText, List<Primitive> primitives)
+    public static int getPrimitiveIdWhichMatches(String primitiveTextQuery, List<Primitive> primitives, boolean ignoreCase)
     {
+        primitiveTextQuery = ignoreCase ? primitiveTextQuery.toLowerCase() : primitiveTextQuery;
+
         for(Primitive primitive : primitives)
         {
-            if(primitive.getPrimitiveText().equals(primitiveText))
+            String primitiveListText = ignoreCase ? primitive.getPrimitiveText().toLowerCase() : primitive.getPrimitiveText();
+            if(primitiveListText.equals(primitiveTextQuery))
             {
                 return primitive.getId();
             }

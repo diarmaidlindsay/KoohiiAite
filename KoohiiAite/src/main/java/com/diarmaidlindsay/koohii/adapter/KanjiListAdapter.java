@@ -156,16 +156,36 @@ public class KanjiListAdapter extends BaseAdapter {
         filterText = filterText.toLowerCase(Locale.getDefault());
         filteredHeisigKanjiSet.clear();
 
-        if (filterText.length() != 0) {
-            filterOnId(filterText);
-            filterOnKanji(filterText);
-            filterOnKeyword(filterText);
-            filterOnPrimitives(filterText);
+        if (filterText.length() > 0) {
+            if(isNumeric(filterText))
+            {
+                filterOnId(filterText);
+            }
+            else if(isKanji(filterText.charAt(0)))
+            {
+                filterOnKanji(filterText);
+            }
+            else
+            {
+                filterOnKeyword(filterText);
+                filterOnPrimitives(filterText);
+            }
         }
 
         updateFilteredList(filterText);
         updatePrimitiveList();
         notifyDataSetChanged();
+    }
+
+    private boolean isNumeric(String value)
+    {
+        return value.matches("\\d+");
+    }
+
+    private boolean isKanji(char value)
+    {
+        return Character.UnicodeBlock.of(value)
+                == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS;
     }
 
     private void updateFilteredList(String filterText) {
@@ -198,6 +218,7 @@ public class KanjiListAdapter extends BaseAdapter {
      * Iterate over masterList
      */
     private void filterOnId(String filterText) {
+        //only run if string is number
         for (HeisigKanji kanji : masterList) {
             String id = String.valueOf(kanji.getId());
 
@@ -231,6 +252,17 @@ public class KanjiListAdapter extends BaseAdapter {
         }
     }
 
+    //TODO : don't lose search terms when clicking list item
+    //TODO : optimise suggestion filtering (don't search all each time)
+    //TODO : when submit search, close keyboard and search (atm does nothing)
+
+    /**
+     * If no comma, fuzzy search on 1 primitive string.
+     * If comma, exact match on 1 or more primitive strings.
+     * Can't do multiple fuzzy matches because would return too many results and difficult
+     * to collate effectively and remove duplicates without intersection method.
+     * Maybe fancy SQL could solve this?
+     */
     private void filterOnPrimitives(String filterText)
     {
         if(filterText.length()>0)
@@ -249,7 +281,7 @@ public class KanjiListAdapter extends BaseAdapter {
                 {
                     primitiveString = primitiveString.trim();
                     int primitiveIdMatched =
-                            Primitive.getPrimitiveIdWhichMatches(primitiveString, primitiveList);
+                            Primitive.getPrimitiveIdWhichMatches(primitiveString, primitiveList, true);
                     if(primitiveIdMatched == -1)
                     {
                         //no exact match found for primitive string
@@ -277,7 +309,7 @@ public class KanjiListAdapter extends BaseAdapter {
                 //if no comma, assume we're fuzzy searching for 1 primitive
                 //ie night -> night, nightbreak
                 List<Integer> primitiveIds =
-                        Primitive.getPrimitiveIdsContaining(filterText, primitiveList);
+                        Primitive.getPrimitiveIdsContaining(filterText, primitiveList, true);
                 dataSource.open();
                 heisigIds =
                         dataSource.getHeisigIdsMatching(primitiveIds.toArray(new Integer[primitiveIds.size()]));
