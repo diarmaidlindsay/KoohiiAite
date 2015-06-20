@@ -3,7 +3,6 @@ package com.diarmaidlindsay.koohii.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -254,7 +253,6 @@ public class KanjiListAdapter extends BaseAdapter {
 
     //TODO : don't lose search terms when clicking list item
     //TODO : optimise suggestion filtering (don't search all each time)
-    //TODO : when submit search, close keyboard and search (atm does nothing)
 
     /**
      * If no comma, fuzzy search on 1 primitive string.
