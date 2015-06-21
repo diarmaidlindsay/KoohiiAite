@@ -19,9 +19,10 @@ public class SuggestionsAdapter extends SimpleCursorAdapter {
     private List<Keyword> allKeywords;
     private List<Primitive> allPrimitives;
     private List<String> suggestionsList;
+    private String previousQuery;
 
     public SuggestionsAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
-        super(context, layout, null, from, to, flags);
+        super(context, layout, c, from, to, flags);
         PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(context);
         KeywordDataSource keywordDataSource = new KeywordDataSource(context);
         primitiveDataSource.open();
@@ -37,37 +38,46 @@ public class SuggestionsAdapter extends SimpleCursorAdapter {
     {
         final MatrixCursor cursor = new MatrixCursor(new String[]{ BaseColumns._ID, "keywordPrimitive" });
 
-        if(query.length() < 2)
-        {
+        if(query.length() < 2) {
             suggestionsList.clear();
+            previousQuery = null;
             changeCursor(cursor);
             return;
         }
         query = query.toLowerCase();
         Set<String> suggestionsSet = new HashSet<>();
 
-        //have to search everything if no fallback searches
-//        if(suggestionsList.size() == 0) {
-        for (Primitive primitive : allPrimitives) {
-            if (primitive.getPrimitiveText().toLowerCase().contains(query)) {
-                suggestionsSet.add(primitive.getPrimitiveText());
+        //some text was deleted so we should fall back to suggest from all primitives and keywords
+        if(previousQuery == null || query.length() < previousQuery.length()) {
+            for (Primitive primitive : allPrimitives) {
+                if (primitive.getPrimitiveText().toLowerCase().contains(query)) {
+                    suggestionsSet.add(primitive.getPrimitiveText());
+                }
+            }
+
+            for (Keyword keyword : allKeywords) {
+                if (keyword.getKeywordText().toLowerCase().contains(query)) {
+                    suggestionsSet.add(keyword.getKeywordText());
+                }
+            }
+        }
+        //search the subset of results from the previous query
+        else
+        {
+            for(String text : suggestionsList) {
+                if(text.toLowerCase().contains(query)) {
+                    suggestionsSet.add(text);
+                }
             }
         }
 
-        for (Keyword keyword : allKeywords) {
-            if (keyword.getKeywordText().toLowerCase().contains(query)) {
-                suggestionsSet.add(keyword.getKeywordText());
-            }
-        }
-//        }
         suggestionsList = new ArrayList<>(suggestionsSet);
         Collections.sort(suggestionsList, new SortIgnoreCase());
 
-        for(int i = 0; i < suggestionsList.size(); i++)
-        {
+        for(int i = 0; i < suggestionsList.size(); i++) {
             cursor.addRow(new Object[]{i, suggestionsList.get(i)});
         }
-
+        previousQuery = query;
         changeCursor(cursor);
     }
 
