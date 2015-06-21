@@ -133,7 +133,7 @@ public class KanjiListAdapter extends BaseAdapter {
             public void onClick(View arg0) {
                 //collapse search box and hide keyboard
                 if(mContext instanceof KanjiListActivity){
-                    ((KanjiListActivity)mContext).collapseSearchView();
+                    ((KanjiListActivity)mContext).hideKeyboard();
                 }
 
                 Intent intent = new Intent(mContext, KanjiDetailActivity.class);
@@ -251,7 +251,6 @@ public class KanjiListAdapter extends BaseAdapter {
         }
     }
 
-    //TODO : don't lose search terms when clicking list item
     //TODO : optimise suggestion filtering (don't search all each time)
 
     /**

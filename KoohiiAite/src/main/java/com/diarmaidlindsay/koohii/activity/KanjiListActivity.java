@@ -168,7 +168,6 @@ public class KanjiListActivity extends AppCompatActivity {
                 String query = searchView.getQuery().toString();
                 query = query.replace(getLastPart(query), choice);
                 searchView.setQuery(query, false);
-//                searchView.clearFocus();
                 return true;
             }
 
@@ -179,25 +178,14 @@ public class KanjiListActivity extends AppCompatActivity {
                 String query = searchView.getQuery().toString();
                 query = query.replace(getLastPart(query), choice);
                 searchView.setQuery(query, false);
-//                searchView.clearFocus();
                 return true;
             }
         };
     }
 
-    private void hideKeyboard()
+    public void hideKeyboard()
     {
         InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    /**
-     * Hide soft keyboard then collapse search view.
-     */
-    public void collapseSearchView()
-    {
-        //if you don't hide soft keyboard, you get a blank space where the keyboard was momentarily when returning to list view
-        hideKeyboard();
-        searchItem.collapseActionView();
     }
 }
