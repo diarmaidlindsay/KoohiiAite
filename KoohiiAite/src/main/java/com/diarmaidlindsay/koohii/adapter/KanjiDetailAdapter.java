@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
+import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
 import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
 import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
 import com.diarmaidlindsay.koohii.fragment.DictionaryFragment;

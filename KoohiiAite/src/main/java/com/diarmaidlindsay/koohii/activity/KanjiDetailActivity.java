@@ -1,6 +1,7 @@
 package com.diarmaidlindsay.koohii.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.fragment.KanjiDetailFragment;
+
+import java.util.List;
 
 
 public class KanjiDetailActivity extends AppCompatActivity {
@@ -75,11 +78,28 @@ public class KanjiDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private int getCurrentPagerIndex()
+    {
+        List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
+        if(fragmentList != null)
+        {
+            Fragment fragment = fragmentList.get(fragmentList.size() - 1);
+            if(fragment instanceof KanjiDetailFragment)
+            {
+                return ((KanjiDetailFragment) fragment).getCurrentPagerIndex();
+            }
+        }
+
+        return -1;
+    }
+
     private void swapFragment(int newIndex)
     {
         KanjiDetailFragment fragment = new KanjiDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putInt("heisigId", Integer.parseInt(filteredIdList[newIndex]));
+        //preserve viewpager index during next/prev, else set to 0 if none exists
+        bundle.putInt("currentPage", getCurrentPagerIndex() == -1 ? 0 : getCurrentPagerIndex());
         fragment.setArguments(bundle);
         // Begin the transaction
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
