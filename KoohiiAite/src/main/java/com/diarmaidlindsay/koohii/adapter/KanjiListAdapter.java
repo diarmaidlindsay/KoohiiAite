@@ -86,7 +86,7 @@ public class KanjiListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.list_item_kanji, parent, false);
@@ -137,9 +137,9 @@ public class KanjiListAdapter extends BaseAdapter {
                 }
 
                 Intent intent = new Intent(mContext, KanjiDetailActivity.class);
-                intent.putExtra("heisigId", heisigId);
-                intent.putExtra("keyword", keyword);
-                intent.putExtra("kanji", kanji);
+                intent.putExtra("filteredListIndex", position);
+                //put all the filtered heisig ids for next/prev navigation
+                intent.putExtra("filteredIdList", HeisigKanji.getIds1Indexed(filteredHeisigKanjiList));
                 mContext.startActivity(intent);
             }
         });
@@ -250,8 +250,6 @@ public class KanjiListAdapter extends BaseAdapter {
             }
         }
     }
-
-    //TODO : optimise suggestion filtering (don't search all each time)
 
     /**
      * If no comma, fuzzy search on 1 primitive string.

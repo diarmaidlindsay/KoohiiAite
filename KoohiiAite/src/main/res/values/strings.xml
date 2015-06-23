@@ -20,5 +20,7 @@
     <string name="sample_fragment_category_label">Category</string>
     <string name="sample_fragment_hiragana_label">Hiragana Reading</string>
     <string name="sample_fragment_english_label">English Meaning</string>
+    <string name="detail_menu_prev">Prev</string>
+    <string name="detail_menu_next">Next</string>
 
 </resources>

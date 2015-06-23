@@ -39,6 +39,18 @@ public class HeisigKanjiDataSource extends CommonDataSource {
         return allKanji;
     }
 
+    public HeisigKanji getKanjiFor(int id)
+    {
+        HeisigKanji theKanji;
+        Cursor cursor = database.query(DatabaseAssetHelper.TABLE_HEISIG_KANJI,
+                allColumns, COLUMN_ID+" = "+id, null, null, null, null);
+
+        cursor.moveToFirst();
+        theKanji = cursorToKanji(cursor);
+        cursor.close();
+        return theKanji;
+    }
+
     private HeisigKanji cursorToKanji(Cursor cursor) {
         return new HeisigKanji(
                 cursor.getInt(0),

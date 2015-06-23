@@ -1,37 +1,52 @@
 package com.diarmaidlindsay.koohii.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.diarmaidlindsay.koohii.R;
-import com.diarmaidlindsay.koohii.adapter.KanjiDetailAdapter;
+import com.diarmaidlindsay.koohii.fragment.KanjiDetailFragment;
 
-/**
- * Display details of the heisig_id passed in
- * using Pager
- */
+
 public class KanjiDetailActivity extends AppCompatActivity {
 
-    FragmentPagerAdapter adapterViewPager;
+    int currentIndex;
+    String[] filteredIdList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_kanji_detail);
-        ViewPager vPager = (ViewPager) findViewById(R.id.vpPager);
-        adapterViewPager = new KanjiDetailAdapter(getSupportFragmentManager(), getIntent());
-        vPager.setAdapter(adapterViewPager);
+
+        Bundle arguments = getIntent().getExtras();
+        currentIndex = arguments.getInt("filteredListIndex");
+        filteredIdList = arguments.getStringArray("filteredIdList");
+        swapFragment(currentIndex);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_kanji_detail, menu);
+        MenuItem prevButton = menu.findItem(R.id.action_previous);
+        MenuItem nextButton = menu.findItem(R.id.action_next);
+        if(currentIndex == 0)
+        {
+            prevButton.setEnabled(false);
+        } else {
+            prevButton.setEnabled(true);
+        }
+
+        if(currentIndex == (filteredIdList.length - 1))
+        {
+            nextButton.setEnabled(false);
+        } else {
+            nextButton.setEnabled(true);
+        }
+
         return true;
     }
 
@@ -47,10 +62,30 @@ public class KanjiDetailActivity extends AppCompatActivity {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
+            case R.id.action_previous:
+                swapFragment(--currentIndex);
+                return true;
+            case R.id.action_next:
+                swapFragment(++currentIndex);
+                return true;
             case R.id.action_settings:
                 //handle settings here
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void swapFragment(int newIndex)
+    {
+        KanjiDetailFragment fragment = new KanjiDetailFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt("heisigId", Integer.parseInt(filteredIdList[newIndex]));
+        fragment.setArguments(bundle);
+        // Begin the transaction
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        // Replace the contents of the container with the new fragment
+        ft.replace(R.id.detail_fragment_framelayout, fragment);
+        // Complete the changes added above
+        ft.commit();
     }
 }

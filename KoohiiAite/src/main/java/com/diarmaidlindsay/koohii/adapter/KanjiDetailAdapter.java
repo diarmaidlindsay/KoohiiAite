@@ -1,14 +1,18 @@
 package com.diarmaidlindsay.koohii.adapter;
 
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
+import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
 import com.diarmaidlindsay.koohii.fragment.DictionaryFragment;
 import com.diarmaidlindsay.koohii.fragment.KoohiiFragment;
 import com.diarmaidlindsay.koohii.fragment.SampleWordsFragment;
 import com.diarmaidlindsay.koohii.fragment.StoryFragment;
+import com.diarmaidlindsay.koohii.model.HeisigKanji;
+import com.diarmaidlindsay.koohii.model.Keyword;
 
 /**
  * Invoked when user clicks a list item in the KanjiListActivity
@@ -19,12 +23,39 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
     SampleWordsFragment sampleWordsFragment;
     KoohiiFragment koohiiFragment;
 
+    Context mContext;
     Bundle arguments;
     private final int NUM_ITEMS = 4;
 
-    public KanjiDetailAdapter(FragmentManager fragmentManager, Intent intent) {
+    public KanjiDetailAdapter(FragmentManager fragmentManager, Bundle arguments, Context context) {
         super(fragmentManager);
-        arguments = intent.getExtras();
+        this.mContext = context;
+        int heisigId = arguments.getInt("heisigId");
+        String keyword = getKeywordFromDatabase(heisigId);
+        String kanji = getKanjiFromDatabase(heisigId);
+        arguments.putString("keyword", keyword);
+        arguments.putString("kanji", kanji);
+        this.arguments = arguments;
+    }
+
+    private String getKanjiFromDatabase(int heisigId)
+    {
+        HeisigKanjiDataSource dataSource = new HeisigKanjiDataSource(mContext);
+        dataSource.open();
+        HeisigKanji heisigKanji = dataSource.getKanjiFor(heisigId);
+        dataSource.close();
+
+        return heisigKanji.getKanji();
+    }
+
+    private String getKeywordFromDatabase(int heisigId)
+    {
+        KeywordDataSource dataSource = new KeywordDataSource(mContext);
+        dataSource.open();
+        Keyword keyword = dataSource.getKeywordFor(heisigId);
+        dataSource.close();
+
+        return keyword.getKeywordText();
     }
 
     // Returns total number of pages
@@ -56,7 +87,11 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
                 }
                 return sampleWordsFragment;
             case 3:
-                return new KoohiiFragment();
+                if(koohiiFragment == null) {
+                    koohiiFragment = new KoohiiFragment();
+                    koohiiFragment.setArguments(arguments);
+                }
+                return koohiiFragment;
             default:
                 return null;
         }

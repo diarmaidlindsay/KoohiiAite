@@ -60,6 +60,9 @@ public class HeisigKanji {
         return ids.toArray(new String[ids.size()]);
     }
 
+    /**
+     * For indexing other collections, using the heisig_id as the index
+     */
     public static String[] getIds0Indexed(List<HeisigKanji> list)
     {
         List<String> ids = new ArrayList<>();

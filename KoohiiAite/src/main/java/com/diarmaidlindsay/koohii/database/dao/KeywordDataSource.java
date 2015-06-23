@@ -3,7 +3,6 @@ package com.diarmaidlindsay.koohii.database.dao;
 import android.content.Context;
 import android.database.Cursor;
 import com.diarmaidlindsay.koohii.database.DatabaseAssetHelper;
-import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.Keyword;
 
 import java.util.ArrayList;
@@ -36,6 +35,18 @@ public class KeywordDataSource extends CommonDataSource {
         }
         cursor.close();
         return keywordList;
+    }
+
+    public Keyword getKeywordFor(int heisigId)
+    {
+        Keyword keyword;
+        Cursor cursor = database.query(DatabaseAssetHelper.TABLE_KEYWORD,
+                allColumns, COLUMN_ID+ " = "+ heisigId, null, null, null, null);
+        cursor.moveToFirst();
+        keyword = cursorToKeyword(cursor);
+        cursor.close();
+
+        return keyword;
     }
 
     private Keyword cursorToKeyword(Cursor cursor) {
