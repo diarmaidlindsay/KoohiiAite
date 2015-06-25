@@ -2,36 +2,39 @@
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:colorBackground">@color/amber_b2</item>
+        <item name="android:background">@color/amber_b2</item>
+        <item name="android:textColor">@android:color/white</item>
         <!-- Customize your theme here. -->
     </style>
     <style name="DetailTitle" parent="@android:style/TextAppearance.Medium">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">@android:color/white</item>
         <item name="android:typeface">monospace</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">#977A08</item>
+        <item name="android:background">@color/amber_d2</item>
     </style>
     <style name="DetailItem" parent="@android:style/TextAppearance.Medium">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#000000</item>
+        <item name="android:textColor">@android:color/black</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">#EBBC01</item>
+        <item name="android:background">@color/amber_b2</item>
     </style>
     <style name="SampleTitle" parent="@android:style/TextAppearance.Small">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">@android:color/white</item>
         <item name="android:typeface">monospace</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">#977A08</item>
+        <item name="android:background">@color/amber_d2</item>
     </style>
     <style name="SampleItem" parent="@android:style/TextAppearance.Small">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">#000000</item>
+        <item name="android:textColor">@android:color/black</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">#EBBC01</item>
+        <item name="android:background">@color/amber_b2</item>
     </style>
 </resources>

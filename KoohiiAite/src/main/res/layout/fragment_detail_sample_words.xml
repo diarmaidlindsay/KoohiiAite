@@ -10,5 +10,5 @@
             android:layout_height="wrap_content"
             android:id="@+id/sample_words_list_view"
             android:clickable="false"
-            android:divider="#ffffffff"/>
+            android:divider="@android:color/white"/>
 </LinearLayout>

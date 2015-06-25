@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="amber_b2" type="color">#EBBC01</item>
+    <item name="amber_b1" type="color">#BA970B</item>
+    <item name="amber" type="color">#977A08</item>
+    <item name="amber_d1" type="color">#6A5500</item>
+    <item name="amber_d2" type="color">#3E3200</item>
+</resources>

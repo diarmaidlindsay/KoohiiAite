@@ -10,7 +10,8 @@
                 android:id="@+id/kanji_list_item"
                 android:text="@string/unSet"
                 android:paddingRight="10dp"
-                android:textColor="#3E3200"
+                android:paddingEnd="10dp"
+                android:textColor="@android:color/black"
                 android:textSize="36sp"
                 android:maxLines="1"
                 android:layout_gravity="center_vertical"
@@ -32,7 +33,8 @@
                                 android:textAppearance="?android:attr/textAppearanceLarge"
                                 android:text="@string/unSet"
                                 android:paddingRight="10dp"
-                                android:textColor="#6A5500"
+                                android:paddingEnd="10dp"
+                                android:textColor="@color/amber_d2"
                                 android:maxLines="1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
@@ -41,7 +43,7 @@
                                 android:id="@+id/keyword_list_item"
                                 android:textAppearance="?android:attr/textAppearanceMedium"
                                 android:text="@string/unSet"
-                                android:textColor="#977A08"
+                                android:textColor="@color/amber_d1"
                                 android:maxLines="1"
                                 android:layout_gravity="center_vertical"
                                 android:layout_width="wrap_content"
@@ -53,7 +55,7 @@
                         android:id="@+id/primitives_list_item"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="@string/unSet"
-                        android:textColor="#6A5500"
+                        android:textColor="@color/amber_d2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
