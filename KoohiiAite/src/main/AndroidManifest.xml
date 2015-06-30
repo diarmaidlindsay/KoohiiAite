@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.diarmaidlindsay.koohii" >
+          package="com.diarmaidlindsay.koohii">
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-        <activity
-            android:name=".activity.KanjiListActivity"
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:launchMode="singleTop">
+            android:theme="@style/AppTheme">
+        <activity
+                android:name=".activity.KanjiListActivity"
+                android:label="@string/app_name"
+                android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
             <meta-data
@@ -22,13 +22,22 @@
             </meta-data>
         </activity>
         <activity
-            android:name=".activity.KanjiDetailActivity"
-            android:label="@string/app_name"
-            android:parentActivityName=".activity.KanjiListActivity" >
+                android:name=".activity.KanjiDetailActivity"
+                android:label="@string/app_name"
+                android:parentActivityName=".activity.KanjiListActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activity.KanjiListActivity" />
+                    android:value=".activity.KanjiListActivity"/>
+        </activity>
+        <activity
+                android:name=".activity.PrimitiveListActivity"
+                android:label="@string/title_primitives"
+                android:parentActivityName=".activity.KanjiListActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".activity.KanjiListActivity"/>
         </activity>
     </application>
 

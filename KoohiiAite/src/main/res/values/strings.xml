@@ -22,5 +22,7 @@
     <string name="sample_fragment_english_label">English Meaning</string>
     <string name="detail_menu_prev">Prev</string>
     <string name="detail_menu_next">Next</string>
+    <string name="action_primitives">Primitives</string>
+    <string name="title_primitives">View Primitives</string>
 
 </resources>

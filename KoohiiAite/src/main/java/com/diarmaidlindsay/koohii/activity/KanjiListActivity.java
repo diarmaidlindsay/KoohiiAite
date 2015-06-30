@@ -2,6 +2,7 @@ package com.diarmaidlindsay.koohii.activity;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -90,12 +91,20 @@ public class KanjiListActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id)
+        {
+            case R.id.action_settings :
+                return true;
+            case R.id.action_primitives :
+                showPrimitives();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    private void showPrimitives() {
+        startActivity(new Intent(this, PrimitiveListActivity.class));
     }
 
     /**
