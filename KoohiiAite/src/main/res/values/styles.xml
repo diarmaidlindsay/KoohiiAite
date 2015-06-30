@@ -37,4 +37,8 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@color/amber_b2</item>
     </style>
+    <style name="GreyItalicSmallText" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@android:color/darker_gray</item>
+        <item name="android:textStyle">italic</item>
+    </style>
 </resources>

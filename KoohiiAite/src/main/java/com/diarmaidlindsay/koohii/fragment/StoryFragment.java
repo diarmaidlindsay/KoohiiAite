@@ -2,6 +2,9 @@ package com.diarmaidlindsay.koohii.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +35,23 @@ public class StoryFragment extends Fragment {
         String heisigId = HeisigKanji.getHeisigIdAsString(heisigIdInt);
         String kanji = args.getString("kanji");
         String keyword = args.getString("keyword");
+        String userKeyword = args.getString("userKeyword");
         String storyText = getStoryFromDatabase(heisigIdInt);
+
+        if(userKeyword != null)
+        {
+            SpannableString keywordText = new SpannableString(userKeyword + " ("+keyword+")");
+            keywordText.setSpan(new TextAppearanceSpan(getActivity(), R.style.GreyItalicSmallText), userKeyword.length(), keywordText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            textViewKeyword.setText(keywordText, TextView.BufferType.SPANNABLE);
+        } else
+        {
+            textViewKeyword.setText(keyword);
+        }
 
         // Load the results into the TextViews
         textViewHeisigId.setText(heisigId);
         textViewKanji.setText(kanji);
-        textViewKeyword.setText(keyword);
+
         textViewStory.setText(storyText);
 
         return view;

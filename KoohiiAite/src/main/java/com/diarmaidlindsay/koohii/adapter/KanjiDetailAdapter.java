@@ -5,10 +5,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
-import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
 import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
 import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
+import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
 import com.diarmaidlindsay.koohii.fragment.DictionaryFragment;
 import com.diarmaidlindsay.koohii.fragment.KoohiiFragment;
 import com.diarmaidlindsay.koohii.fragment.SampleWordsFragment;
@@ -34,8 +33,10 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
         this.mContext = context;
         int heisigId = arguments.getInt("heisigId");
         String keyword = getKeywordFromDatabase(heisigId);
+        String userKeyword = getUserKeywordFromDatabase(heisigId);
         String kanji = getKanjiFromDatabase(heisigId);
         arguments.putString("keyword", keyword);
+        arguments.putString("userKeyword", userKeyword);
         arguments.putString("kanji", kanji);
         this.arguments = arguments;
     }
@@ -58,6 +59,16 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
         dataSource.close();
 
         return keyword.getKeywordText();
+    }
+
+    private String getUserKeywordFromDatabase(int heisigId)
+    {
+        UserKeywordDataSource dataSource = new UserKeywordDataSource(mContext);
+        dataSource.open();
+        Keyword keyword = dataSource.getKeywordFor(heisigId);
+        dataSource.close();
+
+        return keyword == null ? null : keyword.getKeywordText();
     }
 
     // Returns total number of pages

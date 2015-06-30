@@ -3,7 +3,7 @@ package com.diarmaidlindsay.koohii.model;
 import java.util.List;
 
 /**
- *  Represent an entry in the keyword table
+ *  Represent an entry in the keyword and user_keyword table
  */
 public class Keyword {
     private int heisigId;

@@ -10,10 +10,7 @@ import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
 import com.diarmaidlindsay.koohii.activity.KanjiListActivity;
-import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
-import com.diarmaidlindsay.koohii.database.dao.HeisigToPrimitiveDataSource;
-import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
-import com.diarmaidlindsay.koohii.database.dao.PrimitiveDataSource;
+import com.diarmaidlindsay.koohii.database.dao.*;
 import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.HeisigToPrimitive;
 import com.diarmaidlindsay.koohii.model.Keyword;
@@ -30,6 +27,7 @@ public class KanjiListAdapter extends BaseAdapter {
 
     private List<HeisigKanji> masterList; //list of all HeisigKanjis
     private List<Keyword> keywordList; //list of all Keywords
+    private Map<Integer, String> userKeywordMap; //HashMap of User Keywords (id, text)
     private List<Primitive> primitiveList; //list of all Primitives
 
     private Set<Integer> filteredHeisigKanjiSet = new HashSet<>(); //filtered heisig_ids
@@ -57,17 +55,21 @@ public class KanjiListAdapter extends BaseAdapter {
 
     private void initialiseDatasets() {
         KeywordDataSource keywordDataSource = new KeywordDataSource(mContext);
+        UserKeywordDataSource userKeywordDataSource = new UserKeywordDataSource(mContext);
         HeisigKanjiDataSource heisigKanjiDataSource = new HeisigKanjiDataSource(mContext);
         PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(mContext);
         heisigKanjiDataSource.open();
         keywordDataSource.open();
+        userKeywordDataSource.open();
         primitiveDataSource.open();
         masterList = heisigKanjiDataSource.getAllKanji();
         keywordList = keywordDataSource.getAllKeywords();
+        userKeywordMap = userKeywordDataSource.getAllUserKeywords();
         primitiveList = primitiveDataSource.getAllPrimitives();
-        heisigKanjiDataSource.close(); //Open again when needed
-        keywordDataSource.close(); //Open again when needed
-        primitiveDataSource.close(); //Open again when needed
+        heisigKanjiDataSource.close();
+        userKeywordDataSource.close();
+        keywordDataSource.close();
+        primitiveDataSource.close();
     }
 
     @Override
@@ -121,7 +123,11 @@ public class KanjiListAdapter extends BaseAdapter {
         }
 
         final String kanji = theKanji.getKanji();
-        final String keyword = keywordList.get(heisigId - 1).getKeywordText(); //convert to 0-index
+        String userKeyword = userKeywordMap.get(heisigId);
+        //if user entered their own keyword, use it, else use default keyword
+        final String keyword = userKeyword == null ?
+                keywordList.get(heisigId - 1).getKeywordText() //convert to 0-index
+                : userKeyword;
 
         viewHolder.heisig.setText(HeisigKanji.getHeisigIdAsString(heisigId));
         viewHolder.kanji.setText(kanji);
