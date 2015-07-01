@@ -1,5 +1,6 @@
 package com.diarmaidlindsay.koohii.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -107,5 +108,13 @@ public class KanjiDetailActivity extends AppCompatActivity {
         ft.replace(R.id.detail_fragment_framelayout, fragment);
         // Complete the changes added above
         ft.commit();
+    }
+
+    public void setResult(int heisigId, String keyword)
+    {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("heisigId", heisigId);
+        returnIntent.putExtra("keyword", keyword);
+        setResult(RESULT_OK, returnIntent);
     }
 }

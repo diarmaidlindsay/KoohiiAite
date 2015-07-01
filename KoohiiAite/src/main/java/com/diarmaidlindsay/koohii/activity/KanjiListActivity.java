@@ -192,6 +192,19 @@ public class KanjiListActivity extends AppCompatActivity {
         };
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK)
+        {
+            int heisigId = data.getIntExtra("heisigId", -1);
+            String keyword = data.getStringExtra("keyword");
+
+            kanjiListAdapter.updateKeyword(heisigId, keyword);
+            kanjiListAdapter.notifyDataSetChanged();
+        }
+    }
+
     public void hideKeyboard()
     {
         InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);

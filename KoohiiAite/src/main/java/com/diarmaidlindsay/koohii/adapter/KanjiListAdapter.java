@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
 import com.diarmaidlindsay.koohii.activity.KanjiListActivity;
@@ -140,13 +141,14 @@ public class KanjiListAdapter extends BaseAdapter {
                 //collapse search box and hide keyboard
                 if(mContext instanceof KanjiListActivity){
                     ((KanjiListActivity)mContext).hideKeyboard();
+                    Intent intent = new Intent(mContext, KanjiDetailActivity.class);
+                    intent.putExtra("filteredListIndex", position);
+                    //put all the filtered heisig ids for next/prev navigation
+                    intent.putExtra("filteredIdList", HeisigKanji.getIds1Indexed(filteredHeisigKanjiList));
+                    ((KanjiListActivity)mContext).startActivityForResult(intent, 1);
+                } else {
+                    Toast.makeText(mContext, "Context was not KanjiListActivity", Toast.LENGTH_SHORT).show();
                 }
-
-                Intent intent = new Intent(mContext, KanjiDetailActivity.class);
-                intent.putExtra("filteredListIndex", position);
-                //put all the filtered heisig ids for next/prev navigation
-                intent.putExtra("filteredIdList", HeisigKanji.getIds1Indexed(filteredHeisigKanjiList));
-                mContext.startActivity(intent);
             }
         });
 

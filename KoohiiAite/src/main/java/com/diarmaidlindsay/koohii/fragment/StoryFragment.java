@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.diarmaidlindsay.koohii.R;
+import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
 import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
 import com.diarmaidlindsay.koohii.model.HeisigKanji;
@@ -27,6 +28,7 @@ import com.diarmaidlindsay.koohii.model.Story;
  */
 public class StoryFragment extends Fragment {
     private Button buttonKeyword;
+    private int heisigIdInt;
     private String userKeyword;
     private String originalKeyword;
 
@@ -40,7 +42,7 @@ public class StoryFragment extends Fragment {
         TextView textViewStory = (TextView) view.findViewById(R.id.story_detail);
 
         Bundle args = getArguments();
-        final int heisigIdInt = args.getInt("heisigId", 0);
+        heisigIdInt = args.getInt("heisigId", 0);
 
         String heisigId = HeisigKanji.getHeisigIdAsString(heisigIdInt);
         String kanji = args.getString("kanji");
@@ -76,7 +78,7 @@ public class StoryFragment extends Fragment {
                 buttonDefault.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        deleteKeyword(heisigIdInt, originalKeyword);
+                        deleteKeyword(heisigIdInt);
                         dialog.dismiss();
                     }
                 });
@@ -123,11 +125,12 @@ public class StoryFragment extends Fragment {
         if(success) {
             userKeyword = keywordText;
             updateWidgets();
+            updateParentActivity();
         }
         dataSource.close();
     }
 
-    private void deleteKeyword(int heisigId, String originalKeyword)
+    private void deleteKeyword(int heisigId)
     {
         UserKeywordDataSource dataSource = new UserKeywordDataSource(getActivity());
         dataSource.open();
@@ -136,6 +139,7 @@ public class StoryFragment extends Fragment {
             userKeyword = null;
             success = true;
             updateWidgets();
+            updateParentActivity();
         }
 
         Toast.makeText(getActivity(), success ? "Keyword Reset" : "Error! Keyword not Changed",
@@ -163,6 +167,22 @@ public class StoryFragment extends Fragment {
             SpannableString keywordText = new SpannableString(userKeyword + " ("+originalKeyword+")");
             keywordText.setSpan(new TextAppearanceSpan(getActivity(), R.style.GreyItalicSmallText), userKeyword.length(), keywordText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             buttonKeyword.setText(keywordText, TextView.BufferType.SPANNABLE);
+        }
+    }
+
+    /**
+     * Tell the KanjiListActivity that our keyword has changed and it should update
+     */
+    private void updateParentActivity()
+    {
+        if(getActivity() instanceof KanjiDetailActivity)
+        {
+            if(userKeyword == null)
+            {
+                ((KanjiDetailActivity) getActivity()).setResult(heisigIdInt, originalKeyword);
+            } else {
+                ((KanjiDetailActivity) getActivity()).setResult(heisigIdInt, userKeyword);
+            }
         }
     }
 }
