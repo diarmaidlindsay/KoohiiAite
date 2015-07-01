@@ -10,7 +10,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.fragment.KanjiDetailFragment;
+import com.diarmaidlindsay.koohii.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -18,6 +20,8 @@ public class KanjiDetailActivity extends AppCompatActivity {
 
     int currentIndex;
     String[] filteredIdList;
+    List<Integer> changedIds = new ArrayList<>();
+    List<String> changedKeywords = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +117,10 @@ public class KanjiDetailActivity extends AppCompatActivity {
     public void setResult(int heisigId, String keyword)
     {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("heisigId", heisigId);
-        returnIntent.putExtra("keyword", keyword);
+        changedIds.add(heisigId);
+        changedKeywords.add(keyword);
+        returnIntent.putExtra("heisigIds", Utils.toIntArray(changedIds));
+        returnIntent.putExtra("keywords", changedKeywords.toArray(new String[changedKeywords.size()]));
         setResult(RESULT_OK, returnIntent);
     }
 }

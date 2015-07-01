@@ -171,7 +171,7 @@ public class StoryFragment extends Fragment {
     }
 
     /**
-     * Tell the KanjiListActivity that our keyword has changed and it should update
+     * Tell the KanjiListActivity that user changed keyword(s) and it should update dataset of its Adapter
      */
     private void updateParentActivity()
     {

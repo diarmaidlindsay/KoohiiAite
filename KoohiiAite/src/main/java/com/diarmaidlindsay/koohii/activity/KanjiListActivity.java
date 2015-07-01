@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
@@ -197,10 +198,23 @@ public class KanjiListActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK)
         {
-            int heisigId = data.getIntExtra("heisigId", -1);
-            String keyword = data.getStringExtra("keyword");
+            int[] heisigIds = data.getIntArrayExtra("heisigIds");
+            String[] keywords = data.getStringArrayExtra("keywords");
 
-            kanjiListAdapter.updateKeyword(heisigId, keyword);
+            //user didn't modify anything
+            if(heisigIds == null || keywords == null)
+            {
+                return;
+            } else if(heisigIds.length != keywords.length)
+            {
+                Log.e("KanjiListActivity", "Array of Keyword ids and texts aren't same size!");
+                return;
+            }
+
+            for(int i = 0; i < heisigIds.length; i++) {
+                kanjiListAdapter.updateKeyword(heisigIds[i], keywords[i]);
+            }
+
             kanjiListAdapter.notifyDataSetChanged();
         }
     }
