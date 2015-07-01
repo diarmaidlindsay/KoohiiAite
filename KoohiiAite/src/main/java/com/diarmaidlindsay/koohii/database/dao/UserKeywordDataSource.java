@@ -1,5 +1,6 @@
 package com.diarmaidlindsay.koohii.database.dao;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import com.diarmaidlindsay.koohii.database.DatabaseAssetHelper;
@@ -56,5 +57,42 @@ public class UserKeywordDataSource extends CommonDataSource {
         return new Keyword(
                 cursor.getInt(0),
                 cursor.getString(1));
+    }
+
+    /**
+     * Returns true if insertion successful
+     */
+    public boolean insertKeyword(int heisigId, String keyword) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_ID, heisigId);
+        values.put(COLUMN_KEYWORD, keyword);
+        //-1 is failed insertion, so return true if not -1
+        return database.insert(DatabaseAssetHelper.TABLE_USER_KEYWORD, null, values) != -1;
+    }
+
+    public boolean updateKeyword(int heisigId, String keyword) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_KEYWORD, keyword);
+
+        // Which row to update, based on the ID
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(heisigId) };
+
+        //0 means no rows affected, so return true if not 0
+        return database.update(
+                DatabaseAssetHelper.TABLE_USER_KEYWORD,
+                values,
+                selection,
+                selectionArgs) != 0;
+    }
+
+    public boolean deleteKeyword(int heisigId)
+    {
+        // Define 'where' part of query.
+        String selection = COLUMN_ID + " = ?";
+        // Specify arguments in placeholder order.
+        String[] selectionArgs = { String.valueOf(heisigId) };
+        //0 is failed deletion, so return true if not 0
+        return database.delete(DatabaseAssetHelper.TABLE_USER_KEYWORD, selection, selectionArgs) != 0;
     }
 }

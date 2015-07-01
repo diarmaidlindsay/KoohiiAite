@@ -326,7 +326,7 @@ public class KanjiListAdapter extends BaseAdapter {
         }
     }
 
-    public List<Integer> intersection(List<List<Integer>> matches) {
+    private List<Integer> intersection(List<List<Integer>> matches) {
         List<Integer> intersection = new ArrayList<>();
         if(matches.size() > 0)
         {
@@ -339,5 +339,9 @@ public class KanjiListAdapter extends BaseAdapter {
         }
 
         return intersection;
+    }
+
+    public void updateKeyword(int heisigId, String keywordText) {
+        userKeywordMap.put(heisigId, keywordText);
     }
 }

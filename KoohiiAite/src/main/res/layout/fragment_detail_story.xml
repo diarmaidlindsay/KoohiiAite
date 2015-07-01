@@ -28,8 +28,8 @@
             android:text="@string/story_fragment_keyword_label"
             style="@style/DetailTitle"/>
 
-    <TextView
-            style="@style/DetailItem"
+    <Button
+            style="@style/KoohiiButton"
             android:text="@string/unSet"
             android:id="@+id/keyword_detail"/>
 

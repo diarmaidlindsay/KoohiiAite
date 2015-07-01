@@ -24,5 +24,9 @@
     <string name="detail_menu_next">Next</string>
     <string name="action_primitives">Primitives</string>
     <string name="title_primitives">View Primitives</string>
+    <string name="dialog_title_edit_keyword">Edit Keyword</string>
+    <string name="button_submit">Submit</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_default">Default</string>
 
 </resources>
