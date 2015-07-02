@@ -69,8 +69,11 @@ public class StoryFragment extends Fragment {
                 submitButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //if userKeyword not null that means there was a previous user keyword entered and we're updating it
-                        submitKeyword(heisigIdInt, keywordEditText.getText().toString(), userKeyword != null, originalKeyword);
+                        //only submit if user actually changes the keyword from original
+                        if(!keywordEditText.getText().toString().equals(originalKeyword)) {
+                            //if userKeyword not null that means there was a previous user keyword entered and we're updating it
+                            submitKeyword(heisigIdInt, keywordEditText.getText().toString(), userKeyword != null);
+                        }
                         dialog.dismiss();
                     }
                 });
@@ -106,7 +109,7 @@ public class StoryFragment extends Fragment {
         return view;
     }
 
-    private void submitKeyword(int heisigId, String keywordText, boolean update, String originalKeyword)
+    private void submitKeyword(int heisigId, String keywordText, boolean update)
     {
         UserKeywordDataSource dataSource = new UserKeywordDataSource(getActivity());
         dataSource.open();

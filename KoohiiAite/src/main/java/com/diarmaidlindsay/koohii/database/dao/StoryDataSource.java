@@ -6,6 +6,7 @@ import com.diarmaidlindsay.koohii.database.DatabaseAssetHelper;
 import com.diarmaidlindsay.koohii.model.Story;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,6 +38,24 @@ public class StoryDataSource extends CommonDataSource {
         // make sure to close the cursor
         cursor.close();
         return allStories;
+    }
+
+    /**
+     * In the Kanji list view we don't have to display the stories.
+     * We just need to know which kanji have stories written or not.
+     * List size should be equal to total i
+     */
+    public List<Boolean> getStoryFlags(int size)
+    {
+        List<Boolean> storyFlags = new ArrayList<>(Collections.nCopies(size, false));
+        List<Story> allStories = getAllStories();
+
+        for(Story story : allStories) {
+            int index = story.getHeisig_id() - 1;
+            storyFlags.set(index, true);
+        }
+
+        return storyFlags;
     }
 
     /**

@@ -213,6 +213,7 @@ public class KanjiListActivity extends AppCompatActivity {
 
             for(int i = 0; i < heisigIds.length; i++) {
                 kanjiListAdapter.updateKeyword(heisigIds[i], keywords[i]);
+                kanjiListAdapter.updateIndicatorVisibility(heisigIds[i] - 1); //change to 0-indexed
             }
 
             kanjiListAdapter.notifyDataSetChanged();

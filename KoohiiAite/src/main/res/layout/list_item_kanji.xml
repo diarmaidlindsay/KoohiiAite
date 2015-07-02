@@ -6,64 +6,105 @@
         android:focusable="false"
         android:orientation="horizontal">
 
+    <TextView
+            android:id="@+id/kanji_list_item"
+            android:text="@string/unSet"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingEnd="5dp"
+            android:textColor="@android:color/white"
+            android:background="@color/amber_d2"
+            android:textSize="36sp"
+            android:maxLines="1"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:gravity="center_horizontal"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:id="@+id/heisig_id_list_item"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="@string/unSet"
+                    android:paddingRight="10dp"
+                    android:paddingEnd="10dp"
+                    android:background="@color/amber_d2"
+                    android:textColor="@color/amber_b1"
+                    android:maxLines="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:gravity="center_vertical"/>
+
+            <TextView
+                    android:id="@+id/keyword_list_item"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/unSet"
+                    android:background="@color/amber_d2"
+                    android:textColor="@color/amber_b2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"/>
+
+        </LinearLayout>
+
         <TextView
-                android:id="@+id/kanji_list_item"
+                android:id="@+id/primitives_list_item"
+                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/unSet"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:paddingEnd="5dp"
-                android:textColor="@android:color/white"
-                android:background="@color/amber_d2"
-                android:textSize="36sp"
-                android:maxLines="1"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:gravity="center_horizontal"/>
+                android:background="@color/amber"
+                android:textColor="@android:color/black"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:background="@color/amber_d2"
+                android:orientation="horizontal">
 
-                <LinearLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+            <TextView
+                    android:id="@+id/list_indicator_joyo"
+                    android:layout_width="match_parent"
+                    android:layout_weight=".33"
+                    android:layout_height="match_parent"
+                    android:background="@color/amber_d2"
+                    android:textColor="@color/amber"
+                    android:text="@string/list_indicator_joyo"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:gravity="center"/>
 
-                        <TextView
-                                android:id="@+id/heisig_id_list_item"
-                                android:textAppearance="?android:attr/textAppearanceLarge"
-                                android:text="@string/unSet"
-                                android:paddingRight="10dp"
-                                android:paddingEnd="10dp"
-                                android:background="@color/amber_d2"
-                                android:textColor="@color/amber_b1"
-                                android:maxLines="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="fill_parent"
-                                android:gravity="center_vertical"/>
+            <TextView
+                    android:id="@+id/list_indicator_story"
+                    android:layout_width="match_parent"
+                    android:layout_weight=".33"
+                    android:layout_height="match_parent"
+                    android:background="@color/amber_d2"
+                    android:textColor="@color/amber"
+                    android:text="@string/list_indicator_story"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:gravity="center"/>
 
-                        <TextView
-                                android:id="@+id/keyword_list_item"
-                                android:textAppearance="?android:attr/textAppearanceMedium"
-                                android:text="@string/unSet"
-                                android:background="@color/amber_d2"
-                                android:textColor="@color/amber_b2"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center_vertical"/>
-
-                </LinearLayout>
-
-                <TextView
-                        android:id="@+id/primitives_list_item"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/unSet"
-                        android:textColor="@color/amber_d2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
+            <TextView
+                    android:id="@+id/list_indicator_keyword"
+                    android:layout_width="match_parent"
+                    android:layout_weight=".33"
+                    android:layout_height="match_parent"
+                    android:background="@color/amber_d2"
+                    android:textColor="@color/amber"
+                    android:text="@string/list_indicator_keyword"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:gravity="center"/>
         </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

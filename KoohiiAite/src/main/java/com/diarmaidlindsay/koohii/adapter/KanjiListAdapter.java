@@ -30,6 +30,8 @@ public class KanjiListAdapter extends BaseAdapter {
     private List<Keyword> keywordList; //list of all Keywords
     private Map<Integer, String> userKeywordMap; //HashMap of User Keywords (id, text)
     private List<Primitive> primitiveList; //list of all Primitives
+    //to save memory, only story booleans to indicate whether a list item has a story
+    private List<Boolean> storyList;
 
     private Set<Integer> filteredHeisigKanjiSet = new HashSet<>(); //filtered heisig_ids
     private List<HeisigKanji> filteredHeisigKanjiList = new ArrayList<>(); //filtered HeisigKanjis for display
@@ -38,6 +40,7 @@ public class KanjiListAdapter extends BaseAdapter {
     private LayoutInflater layoutInflater;
 
     /**
+     * This prevents wasted cpu cycles by only inflating the view once
      * http://www.javacodegeeks.com/2013/09/android-viewholder-pattern-example.html
      */
     static class ViewHolderItem {
@@ -45,6 +48,9 @@ public class KanjiListAdapter extends BaseAdapter {
         TextView kanji;
         TextView keyword;
         TextView primitives;
+        TextView joyoIndicator;
+        TextView storyIndicator;
+        TextView keywordIndicator;
     }
 
     public KanjiListAdapter(Context context) {
@@ -59,18 +65,22 @@ public class KanjiListAdapter extends BaseAdapter {
         UserKeywordDataSource userKeywordDataSource = new UserKeywordDataSource(mContext);
         HeisigKanjiDataSource heisigKanjiDataSource = new HeisigKanjiDataSource(mContext);
         PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(mContext);
+        StoryDataSource storyDataSource = new StoryDataSource(mContext);
         heisigKanjiDataSource.open();
         keywordDataSource.open();
         userKeywordDataSource.open();
         primitiveDataSource.open();
+        storyDataSource.open();
         masterList = heisigKanjiDataSource.getAllKanji();
         keywordList = keywordDataSource.getAllKeywords();
         userKeywordMap = userKeywordDataSource.getAllUserKeywords();
         primitiveList = primitiveDataSource.getAllPrimitives();
+        storyList = storyDataSource.getStoryFlags(masterList.size());
         heisigKanjiDataSource.close();
         userKeywordDataSource.close();
         keywordDataSource.close();
         primitiveDataSource.close();
+        storyDataSource.close();
     }
 
     @Override
@@ -98,6 +108,9 @@ public class KanjiListAdapter extends BaseAdapter {
             viewHolder.kanji = (TextView) convertView.findViewById(R.id.kanji_list_item);
             viewHolder.keyword = (TextView) convertView.findViewById(R.id.keyword_list_item);
             viewHolder.primitives = (TextView) convertView.findViewById(R.id.primitives_list_item);
+            viewHolder.joyoIndicator = (TextView) convertView.findViewById(R.id.list_indicator_joyo);
+            viewHolder.storyIndicator = (TextView) convertView.findViewById(R.id.list_indicator_story);
+            viewHolder.keywordIndicator = (TextView) convertView.findViewById(R.id.list_indicator_keyword);
 
             convertView.setTag(viewHolder);
         } else {
@@ -151,6 +164,8 @@ public class KanjiListAdapter extends BaseAdapter {
                 }
             }
         });
+
+        updateIndicatorVisibility(position);
 
         return convertView;
     }
@@ -344,6 +359,40 @@ public class KanjiListAdapter extends BaseAdapter {
     }
 
     public void updateKeyword(int heisigId, String keywordText) {
-        userKeywordMap.put(heisigId, keywordText);
+        //if the "updated" keyword is equal to the orignal, assume a revert to default and remove from user map
+        if(keywordList.get(heisigId-1).getKeywordText().equals(keywordText))
+        {
+            userKeywordMap.remove(heisigId);
+        } else {
+            userKeywordMap.put(heisigId, keywordText);
+        }
+    }
+
+    /**
+     * Update the textual indicators for
+     * JOYO, KEYWORD and STORY for the given position in the list adaptor
+     */
+    public void updateIndicatorVisibility(int position)
+    {
+        HeisigKanji theKanji = (HeisigKanji) getItem(position);
+        final int heisigId = theKanji.getId();
+
+        if(theKanji.isJoyo()) {
+            viewHolder.joyoIndicator.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.joyoIndicator.setVisibility(View.INVISIBLE);
+        }
+
+        if(userKeywordMap.get(heisigId) != null) {
+            viewHolder.keywordIndicator.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.keywordIndicator.setVisibility(View.INVISIBLE);
+        }
+
+        if(storyList.get(heisigId-1)) {
+            viewHolder.storyIndicator.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.storyIndicator.setVisibility(View.INVISIBLE);
+        }
     }
 }

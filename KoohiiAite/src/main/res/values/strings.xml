@@ -28,5 +28,8 @@
     <string name="button_submit">Submit</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_default">Default</string>
+    <string name="list_indicator_joyo">JOYO</string>
+    <string name="list_indicator_story">STORY</string>
+    <string name="list_indicator_keyword">KEYWORD</string>
 
 </resources>
