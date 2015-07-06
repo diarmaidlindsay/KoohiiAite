@@ -31,5 +31,13 @@
     <string name="list_indicator_joyo">JOYO</string>
     <string name="list_indicator_story">STORY</string>
     <string name="list_indicator_keyword">KEYWORD</string>
-
+    <string name="filter_label_joyo">Is Joyo</string>
+    <string name="filter_label_keyword">Has Custom Keyword</string>
+    <string name="filter_label_story">Has Story</string>
+    <string name="filter_hint">Filter</string>
+    <string-array name="values_array_filter">
+        <item>Unset</item>
+        <item>Yes</item>
+        <item>No</item>
+    </string-array>
 </resources>

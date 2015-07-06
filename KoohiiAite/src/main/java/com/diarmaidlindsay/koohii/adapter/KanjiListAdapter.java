@@ -152,20 +152,21 @@ public class KanjiListAdapter extends BaseAdapter {
             @Override
             public void onClick(View arg0) {
                 //collapse search box and hide keyboard
-                if(mContext instanceof KanjiListActivity){
-                    ((KanjiListActivity)mContext).hideKeyboard();
+                if (mContext instanceof KanjiListActivity) {
+                    ((KanjiListActivity) mContext).hideKeyboard();
                     Intent intent = new Intent(mContext, KanjiDetailActivity.class);
                     intent.putExtra("filteredListIndex", position);
                     //put all the filtered heisig ids for next/prev navigation
                     intent.putExtra("filteredIdList", HeisigKanji.getIds1Indexed(filteredHeisigKanjiList));
-                    ((KanjiListActivity)mContext).startActivityForResult(intent, 1);
+                    ((KanjiListActivity) mContext).startActivityForResult(intent, 1);
                 } else {
                     Toast.makeText(mContext, "Context was not KanjiListActivity", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        updateIndicatorVisibility(position);
+        //populate the indicators, to indicate if kanji is joyo, has custom keyword or story written
+        updateIndicatorVisibilityAtPos(position);
 
         return convertView;
     }
@@ -179,33 +180,27 @@ public class KanjiListAdapter extends BaseAdapter {
         filteredHeisigKanjiSet.clear();
 
         if (filterText.length() > 0) {
-            if(isNumeric(filterText))
-            {
+            if (isNumeric(filterText)) {
                 filterOnId(filterText);
-            }
-            else if(isKanji(filterText.charAt(0)))
-            {
+            } else if (isKanji(filterText.charAt(0))) {
                 filterOnKanji(filterText);
-            }
-            else
-            {
+            } else {
                 filterOnKeyword(filterText);
                 filterOnPrimitives(filterText);
             }
         }
 
         updateFilteredList(filterText);
+        applyFilters();
         updatePrimitiveList();
         notifyDataSetChanged();
     }
 
-    private boolean isNumeric(String value)
-    {
+    private boolean isNumeric(String value) {
         return value.matches("\\d+");
     }
 
-    private boolean isKanji(char value)
-    {
+    private boolean isKanji(char value) {
         return Character.UnicodeBlock.of(value)
                 == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS;
     }
@@ -218,15 +213,16 @@ public class KanjiListAdapter extends BaseAdapter {
             filteredHeisigKanjiList.addAll(masterList);
 
         } else {
-            filteredHeisigKanjiList.addAll(HeisigKanji.getHeisigKanjiMatchingIds(new ArrayList<>(filteredHeisigKanjiSet), masterList));
+            filteredHeisigKanjiList.addAll(HeisigKanji.getHeisigKanjiMatchingIds(
+                    new ArrayList<>(filteredHeisigKanjiSet), masterList));
         }
     }
 
     /**
      * Called every time there is a filter operation.
      */
-    private void updatePrimitiveList() {
-        if(filteredHeisigKanjiList.size() > 0) {
+    public void updatePrimitiveList() {
+        if (filteredHeisigKanjiList.size() > 0) {
             HeisigToPrimitiveDataSource heisigToPrimitiveDataSource = new HeisigToPrimitiveDataSource(mContext);
             heisigToPrimitiveDataSource.open();
             String[] heisigIds = HeisigKanji.getIds1Indexed(filteredHeisigKanjiList);
@@ -281,27 +277,22 @@ public class KanjiListAdapter extends BaseAdapter {
      * to collate effectively and remove duplicates without intersection method.
      * Maybe fancy SQL could solve this?
      */
-    private void filterOnPrimitives(String filterText)
-    {
-        if(filterText.length()>0)
-        {
+    private void filterOnPrimitives(String filterText) {
+        if (filterText.length() > 0) {
             HeisigToPrimitiveDataSource dataSource = new HeisigToPrimitiveDataSource(mContext);
             List<Integer> heisigIds;
 
             //ie sun,moon
-            if(filterText.contains(","))
-            {
+            if (filterText.contains(",")) {
                 //if comma seperated primitive list, we're searching for many exact matches
                 String[] primitiveSearchStrings = filterText.split(",");
                 List<Integer> primitiveMatches = new ArrayList<>();
                 //find primitive id which exactly matches string input
-                for(String primitiveString : primitiveSearchStrings)
-                {
+                for (String primitiveString : primitiveSearchStrings) {
                     primitiveString = primitiveString.trim();
                     int primitiveIdMatched =
                             Primitive.getPrimitiveIdWhichMatches(primitiveString, primitiveList, true);
-                    if(primitiveIdMatched == -1)
-                    {
+                    if (primitiveIdMatched == -1) {
                         //no exact match found for primitive string
                         return;
                     }
@@ -314,16 +305,14 @@ public class KanjiListAdapter extends BaseAdapter {
                 //which kanjis contain all these primitives?
                 dataSource.open();
 
-                for(Integer match : primitiveMatches)
-                {
+                for (Integer match : primitiveMatches) {
                     heisigIdsForPrimitiveIds.add(
                             dataSource.getHeisigIdsMatching(new Integer[]{match}));
                 }
                 dataSource.close();
                 //only retain the intersection of these matches, kanji which contain ALL these primitives
                 heisigIds = intersection(heisigIdsForPrimitiveIds);
-            }
-            else{
+            } else {
                 //if no comma, assume we're fuzzy searching for 1 primitive
                 //ie night -> night, nightbreak
                 List<Integer> primitiveIds =
@@ -334,8 +323,7 @@ public class KanjiListAdapter extends BaseAdapter {
                 dataSource.close();
             }
 
-            if(heisigIds.size() == 0)
-            {
+            if (heisigIds.size() == 0) {
                 return;
             }
 
@@ -343,14 +331,75 @@ public class KanjiListAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * Apply the filter selections from the dropdown in the title bar.
+     * If all 3 filters match, the kanji should be displayed, else it should be
+     * removed from the filteredHeisigKanjiList.
+     */
+    public void applyFilters() {
+        if (mContext instanceof KanjiListActivity) {
+            KanjiListFilterAdapter.FilterState joyoFilter =
+                    ((KanjiListActivity) mContext).getJoyoFilter();
+            KanjiListFilterAdapter.FilterState storyFilter =
+                    ((KanjiListActivity) mContext).getStoryFilter();
+            KanjiListFilterAdapter.FilterState keywordFilter =
+                    ((KanjiListActivity) mContext).getKeywordFilter();
+
+            List<HeisigKanji> filteredOutKanji = new ArrayList<>();
+
+            for (HeisigKanji heisigKanji : filteredHeisigKanjiList) {
+
+                boolean joyoMatch = isJoyoMatch(joyoFilter, heisigKanji);
+                boolean storyMatch = isStoryMatch(storyFilter, heisigKanji);
+                boolean keywordMatch = isKeywordMatch(keywordFilter, heisigKanji);
+
+                if(!joyoMatch || !storyMatch || !keywordMatch) {
+                    filteredOutKanji.add(heisigKanji);
+                }
+            }
+
+            filteredHeisigKanjiList.removeAll(filteredOutKanji);
+        }
+    }
+
+    /**
+     * Does the heisig kanji match the user's JOYO filter choice?
+     * Return true if it matches, else return false, meaning it should be filtered out.
+     */
+    private boolean isJoyoMatch(KanjiListFilterAdapter.FilterState state, HeisigKanji heisigKanji) {
+        //If Kanji IS Joyo but user specified NOT joyo, or kanji NOT joyo but user specified IS joyo, it should be removed
+        return !((heisigKanji.isJoyo() && state == KanjiListFilterAdapter.FilterState.NO) ||
+                !heisigKanji.isJoyo() && state == KanjiListFilterAdapter.FilterState.YES);
+    }
+
+    /**
+     * Does the heisig kanji match the user's KEYWORD filter choice?
+     * Return true if it matches, else return false, meaning it should be filtered out.
+     */
+    private boolean isKeywordMatch(KanjiListFilterAdapter.FilterState state, HeisigKanji heisigKanji) {
+        final int heisigId = heisigKanji.getId();
+
+        return !((userKeywordMap.get(heisigId) != null && state == KanjiListFilterAdapter.FilterState.NO) ||
+                userKeywordMap.get(heisigId) == null && state == KanjiListFilterAdapter.FilterState.YES);
+    }
+
+    /**
+     * Does the heisig kanji match the user's STORY filter choice?
+     * Return true if it matches, else return false, meaning it should be filtered out.
+     */
+    private boolean isStoryMatch(KanjiListFilterAdapter.FilterState state, HeisigKanji heisigKanji) {
+        final int heisigId = heisigKanji.getId();
+
+        return !((storyList.get(heisigId - 1) && state == KanjiListFilterAdapter.FilterState.NO) ||
+                !storyList.get(heisigId - 1) && state == KanjiListFilterAdapter.FilterState.YES);
+    }
+
     private List<Integer> intersection(List<List<Integer>> matches) {
         List<Integer> intersection = new ArrayList<>();
-        if(matches.size() > 0)
-        {
+        if (matches.size() > 0) {
             intersection.addAll(matches.get(0));
 
-            for(List<Integer> list :  matches)
-            {
+            for (List<Integer> list : matches) {
                 intersection.retainAll(list);
             }
         }
@@ -360,8 +409,7 @@ public class KanjiListAdapter extends BaseAdapter {
 
     public void updateKeyword(int heisigId, String keywordText) {
         //if the "updated" keyword is equal to the orignal, assume a revert to default and remove from user map
-        if(keywordList.get(heisigId-1).getKeywordText().equals(keywordText))
-        {
+        if (keywordList.get(heisigId - 1).getKeywordText().equals(keywordText)) {
             userKeywordMap.remove(heisigId);
         } else {
             userKeywordMap.put(heisigId, keywordText);
@@ -369,27 +417,36 @@ public class KanjiListAdapter extends BaseAdapter {
     }
 
     /**
-     * Update the textual indicators for
+     * If we have the position in the filtered array, we can use this method
+     * to update the indicators for
      * JOYO, KEYWORD and STORY for the given position in the list adaptor
      */
-    public void updateIndicatorVisibility(int position)
-    {
+    private void updateIndicatorVisibilityAtPos(int position) {
         HeisigKanji theKanji = (HeisigKanji) getItem(position);
-        final int heisigId = theKanji.getId();
+        updateIndicatorVisibilityWithId(theKanji.getId());
+    }
 
-        if(theKanji.isJoyo()) {
+    /**
+     * Update the indicator based on a given heisig id, after these kanji
+     * were modified in detail view
+     */
+    public void updateIndicatorVisibilityWithId(int heisigId) {
+
+        HeisigKanji theKanji = masterList.get(heisigId - 1); //convert to 0-indexed
+
+        if (theKanji.isJoyo()) {
             viewHolder.joyoIndicator.setVisibility(View.VISIBLE);
         } else {
             viewHolder.joyoIndicator.setVisibility(View.INVISIBLE);
         }
 
-        if(userKeywordMap.get(heisigId) != null) {
+        if (userKeywordMap.get(heisigId) != null) {
             viewHolder.keywordIndicator.setVisibility(View.VISIBLE);
         } else {
             viewHolder.keywordIndicator.setVisibility(View.INVISIBLE);
         }
 
-        if(storyList.get(heisigId-1)) {
+        if (storyList.get(heisigId - 1)) {
             viewHolder.storyIndicator.setVisibility(View.VISIBLE);
         } else {
             viewHolder.storyIndicator.setVisibility(View.INVISIBLE);

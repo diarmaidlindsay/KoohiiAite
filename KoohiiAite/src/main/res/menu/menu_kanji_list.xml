@@ -3,7 +3,11 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".KanjiList">
 
-    <item android:id="@+id/search"
+    <item android:id="@+id/filter_spinner"
+          android:title="@string/filter_hint"
+          app:showAsAction="ifRoom"
+          app:actionViewClass="com.diarmaidlindsay.koohii.widget.SpinnerFilter" />
+    <item android:id="@+id/kanji_list_search"
           android:title="@string/search_hint"
           android:icon="@drawable/ic_action_search"
           app:showAsAction="collapseActionView|ifRoom"

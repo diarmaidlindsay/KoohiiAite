@@ -17,7 +17,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
+import com.diarmaidlindsay.koohii.adapter.KanjiListFilterAdapter;
 import com.diarmaidlindsay.koohii.adapter.SuggestionsAdapter;
+import com.diarmaidlindsay.koohii.widget.OnSpinnerEventsListener;
+import com.diarmaidlindsay.koohii.widget.SpinnerFilter;
 
 /**
  *  Koohii Aite uses Heisig Old Edition
@@ -35,9 +38,13 @@ import com.diarmaidlindsay.koohii.adapter.SuggestionsAdapter;
 public class KanjiListActivity extends AppCompatActivity {
 
     private KanjiListAdapter kanjiListAdapter;
+    private KanjiListFilterAdapter kanjiListFilterAdapter;
     private SuggestionsAdapter suggestionAdapter;
+    private MenuItem filterItem;
     private MenuItem searchItem;
     private SearchView searchView;
+    private SpinnerFilter spinnerFilter;
+    private OnSpinnerEventsListener spinnerListener;
     private TextView result;
     private ListView kanjiList;
 
@@ -48,20 +55,67 @@ public class KanjiListActivity extends AppCompatActivity {
 
         kanjiList = (ListView) findViewById(R.id.kanjiListView);
         suggestionAdapter = getCursorAdapter();
+        String[] spinnerValues = {"n/a, Yes, No"};
+        kanjiListFilterAdapter = new KanjiListFilterAdapter(this, R.id.filter_spinner, spinnerValues);
         kanjiListAdapter = new KanjiListAdapter(this);
         kanjiList.setAdapter(kanjiListAdapter);
         result = (TextView) findViewById(R.id.result);
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // mSpin is our custom Spinner
+        if (spinnerFilter.hasBeenOpened() && hasFocus) {
+            spinnerFilter.performClosedEvent();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_kanji_list, menu);
 
+        filterItem = menu.findItem(R.id.filter_spinner);
+        spinnerFilter = (SpinnerFilter) filterItem.getActionView();
+        spinnerFilter.setAdapter(kanjiListFilterAdapter);
+        spinnerListener = new OnSpinnerEventsListener() {
+            boolean changed;
+
+            Runnable mFilterTask = new Runnable() {
+
+                @Override
+                public void run() {
+                    kanjiListAdapter.filter(searchView.getQuery().toString());
+                    result.setText(kanjiListAdapter.getCount() + " items displayed");
+                }
+            };
+
+            @Override
+            public void notifyContentsChange() {
+                changed = true;
+            }
+
+            @Override
+            public void onSpinnerOpened() {
+                changed = false;
+            }
+
+            @Override
+            public void onSpinnerClosed() {
+                if(changed) {
+                    mHandler.postDelayed(mFilterTask, 0);
+                }
+            }
+
+            private Handler mHandler = new Handler();
+        };
+        spinnerFilter.setSpinnerEventsListener(spinnerListener);
+
+        // we want to be able to filter the search results!
         SearchManager searchManager = (SearchManager)
                 getSystemService(Context.SEARCH_SERVICE);
-        searchItem = menu.findItem(R.id.search);
+        searchItem = menu.findItem(R.id.kanji_list_search);
         searchView = (SearchView) searchItem.getActionView();
         searchView.setSearchableInfo(searchManager.
                 getSearchableInfo(getComponentName()));
@@ -211,9 +265,10 @@ public class KanjiListActivity extends AppCompatActivity {
                 return;
             }
 
+            //user modified kanji(s) in the detail view, so update indicators
             for(int i = 0; i < heisigIds.length; i++) {
                 kanjiListAdapter.updateKeyword(heisigIds[i], keywords[i]);
-                kanjiListAdapter.updateIndicatorVisibility(heisigIds[i] - 1); //change to 0-indexed
+                kanjiListAdapter.updateIndicatorVisibilityWithId(heisigIds[i]); //change to 0-indexed
             }
 
             kanjiListAdapter.notifyDataSetChanged();
@@ -224,5 +279,30 @@ public class KanjiListActivity extends AppCompatActivity {
     {
         InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(searchView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    /**
+     * Allow list adapter to observe the joyo filter state
+     */
+    public KanjiListFilterAdapter.FilterState getJoyoFilter() {
+        return kanjiListFilterAdapter.getJoyoFilter();
+    }
+
+    /**
+     * Allow list adapter to observe the keyword filter state
+     */
+    public KanjiListFilterAdapter.FilterState getKeywordFilter() {
+        return kanjiListFilterAdapter.getKeywordFilter();
+    }
+
+    /**
+     * Allow list adapter to observe the story filter state
+     */
+    public KanjiListFilterAdapter.FilterState getStoryFilter() {
+        return kanjiListFilterAdapter.getStoryFilter();
+    }
+
+    public void notifyFilterChanged() {
+        spinnerListener.notifyContentsChange();
     }
 }
