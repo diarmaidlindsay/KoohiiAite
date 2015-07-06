@@ -39,7 +39,7 @@ public class PrimitiveGridAdapter extends BaseAdapter {
 
     private void scanForImages() {
         try {
-            if (filenames != null) {
+            if (filenames == null) {
                 filenames = mContext.getAssets().list(IMAGE_FOLDER);
             }
         } catch (IOException e) {
@@ -97,7 +97,10 @@ public class PrimitiveGridAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return filenames.length;
+        if(filenames != null) {
+            return filenames.length;
+        }
+        return 0;
     }
 
     @Override
