@@ -19,6 +19,7 @@ import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.KanjiListAdapter;
 import com.diarmaidlindsay.koohii.adapter.KanjiListFilterAdapter;
 import com.diarmaidlindsay.koohii.adapter.SuggestionsAdapter;
+import com.diarmaidlindsay.koohii.widget.KanjiSearchView;
 import com.diarmaidlindsay.koohii.widget.OnSpinnerEventsListener;
 import com.diarmaidlindsay.koohii.widget.SpinnerFilter;
 
@@ -42,7 +43,7 @@ public class KanjiListActivity extends AppCompatActivity {
     private SuggestionsAdapter suggestionAdapter;
     private MenuItem filterItem;
     private MenuItem searchItem;
-    private SearchView searchView;
+    private KanjiSearchView searchView;
     private SpinnerFilter spinnerFilter;
     private OnSpinnerEventsListener spinnerListener;
     private TextView result;
@@ -116,7 +117,7 @@ public class KanjiListActivity extends AppCompatActivity {
         SearchManager searchManager = (SearchManager)
                 getSystemService(Context.SEARCH_SERVICE);
         searchItem = menu.findItem(R.id.kanji_list_search);
-        searchView = (SearchView) searchItem.getActionView();
+        searchView = (KanjiSearchView) searchItem.getActionView();
         searchView.setSearchableInfo(searchManager.
                 getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(getTextListener());
