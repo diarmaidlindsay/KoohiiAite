@@ -35,6 +35,9 @@
     <string name="filter_label_keyword">Has Custom Keyword</string>
     <string name="filter_label_story">Has Story</string>
     <string name="filter_hint">Filter</string>
+    <string name="filter_state_joyo">Joyo[%s]</string>
+    <string name="filter_state_keyword">Keyword[%s]</string>
+    <string name="filter_state_story">Story[%s]</string>
     <string-array name="values_array_filter">
         <item>Unset</item>
         <item>Yes</item>

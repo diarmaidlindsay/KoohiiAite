@@ -83,6 +83,17 @@
                     android:gravity="center"/>
 
             <TextView
+                    android:id="@+id/list_indicator_keyword"
+                    android:layout_width="match_parent"
+                    android:layout_weight=".33"
+                    android:layout_height="match_parent"
+                    android:background="@color/amber_d2"
+                    android:textColor="@color/amber"
+                    android:text="@string/list_indicator_keyword"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:gravity="center"/>
+
+            <TextView
                     android:id="@+id/list_indicator_story"
                     android:layout_width="match_parent"
                     android:layout_weight=".33"
@@ -93,16 +104,6 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:gravity="center"/>
 
-            <TextView
-                    android:id="@+id/list_indicator_keyword"
-                    android:layout_width="match_parent"
-                    android:layout_weight=".33"
-                    android:layout_height="match_parent"
-                    android:background="@color/amber_d2"
-                    android:textColor="@color/amber"
-                    android:text="@string/list_indicator_keyword"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:gravity="center"/>
         </LinearLayout>
 
     </LinearLayout>

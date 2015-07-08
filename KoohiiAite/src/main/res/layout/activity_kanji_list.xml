@@ -3,15 +3,56 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <TextView
-            android:text="@string/default_results_text"
-            android:id="@+id/result"
+    <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <TextView
+                android:text="@string/default_results_text"
+                android:id="@+id/result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true">
+
+            <TextView
+                    android:id="@+id/joyo_filter_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <TextView
+                    android:id="@+id/keyword_filter_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="0dp"
+                    android:paddingEnd="0dp"/>
+
+            <TextView
+                    android:id="@+id/story_filter_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="0dp"
+                    android:paddingEnd="0dp"/>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
 
     <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/kanjiListView"
             android:clickable="false"/>
+
 </LinearLayout>

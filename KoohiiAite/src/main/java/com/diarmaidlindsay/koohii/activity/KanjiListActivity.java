@@ -41,12 +41,13 @@ public class KanjiListActivity extends AppCompatActivity {
     private KanjiListAdapter kanjiListAdapter;
     private KanjiListFilterAdapter kanjiListFilterAdapter;
     private SuggestionsAdapter suggestionAdapter;
-    private MenuItem filterItem;
-    private MenuItem searchItem;
     private KanjiSearchView searchView;
     private SpinnerFilter spinnerFilter;
     private OnSpinnerEventsListener spinnerListener;
     private TextView result;
+    private TextView joyoFilterState;
+    private TextView keywordFilterState;
+    private TextView storyFilterState;
     private ListView kanjiList;
 
     @Override
@@ -61,6 +62,9 @@ public class KanjiListActivity extends AppCompatActivity {
         kanjiListAdapter = new KanjiListAdapter(this);
         kanjiList.setAdapter(kanjiListAdapter);
         result = (TextView) findViewById(R.id.result);
+        joyoFilterState = (TextView) findViewById(R.id.joyo_filter_state);
+        keywordFilterState = (TextView) findViewById(R.id.keyword_filter_state);
+        storyFilterState = (TextView) findViewById(R.id.story_filter_state);
     }
 
     @Override
@@ -77,17 +81,18 @@ public class KanjiListActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_kanji_list, menu);
 
-        filterItem = menu.findItem(R.id.filter_spinner);
+        MenuItem filterItem = menu.findItem(R.id.filter_spinner);
         spinnerFilter = (SpinnerFilter) filterItem.getActionView();
         spinnerFilter.setAdapter(kanjiListFilterAdapter);
         spinnerListener = new OnSpinnerEventsListener() {
+            //if filter values changed, we should perform a search with new values
             boolean changed;
 
             Runnable mFilterTask = new Runnable() {
 
                 @Override
                 public void run() {
-                    kanjiListAdapter.filter(searchView.getQuery().toString());
+                    kanjiListAdapter.search(searchView.getQuery().toString());
                     result.setText(kanjiListAdapter.getCount() + " items displayed");
                 }
             };
@@ -116,13 +121,15 @@ public class KanjiListActivity extends AppCompatActivity {
         // we want to be able to filter the search results!
         SearchManager searchManager = (SearchManager)
                 getSystemService(Context.SEARCH_SERVICE);
-        searchItem = menu.findItem(R.id.kanji_list_search);
+        MenuItem searchItem = menu.findItem(R.id.kanji_list_search);
         searchView = (KanjiSearchView) searchItem.getActionView();
         searchView.setSearchableInfo(searchManager.
                 getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(getTextListener());
         searchView.setOnSuggestionListener(getSuggestionListener());
         searchView.setSuggestionsAdapter(suggestionAdapter);
+
+        notifyFilterChanged();
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -212,7 +219,7 @@ public class KanjiListActivity extends AppCompatActivity {
 
                 @Override
                 public void run() {
-                    kanjiListAdapter.filter(text);
+                    kanjiListAdapter.search(text);
                     result.setText(kanjiListAdapter.getCount() + " items displayed");
                 }
             };
@@ -305,5 +312,56 @@ public class KanjiListActivity extends AppCompatActivity {
 
     public void notifyFilterChanged() {
         spinnerListener.notifyContentsChange();
+        updateFilterIndicators();
     }
+
+    /**
+     * The textual indicators above the kanji list, describing the state of the filter toggles
+     */
+    private void updateFilterIndicators() {
+        final String joyoFilter = getString(R.string.filter_state_joyo);
+        final String keywordFilter = getString(R.string.filter_state_keyword);
+        final String storyFilter = getString(R.string.filter_state_story);
+
+        final String UNSET = "  ";
+        final String YES = "O";
+        final String NO = "X";
+
+        switch (getJoyoFilter()) {
+            case UNSET:
+                joyoFilterState.setText(String.format(joyoFilter, UNSET));
+                break;
+            case YES:
+                joyoFilterState.setText(String.format(joyoFilter, YES));
+                break;
+            case NO:
+                joyoFilterState.setText(String.format(joyoFilter, NO));
+                break;
+        }
+
+        switch (getKeywordFilter()) {
+            case UNSET:
+                keywordFilterState.setText(String.format(keywordFilter, UNSET));
+                break;
+            case YES:
+                keywordFilterState.setText(String.format(keywordFilter, YES));
+                break;
+            case NO:
+                keywordFilterState.setText(String.format(keywordFilter, NO));
+                break;
+        }
+
+        switch (getStoryFilter()) {
+            case UNSET:
+                storyFilterState.setText(String.format(storyFilter, UNSET));
+                break;
+            case YES:
+                storyFilterState.setText(String.format(storyFilter, YES));
+                break;
+            case NO:
+                storyFilterState.setText(String.format(storyFilter, NO));
+                break;
+        }
+    }
+
 }

@@ -57,7 +57,7 @@ public class KanjiListAdapter extends BaseAdapter {
         this.mContext = context;
         layoutInflater = LayoutInflater.from(context);
         initialiseDatasets();
-        filter("");
+        search("");
     }
 
     private void initialiseDatasets() {
@@ -172,25 +172,24 @@ public class KanjiListAdapter extends BaseAdapter {
     }
 
     /**
-     * Eventually should observe the state of "filter on" checkboxes
-     * Only filter on the selected data
+     * Search the Kanji list with the given search string
      */
-    public void filter(String filterText) {
-        filterText = filterText.toLowerCase(Locale.getDefault());
+    public void search(String searchString) {
+        searchString = searchString.toLowerCase(Locale.getDefault());
         filteredHeisigKanjiSet.clear();
 
-        if (filterText.length() > 0) {
-            if (isNumeric(filterText)) {
-                filterOnId(filterText);
-            } else if (isKanji(filterText.charAt(0))) {
-                filterOnKanji(filterText);
+        if (searchString.length() > 0) {
+            if (isNumeric(searchString)) {
+                filterOnId(searchString);
+            } else if (isKanji(searchString.charAt(0))) {
+                filterOnKanji(searchString);
             } else {
-                filterOnKeyword(filterText);
-                filterOnPrimitives(filterText);
+                filterOnKeyword(searchString);
+                filterOnPrimitives(searchString);
             }
         }
 
-        updateFilteredList(filterText);
+        updateFilteredList(searchString);
         applyFilters();
         updatePrimitiveList();
         notifyDataSetChanged();
