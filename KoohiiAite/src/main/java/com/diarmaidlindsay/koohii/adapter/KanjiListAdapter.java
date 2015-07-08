@@ -2,6 +2,7 @@ package com.diarmaidlindsay.koohii.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,11 +54,14 @@ public class KanjiListAdapter extends BaseAdapter {
         TextView keywordIndicator;
     }
 
-    public KanjiListAdapter(Context context) {
+    public KanjiListAdapter(Context context, Bundle savedInstanceState) {
         this.mContext = context;
         layoutInflater = LayoutInflater.from(context);
         initialiseDatasets();
-        search("");
+        //only perform initial search if we're coming from fresh state
+        if(savedInstanceState==null) {
+            search("");
+        }
     }
 
     private void initialiseDatasets() {

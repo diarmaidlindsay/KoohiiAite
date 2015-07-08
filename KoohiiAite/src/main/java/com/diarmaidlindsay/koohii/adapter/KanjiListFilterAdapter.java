@@ -46,6 +46,10 @@ public class KanjiListFilterAdapter extends ArrayAdapter<String> {
             Log.e("FilterState", "Couldn't find given filter state : " + stateNum);
             return UNSET;
         }
+
+        public int getStateNum() {
+            return stateNum;
+        }
     }
 
     public KanjiListFilterAdapter(Context context, int resource, String[] objects) {
@@ -81,9 +85,9 @@ public class KanjiListFilterAdapter extends ArrayAdapter<String> {
             viewHolder.joyoButton = (MultiStateToggleButton) convertView.findViewById(R.id.toggle_joyo);
             viewHolder.keywordButton = (MultiStateToggleButton) convertView.findViewById(R.id.toggle_keyword);
             viewHolder.storyButton = (MultiStateToggleButton) convertView.findViewById(R.id.toggle_story);
-            viewHolder.joyoButton.setValue(0); //"Unset" by default
-            viewHolder.keywordButton.setValue(0);
-            viewHolder.storyButton.setValue(0);
+            viewHolder.joyoButton.setValue(joyoFilter.getStateNum());
+            viewHolder.keywordButton.setValue(keywordFilter.getStateNum());
+            viewHolder.storyButton.setValue(storyFilter.getStateNum());
 
             convertView.setTag(viewHolder);
         } else {
@@ -138,5 +142,17 @@ public class KanjiListFilterAdapter extends ArrayAdapter<String> {
 
     public FilterState getStoryFilter() {
         return storyFilter;
+    }
+
+    public void setJoyoFilter(Integer value) {
+        joyoFilter = FilterState.getStateFor(value);
+    }
+
+    public void setKeywordFilter(Integer value) {
+        keywordFilter = FilterState.getStateFor(value);
+    }
+
+    public void setStoryFilter(Integer value) {
+        storyFilter = FilterState.getStateFor(value);
     }
 }

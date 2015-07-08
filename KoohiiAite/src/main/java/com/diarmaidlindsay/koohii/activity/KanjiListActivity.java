@@ -50,16 +50,21 @@ public class KanjiListActivity extends AppCompatActivity {
     private TextView storyFilterState;
     private ListView kanjiList;
 
+    private Bundle savedInstanceState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //if onCreate was called after rotation, we need saved bundle for options menu
+        this.savedInstanceState = savedInstanceState;
+
         setContentView(R.layout.activity_kanji_list);
 
         kanjiList = (ListView) findViewById(R.id.kanjiListView);
         suggestionAdapter = getCursorAdapter();
         String[] spinnerValues = {"n/a, Yes, No"};
         kanjiListFilterAdapter = new KanjiListFilterAdapter(this, R.id.filter_spinner, spinnerValues);
-        kanjiListAdapter = new KanjiListAdapter(this);
+        kanjiListAdapter = new KanjiListAdapter(this, savedInstanceState);
         kanjiList.setAdapter(kanjiListAdapter);
         result = (TextView) findViewById(R.id.result);
         joyoFilterState = (TextView) findViewById(R.id.joyo_filter_state);
@@ -128,6 +133,16 @@ public class KanjiListActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(getTextListener());
         searchView.setOnSuggestionListener(getSuggestionListener());
         searchView.setSuggestionsAdapter(suggestionAdapter);
+
+        //if device rotated, restore values here!
+        if(savedInstanceState != null) {
+            kanjiListFilterAdapter.setJoyoFilter(savedInstanceState.getInt("joyoFilter", 0));
+            kanjiListFilterAdapter.setKeywordFilter(savedInstanceState.getInt("keywordFilter", 0));
+            kanjiListFilterAdapter.setStoryFilter(savedInstanceState.getInt("storyFilter", 0));
+            String query = savedInstanceState.getString("searchQuery");
+            //trigger a search with the onTextChanged Listener
+            searchView.setQuery(query, true);
+        }
 
         notifyFilterChanged();
 
@@ -364,4 +379,17 @@ public class KanjiListActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * When rotation changes, we need to save...
+     * Search query
+     * Filters
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("searchQuery", searchView.getQuery().toString());
+        outState.putInt("joyoFilter", kanjiListFilterAdapter.getJoyoFilter().getStateNum());
+        outState.putInt("keywordFilter", kanjiListFilterAdapter.getKeywordFilter().getStateNum());
+        outState.putInt("storyFilter", kanjiListFilterAdapter.getStoryFilter().getStateNum());
+        super.onSaveInstanceState(outState);
+    }
 }
