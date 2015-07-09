@@ -295,6 +295,8 @@ public class KanjiListActivity extends AppCompatActivity {
             }
 
             kanjiListAdapter.notifyDataSetChanged();
+            //if we return from detail view, and something has changed, resubmit the search query by triggering the filter's onClosed listener
+            spinnerListener.onSpinnerClosed();
         }
     }
 

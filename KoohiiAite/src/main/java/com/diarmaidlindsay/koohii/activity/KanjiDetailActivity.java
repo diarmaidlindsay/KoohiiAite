@@ -1,6 +1,7 @@
 package com.diarmaidlindsay.koohii.activity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -31,7 +32,11 @@ public class KanjiDetailActivity extends AppCompatActivity {
         Bundle arguments = getIntent().getExtras();
         currentIndex = arguments.getInt("filteredListIndex");
         filteredIdList = arguments.getStringArray("filteredIdList");
-        swapFragment(currentIndex);
+        if(savedInstanceState != null) {
+            swapFragment(savedInstanceState.getInt("currentIndex"));
+        } else {
+            swapFragment(currentIndex);
+        }
     }
 
     @Override
@@ -83,14 +88,16 @@ public class KanjiDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Ask the view pager in the child fragment manager which page index it is currently displaying.
+     * Used for pressing next/prev and preserving the tab index.
+     */
     private int getCurrentPagerIndex()
     {
         List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
-        if(fragmentList != null)
-        {
+        if (fragmentList != null) {
             Fragment fragment = fragmentList.get(fragmentList.size() - 1);
-            if(fragment instanceof KanjiDetailFragment)
-            {
+            if(fragment instanceof KanjiDetailFragment) {
                 return ((KanjiDetailFragment) fragment).getCurrentPagerIndex();
             }
         }
@@ -122,5 +129,11 @@ public class KanjiDetailActivity extends AppCompatActivity {
         returnIntent.putExtra("heisigIds", Utils.toIntArray(changedIds));
         returnIntent.putExtra("keywords", changedKeywords.toArray(new String[changedKeywords.size()]));
         setResult(RESULT_OK, returnIntent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentIndex", currentIndex);
     }
 }
