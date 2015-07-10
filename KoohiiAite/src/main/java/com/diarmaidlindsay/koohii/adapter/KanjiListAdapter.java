@@ -189,6 +189,7 @@ public class KanjiListAdapter extends BaseAdapter {
                 filterOnKanji(searchString);
             } else {
                 filterOnKeyword(searchString);
+                filterOnUserKeyword(searchString);
                 filterOnPrimitives(searchString);
             }
         }
@@ -256,6 +257,18 @@ public class KanjiListAdapter extends BaseAdapter {
         for (Keyword keyword : keywordList) {
             if (keyword.getKeywordText().toLowerCase(Locale.getDefault()).contains(filterText)) {
                 filteredHeisigKanjiSet.add(keyword.getHeisigId());
+            }
+        }
+    }
+
+    /**
+     * Iterate over user keywords
+     */
+    private void filterOnUserKeyword(String filterText) {
+        for (Integer heisigId : userKeywordMap.keySet()) {
+            String userKeyword = userKeywordMap.get(heisigId);
+            if(userKeyword.toLowerCase(Locale.getDefault()).contains(filterText)) {
+                filteredHeisigKanjiSet.add(heisigId);
             }
         }
     }
