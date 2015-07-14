@@ -38,6 +38,11 @@
     <string name="filter_state_joyo">Joyo[%s]</string>
     <string name="filter_state_keyword">Keyword[%s]</string>
     <string name="filter_state_story">Story[%s]</string>
+    <string name="button_choose_file">Choose CSV</string>
+    <string name="button_confirm">Confirm</string>
+    <string name="title_import_story">Import Stories</string>
+    <string name="action_import_story">Import Stories</string>
+    <string name="title_choose_csv">Locate my_stories.csv</string>
     <string-array name="values_array_filter">
         <item>Unset</item>
         <item>Yes</item>

@@ -176,6 +176,9 @@ public class KanjiListActivity extends AppCompatActivity {
             case R.id.action_primitives :
                 showPrimitives();
                 return true;
+            case R.id.action_import_story :
+                importStory();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -183,6 +186,10 @@ public class KanjiListActivity extends AppCompatActivity {
 
     private void showPrimitives() {
         startActivity(new Intent(this, PrimitiveListActivity.class));
+    }
+
+    private void importStory() {
+        startActivityForResult(new Intent(this, ImportStoryActivity.class), 2);
     }
 
     /**
@@ -275,28 +282,32 @@ public class KanjiListActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK)
         {
-            int[] heisigIds = data.getIntArrayExtra("heisigIds");
-            String[] keywords = data.getStringArrayExtra("keywords");
+            if(requestCode == 1) { //Kanji Detail Activity
+                int[] heisigIds = data.getIntArrayExtra("heisigIds");
+                String[] keywords = data.getStringArrayExtra("keywords");
 
-            //user didn't modify anything
-            if(heisigIds == null || keywords == null)
-            {
-                return;
-            } else if(heisigIds.length != keywords.length)
-            {
-                Log.e("KanjiListActivity", "Array of Keyword ids and texts aren't same size!");
-                return;
+                //user didn't modify anything
+                if(heisigIds == null || keywords == null)
+                {
+                    return;
+                } else if(heisigIds.length != keywords.length)
+                {
+                    Log.e("KanjiListActivity", "Array of Keyword ids and texts aren't same size!");
+                    return;
+                }
+
+                //user modified kanji(s) in the detail view, so update indicators
+                for(int i = 0; i < heisigIds.length; i++) {
+                    kanjiListAdapter.updateKeyword(heisigIds[i], keywords[i]);
+                    kanjiListAdapter.updateIndicatorVisibilityWithId(heisigIds[i]); //change to 0-indexed
+                }
+
+                kanjiListAdapter.notifyDataSetChanged();
+                //if we return from detail view, and something has changed, resubmit the search query by triggering the filter's onClosed listener
+                spinnerListener.onSpinnerClosed();
+            } else if(requestCode == 2) { //Import Stories Activity
+                //add stories and keywords to database
             }
-
-            //user modified kanji(s) in the detail view, so update indicators
-            for(int i = 0; i < heisigIds.length; i++) {
-                kanjiListAdapter.updateKeyword(heisigIds[i], keywords[i]);
-                kanjiListAdapter.updateIndicatorVisibilityWithId(heisigIds[i]); //change to 0-indexed
-            }
-
-            kanjiListAdapter.notifyDataSetChanged();
-            //if we return from detail view, and something has changed, resubmit the search query by triggering the filter's onClosed listener
-            spinnerListener.onSpinnerClosed();
         }
     }
 
