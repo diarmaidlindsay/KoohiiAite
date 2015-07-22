@@ -12,6 +12,7 @@ import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
 import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
+import com.diarmaidlindsay.koohii.interfaces.OnCSVParseCompleted;
 import com.diarmaidlindsay.koohii.interfaces.OnDatabaseOperationCompleted;
 import com.diarmaidlindsay.koohii.model.Keyword;
 import com.diarmaidlindsay.koohii.model.Story;
@@ -28,15 +29,18 @@ import java.util.List;
  * Adapter for the List View in the Activity which displays importedStories CSV
  */
 public class ImportStoryAdapter extends BaseAdapter {
-    OnDatabaseOperationCompleted mListener;
+    OnDatabaseOperationCompleted databaseListener;
+    OnCSVParseCompleted csvListener;
+
     List<CSVEntry> importedStories = new ArrayList<>();
     private ViewHolderItem viewHolder;
     private Context mContext;
     private LayoutInflater layoutInflater;
 
-    public ImportStoryAdapter(Context context, OnDatabaseOperationCompleted listener) {
+    public ImportStoryAdapter(Context context, OnDatabaseOperationCompleted databaseListener, OnCSVParseCompleted csvListener) {
         this.mContext = context;
-        this.mListener = listener;
+        this.databaseListener = databaseListener;
+        this.csvListener = csvListener;
         layoutInflater = LayoutInflater.from(context);
     }
 
@@ -80,48 +84,6 @@ public class ImportStoryAdapter extends BaseAdapter {
         return convertView;
     }
 
-    /**
-     * Populate adapter table with the given my_stories.csv
-     *
-     * @return true if file successfully read
-     */
-    public boolean readCSVFile(File csvFile) {
-        BufferedReader br = null;
-        String line;
-        String csvSplitBy = ",";
-        clearStories();
-
-        try {
-
-            br = new BufferedReader(new FileReader(csvFile));
-
-            while ((line = br.readLine()) != null) {
-
-                //match maximum of 5 commas
-                String[] row = line.split(csvSplitBy, 6);
-                //first row is the column headers, we should ignore
-                if (row.length == 6 && Utils.isNumeric(row[0])) {
-                    importedStories.add(new CSVEntry(row[0], row[1], row[2], row[3], row[4], row[5]));
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    //noinspection ReturnInsideFinallyBlock
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     public void clearStories() {
         importedStories.clear();
     }
@@ -150,7 +112,7 @@ public class ImportStoryAdapter extends BaseAdapter {
         }
 
         DatabaseImportTask importTask = new DatabaseImportTask();
-        importTask.execute(newKeywords, newStories, affectedIds);
+        importTask.execute(newKeywords, newStories, affectedIds); //then go to onImportCompleted
     }
 
     static class ViewHolderItem {
@@ -178,6 +140,9 @@ public class ImportStoryAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * Write the imported CSV to the device database
+     */
     private class DatabaseImportTask extends AsyncTask<List<?>, Void, List<Integer>> {
         ProgressDialog progress;
         UserKeywordDataSource userKeywordDataSource;
@@ -226,7 +191,67 @@ public class ImportStoryAdapter extends BaseAdapter {
             if (progress.isShowing()) {
                 progress.dismiss();
             }
-            mListener.onImportCompleted(result);
+            databaseListener.onImportCompleted(result);
+        }
+    }
+
+    /**
+     * Populate adapter table with the given my_stories.csv
+     */
+    public class ReadCSVTask extends AsyncTask<File, Void, Boolean> {
+        ProgressDialog progress;
+
+        @Override
+        protected void onPreExecute() {
+            progress = ProgressDialog.show(mContext, "Reading CSV",
+                    "Please wait while parsing CSV", true);
+        }
+
+        @Override
+        protected Boolean doInBackground(File... params) {
+            if (params.length != 1) {
+                return false;
+            }
+            BufferedReader br = null;
+            String line;
+            String csvSplitBy = ",";
+            clearStories();
+            try {
+                br = new BufferedReader(new FileReader(params[0]));
+
+                while ((line = br.readLine()) != null) {
+
+                    //match maximum of 5 commas
+                    String[] row = line.split(csvSplitBy, 6);
+                    //first row is the column headers, we should ignore
+                    if (row.length == 6 && Utils.isNumeric(row[0])) {
+                        importedStories.add(new CSVEntry(row[0], row[1], row[2], row[3], row[4], row[5]));
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        //noinspection ReturnInsideFinallyBlock
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if (progress.isShowing()) {
+                progress.dismiss();
+            }
+            csvListener.onParsingCompleted(aBoolean);
         }
     }
 }

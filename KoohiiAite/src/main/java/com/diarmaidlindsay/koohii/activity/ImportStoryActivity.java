@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.ImportStoryAdapter;
+import com.diarmaidlindsay.koohii.interfaces.OnCSVParseCompleted;
 import com.diarmaidlindsay.koohii.interfaces.OnDatabaseOperationCompleted;
 import com.diarmaidlindsay.koohii.utils.Utils;
 import com.ipaulpro.afilechooser.FileChooserActivity;
@@ -24,7 +25,7 @@ import java.util.List;
  * Import CSV and display result of import in a table, so the user can
  * confirm or cancel the changes.
  */
-public class ImportStoryActivity extends AppCompatActivity implements OnDatabaseOperationCompleted {
+public class ImportStoryActivity extends AppCompatActivity implements OnDatabaseOperationCompleted, OnCSVParseCompleted {
     static final int ACTIVITY_CODE = 2;
     static final int FILE_CODE = 100;
     ListView listCSVContent; //the csv file's valid rows
@@ -69,7 +70,7 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
             }
         });
 
-        listAdapter = new ImportStoryAdapter(this, this);
+        listAdapter = new ImportStoryAdapter(this, this, this);
         listCSVContent.setAdapter(listAdapter);
 
         buttonCancel.setEnabled(listAdapter.getCount() > 0);
@@ -90,17 +91,9 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
             String path = FileUtils.getPath(this, uri);
 
             if (path != null) {
-                if (listAdapter.readCSVFile(new File(path))) {
-                    if (listAdapter.getCount() > 0) {
-                        listAdapter.notifyDataSetChanged();
-                        buttonConfirm.setEnabled(true);
-                        buttonCancel.setEnabled(true);
-                        Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
-                    }
-                    importCount.setText(listAdapter.getCount() + " stories found for import.");
-                } else {
-                    Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_SHORT).show();
-                }
+                //execute task
+                ImportStoryAdapter.ReadCSVTask csvTask = listAdapter.new ReadCSVTask();
+                csvTask.execute(new File(path)); //then go to onParsingCompleted
             }
         }
     }
@@ -123,5 +116,20 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
         }
         resetView();
         finish();
+    }
+
+    @Override
+    public void onParsingCompleted(boolean success) {
+        if (success) {
+            if (listAdapter.getCount() > 0) {
+                listAdapter.notifyDataSetChanged();
+                buttonConfirm.setEnabled(true);
+                buttonCancel.setEnabled(true);
+                Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
+            }
+            importCount.setText(listAdapter.getCount() + " stories found for import.");
+        } else {
+            Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_SHORT).show();
+        }
     }
 }
