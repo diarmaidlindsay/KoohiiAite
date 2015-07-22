@@ -21,6 +21,11 @@ import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
 import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.Story;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * For display of the Story related to the heisig id
  * which was provided. Also allow editing of story.
@@ -104,9 +109,99 @@ public class StoryFragment extends Fragment {
         textViewHeisigId.setText(heisigId);
         textViewKanji.setText(kanji);
 
-        textViewStory.setText(storyText);
+        textViewStory.setText(formatStory(storyText), TextView.BufferType.SPANNABLE);
         updateWidgets();
         return view;
+    }
+
+    /**
+     * Replace hash and asterix words with bolded and italisised versions of those words
+     * as with kanji.koohii.com
+     */
+    private SpannableString formatStory(String storyText) {
+        SpannableString formattedStory = new SpannableString(storyText);
+        List<StoryFormat> italicSpanStarts = new ArrayList<>();
+        List<StoryFormat> italicSpanEnds = new ArrayList<>();
+        List<StoryFormat> boldSpanStarts = new ArrayList<>();
+        List<StoryFormat> boldSpanEnds = new ArrayList<>();
+
+        //remove double quotes in stories ("")
+        storyText = storyText.replaceAll("\"\"", "\"");
+
+        char[] storyChars = storyText.toCharArray();
+        boolean isItalic = false;
+        boolean isBold = false;
+        int order = 0;
+        for (int i = 0; i < storyChars.length; i++) {
+            char c = storyChars[i];
+            if (c == '*') {
+                //found italic
+                if (!isItalic) {
+                    //italic span start
+                    isItalic = true;
+                    italicSpanStarts.add(new StoryFormat(i, order++));
+                } else {
+                    isItalic = false;
+                    italicSpanEnds.add(new StoryFormat(i, order++));
+                }
+            } else if (c == '#') {
+                if (!isBold) {
+                    isBold = true;
+                    boldSpanStarts.add(new StoryFormat(i, order++));
+                } else {
+                    isBold = false;
+                    boldSpanEnds.add(new StoryFormat(i, order++));
+                }
+            }
+        }
+
+        //if malformatted, return original text
+        if ((italicSpanEnds.size() != italicSpanStarts.size()) || boldSpanStarts.size() != boldSpanEnds.size()) {
+            return formattedStory;
+        }
+
+        //remove hashes and asterixes, string will shorten, we must take this into account with the indexes
+        storyText = storyText.replaceAll("\\*", "");
+        storyText = storyText.replaceAll("#", "");
+
+        //any time the keyword is mentioned in the story, mark it as bold
+        //we can use plain integer array to hold indexes instead of StoryFormat objects because indexes don't need adjustment
+        ArrayList<Integer> keywordSpanStarts = new ArrayList<>();
+        Pattern p = Pattern.compile(userKeyword == null ? originalKeyword.toLowerCase() : userKeyword.toLowerCase());
+        Matcher m = p.matcher(storyText.toLowerCase());
+        while (m.find()) {
+            keywordSpanStarts.add(m.start());
+        }
+
+        formattedStory = new SpannableString(storyText);
+
+        //mark italics
+        for (int i = 0; i < italicSpanStarts.size(); i++) {
+            int indexStarts = italicSpanStarts.get(i).index - italicSpanStarts.get(i).order;
+            int indexEnds = italicSpanEnds.get(i).index - italicSpanEnds.get(i).order;
+            formattedStory.setSpan(new TextAppearanceSpan(getActivity(), R.style.storyAsterix),
+                    indexStarts, indexEnds, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        //mark bolds
+        for (int i = 0; i < boldSpanStarts.size(); i++) {
+            int indexStarts = boldSpanStarts.get(i).index - boldSpanStarts.get(i).order;
+            int indexEnds = boldSpanEnds.get(i).index - boldSpanEnds.get(i).order;
+            //if the text to be bolded is a keyword, we'll do that in the next loop instead
+            if (!keywordSpanStarts.contains(indexStarts)) {
+                formattedStory.setSpan(new TextAppearanceSpan(getActivity(), R.style.storyHash),
+                        indexStarts, indexEnds, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+        int keywordLength = userKeyword == null ? originalKeyword.length() : userKeyword.length();
+        //mark keyword occurances as bold
+        for (Integer start : keywordSpanStarts) {
+            formattedStory.setSpan(new TextAppearanceSpan(getActivity(), R.style.storyHash),
+                    start, start + keywordLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return formattedStory;
     }
 
     private void submitKeyword(int heisigId, String keywordText, boolean update)
@@ -186,6 +281,18 @@ public class StoryFragment extends Fragment {
             } else {
                 ((KanjiDetailActivity) getActivity()).setResult(heisigIdInt, userKeyword);
             }
+        }
+    }
+
+    private class StoryFormat {
+        public int index;
+        public int order;
+        //string will shorten when hashes and asterixes are removed
+        //so use the order to adjust the index afterwards
+
+        public StoryFormat(int index, int order) {
+            this.index = index;
+            this.order = order;
         }
     }
 }

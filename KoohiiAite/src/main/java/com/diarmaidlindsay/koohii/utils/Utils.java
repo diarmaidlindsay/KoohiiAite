@@ -17,4 +17,13 @@ public class Utils {
             ret[i++] = e;
         return ret;
     }
+
+    public static boolean isNumeric(String value) {
+        return value.matches("\\d+");
+    }
+
+    public static boolean isKanji(char value) {
+        return Character.UnicodeBlock.of(value)
+                == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS;
+    }
 }

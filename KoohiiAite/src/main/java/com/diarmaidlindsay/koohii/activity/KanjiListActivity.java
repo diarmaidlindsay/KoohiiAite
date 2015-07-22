@@ -101,6 +101,7 @@ public class KanjiListActivity extends AppCompatActivity {
                     result.setText(kanjiListAdapter.getCount() + " items displayed");
                 }
             };
+            private Handler mHandler = new Handler();
 
             @Override
             public void notifyContentsChange() {
@@ -118,8 +119,6 @@ public class KanjiListActivity extends AppCompatActivity {
                     mHandler.postDelayed(mFilterTask, 0);
                 }
             }
-
-            private Handler mHandler = new Handler();
         };
         spinnerFilter.setSpinnerEventsListener(spinnerListener);
 
@@ -216,6 +215,15 @@ public class KanjiListActivity extends AppCompatActivity {
     {
         return new SearchView.OnQueryTextListener() {
             private String text;
+            Runnable mFilterTask = new Runnable() {
+
+                @Override
+                public void run() {
+                    kanjiListAdapter.search(text);
+                    result.setText(kanjiListAdapter.getCount() + " items displayed");
+                }
+            };
+            private Handler mHandler = new Handler();
 
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -236,17 +244,6 @@ public class KanjiListActivity extends AppCompatActivity {
                 mHandler.postDelayed(mFilterTask, 1000);
                 return true;
             }
-
-            Runnable mFilterTask = new Runnable() {
-
-                @Override
-                public void run() {
-                    kanjiListAdapter.search(text);
-                    result.setText(kanjiListAdapter.getCount() + " items displayed");
-                }
-            };
-
-            private Handler mHandler = new Handler();
         };
     }
 
@@ -282,7 +279,7 @@ public class KanjiListActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK)
         {
-            if(requestCode == 1) { //Kanji Detail Activity
+            if (requestCode == KanjiDetailActivity.ACTIVITY_CODE) { //Kanji Detail Activity
                 int[] heisigIds = data.getIntArrayExtra("heisigIds");
                 String[] keywords = data.getStringArrayExtra("keywords");
 
@@ -305,8 +302,16 @@ public class KanjiListActivity extends AppCompatActivity {
                 kanjiListAdapter.notifyDataSetChanged();
                 //if we return from detail view, and something has changed, resubmit the search query by triggering the filter's onClosed listener
                 spinnerListener.onSpinnerClosed();
-            } else if(requestCode == 2) { //Import Stories Activity
-                //add stories and keywords to database
+            } else if (requestCode == ImportStoryActivity.ACTIVITY_CODE) { //Import Stories Activity
+                int[] heisigIds = data.getIntArrayExtra("heisigIds");
+                kanjiListAdapter.initialiseUserKeywordsAndStories();
+
+                for (int heisigId : heisigIds) {
+                    kanjiListAdapter.updateIndicatorVisibilityWithId(heisigId);
+                }
+
+                kanjiListAdapter.notifyDataSetChanged();
+                spinnerListener.onSpinnerClosed(); //trigger list view refresh
             }
         }
     }

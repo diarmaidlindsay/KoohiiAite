@@ -7,6 +7,7 @@ import com.diarmaidlindsay.koohii.database.DatabaseAssetHelper;
 import com.diarmaidlindsay.koohii.model.Keyword;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,10 +23,9 @@ public class UserKeywordDataSource extends CommonDataSource {
         super(context);
     }
 
-    public Map<Integer, String> getAllUserKeywords()
-    {
+    public Map<Integer, String> getAllUserKeywords() {
         Map<Integer, String> keywordList = new HashMap<>();
-        String orderBy =  COLUMN_ID + " ASC";
+        String orderBy = COLUMN_ID + " ASC";
 
         Cursor cursor = database.query(DatabaseAssetHelper.TABLE_USER_KEYWORD,
                 allColumns, null, null, null, null, orderBy);
@@ -39,13 +39,11 @@ public class UserKeywordDataSource extends CommonDataSource {
         return keywordList;
     }
 
-    public Keyword getKeywordFor(int heisigId)
-    {
+    public Keyword getKeywordFor(int heisigId) {
         Keyword keyword = null;
         Cursor cursor = database.query(DatabaseAssetHelper.TABLE_USER_KEYWORD,
-                allColumns, COLUMN_ID+ " = "+ heisigId, null, null, null, null);
-        if(cursor.moveToFirst())
-        {
+                allColumns, COLUMN_ID + " = " + heisigId, null, null, null, null);
+        if (cursor.moveToFirst()) {
             keyword = cursorToKeyword(cursor);
         }
         cursor.close();
@@ -70,13 +68,29 @@ public class UserKeywordDataSource extends CommonDataSource {
         return database.insert(DatabaseAssetHelper.TABLE_USER_KEYWORD, null, values) != -1;
     }
 
+    /**
+     * returns true if insertion successful
+     */
+    public boolean insertKeywords(List<Keyword> keywords) {
+        boolean success = true;
+        for (Keyword keyword : keywords) {
+            if (!updateKeyword(keyword.getHeisigId(), keyword.getKeywordText())) {
+                if (!insertKeyword(keyword.getHeisigId(), keyword.getKeywordText())) {
+                    success = false;
+                }
+            }
+        }
+
+        return success;
+    }
+
     public boolean updateKeyword(int heisigId, String keyword) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_KEYWORD, keyword);
 
         // Which row to update, based on the ID
         String selection = COLUMN_ID + " = ?";
-        String[] selectionArgs = { String.valueOf(heisigId) };
+        String[] selectionArgs = {String.valueOf(heisigId)};
 
         //0 means no rows affected, so return true if not 0
         return database.update(
@@ -86,12 +100,11 @@ public class UserKeywordDataSource extends CommonDataSource {
                 selectionArgs) != 0;
     }
 
-    public boolean deleteKeyword(int heisigId)
-    {
+    public boolean deleteKeyword(int heisigId) {
         // Define 'where' part of query.
         String selection = COLUMN_ID + " = ?";
         // Specify arguments in placeholder order.
-        String[] selectionArgs = { String.valueOf(heisigId) };
+        String[] selectionArgs = {String.valueOf(heisigId)};
         //0 is failed deletion, so return true if not 0
         return database.delete(DatabaseAssetHelper.TABLE_USER_KEYWORD, selection, selectionArgs) != 0;
     }

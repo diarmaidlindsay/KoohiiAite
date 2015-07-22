@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.diarmaidlindsay.koohii">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
@@ -49,6 +49,13 @@
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".activity.KanjiListActivity"/>
+        </activity>
+        <activity
+                android:name="com.ipaulpro.afilechooser.FileChooserActivity"
+                android:icon="@drawable/ic_chooser"
+                android:enabled="@bool/use_activity"
+                android:exported="true"
+                android:label="@string/title_choose_csv">
         </activity>
     </application>
 </manifest>

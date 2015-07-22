@@ -1,7 +1,6 @@
 package com.diarmaidlindsay.koohii.activity;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -19,10 +18,13 @@ import java.util.List;
 
 public class KanjiDetailActivity extends AppCompatActivity {
 
+    public static final int ACTIVITY_CODE = 1;
     int currentIndex;
     String[] filteredIdList;
     List<Integer> changedIds = new ArrayList<>();
     List<String> changedKeywords = new ArrayList<>();
+    MenuItem prevButton;
+    MenuItem nextButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,7 @@ public class KanjiDetailActivity extends AppCompatActivity {
         Bundle arguments = getIntent().getExtras();
         currentIndex = arguments.getInt("filteredListIndex");
         filteredIdList = arguments.getStringArray("filteredIdList");
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             swapFragment(savedInstanceState.getInt("currentIndex"));
         } else {
             swapFragment(currentIndex);
@@ -44,22 +46,9 @@ public class KanjiDetailActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_kanji_detail, menu);
-        MenuItem prevButton = menu.findItem(R.id.action_previous);
-        MenuItem nextButton = menu.findItem(R.id.action_next);
-        if(currentIndex == 0)
-        {
-            prevButton.setEnabled(false);
-        } else {
-            prevButton.setEnabled(true);
-        }
-
-        if(currentIndex == (filteredIdList.length - 1))
-        {
-            nextButton.setEnabled(false);
-        } else {
-            nextButton.setEnabled(true);
-        }
-
+        prevButton = menu.findItem(R.id.action_previous);
+        nextButton = menu.findItem(R.id.action_next);
+        updateButtonEnablement();
         return true;
     }
 
@@ -92,12 +81,11 @@ public class KanjiDetailActivity extends AppCompatActivity {
      * Ask the view pager in the child fragment manager which page index it is currently displaying.
      * Used for pressing next/prev and preserving the tab index.
      */
-    private int getCurrentPagerIndex()
-    {
+    private int getCurrentPagerIndex() {
         List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
         if (fragmentList != null) {
             Fragment fragment = fragmentList.get(fragmentList.size() - 1);
-            if(fragment instanceof KanjiDetailFragment) {
+            if (fragment instanceof KanjiDetailFragment) {
                 return ((KanjiDetailFragment) fragment).getCurrentPagerIndex();
             }
         }
@@ -105,8 +93,7 @@ public class KanjiDetailActivity extends AppCompatActivity {
         return -1;
     }
 
-    private void swapFragment(int newIndex)
-    {
+    private void swapFragment(int newIndex) {
         KanjiDetailFragment fragment = new KanjiDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putInt("heisigId", Integer.parseInt(filteredIdList[newIndex]));
@@ -119,10 +106,10 @@ public class KanjiDetailActivity extends AppCompatActivity {
         ft.replace(R.id.detail_fragment_framelayout, fragment);
         // Complete the changes added above
         ft.commit();
+        updateButtonEnablement();
     }
 
-    public void setResult(int heisigId, String keyword)
-    {
+    public void setResult(int heisigId, String keyword) {
         Intent returnIntent = new Intent();
         changedIds.add(heisigId);
         changedKeywords.add(keyword);
@@ -135,5 +122,25 @@ public class KanjiDetailActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("currentIndex", currentIndex);
+    }
+
+    /**
+     * Manage Prev/Next button state
+     */
+    private void updateButtonEnablement() {
+        if (prevButton != null && nextButton != null) {
+            if (currentIndex == 0) {
+                prevButton.setEnabled(false);
+            } else {
+                prevButton.setEnabled(true);
+            }
+
+            if (currentIndex == (filteredIdList.length - 1)) {
+                nextButton.setEnabled(false);
+            } else {
+                nextButton.setEnabled(true);
+            }
+        }
+
     }
 }

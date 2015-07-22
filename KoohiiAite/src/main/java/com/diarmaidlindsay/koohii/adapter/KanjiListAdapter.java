@@ -17,6 +17,7 @@ import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.HeisigToPrimitive;
 import com.diarmaidlindsay.koohii.model.Keyword;
 import com.diarmaidlindsay.koohii.model.Primitive;
+import com.diarmaidlindsay.koohii.utils.Utils;
 
 import java.util.*;
 
@@ -40,50 +41,47 @@ public class KanjiListAdapter extends BaseAdapter {
 
     private LayoutInflater layoutInflater;
 
-    /**
-     * This prevents wasted cpu cycles by only inflating the view once
-     * http://www.javacodegeeks.com/2013/09/android-viewholder-pattern-example.html
-     */
-    static class ViewHolderItem {
-        TextView heisig;
-        TextView kanji;
-        TextView keyword;
-        TextView primitives;
-        TextView joyoIndicator;
-        TextView storyIndicator;
-        TextView keywordIndicator;
-    }
-
     public KanjiListAdapter(Context context, Bundle savedInstanceState) {
         this.mContext = context;
         layoutInflater = LayoutInflater.from(context);
         initialiseDatasets();
         //only perform initial search if we're coming from fresh state
-        if(savedInstanceState==null) {
+        if (savedInstanceState == null) {
             search("");
         }
     }
 
     private void initialiseDatasets() {
         KeywordDataSource keywordDataSource = new KeywordDataSource(mContext);
-        UserKeywordDataSource userKeywordDataSource = new UserKeywordDataSource(mContext);
         HeisigKanjiDataSource heisigKanjiDataSource = new HeisigKanjiDataSource(mContext);
         PrimitiveDataSource primitiveDataSource = new PrimitiveDataSource(mContext);
-        StoryDataSource storyDataSource = new StoryDataSource(mContext);
+
         heisigKanjiDataSource.open();
         keywordDataSource.open();
-        userKeywordDataSource.open();
         primitiveDataSource.open();
-        storyDataSource.open();
+
         masterList = heisigKanjiDataSource.getAllKanji();
         keywordList = keywordDataSource.getAllKeywords();
-        userKeywordMap = userKeywordDataSource.getAllUserKeywords();
         primitiveList = primitiveDataSource.getAllPrimitives();
-        storyList = storyDataSource.getStoryFlags(masterList.size());
+
         heisigKanjiDataSource.close();
-        userKeywordDataSource.close();
         keywordDataSource.close();
         primitiveDataSource.close();
+
+        initialiseUserKeywordsAndStories();
+    }
+
+    /**
+     * Called after a CSV import
+     */
+    public void initialiseUserKeywordsAndStories() {
+        UserKeywordDataSource userKeywordDataSource = new UserKeywordDataSource(mContext);
+        userKeywordDataSource.open();
+        userKeywordMap = userKeywordDataSource.getAllUserKeywords();
+        userKeywordDataSource.close();
+        StoryDataSource storyDataSource = new StoryDataSource(mContext);
+        storyDataSource.open();
+        storyList = storyDataSource.getStoryFlags(masterList.size());
         storyDataSource.close();
     }
 
@@ -162,7 +160,7 @@ public class KanjiListAdapter extends BaseAdapter {
                     intent.putExtra("filteredListIndex", position);
                     //put all the filtered heisig ids for next/prev navigation
                     intent.putExtra("filteredIdList", HeisigKanji.getIds1Indexed(filteredHeisigKanjiList));
-                    ((KanjiListActivity) mContext).startActivityForResult(intent, 1);
+                    ((KanjiListActivity) mContext).startActivityForResult(intent, KanjiDetailActivity.ACTIVITY_CODE);
                 } else {
                     Toast.makeText(mContext, "Context was not KanjiListActivity", Toast.LENGTH_SHORT).show();
                 }
@@ -183,9 +181,9 @@ public class KanjiListAdapter extends BaseAdapter {
         filteredHeisigKanjiSet.clear();
 
         if (searchString.length() > 0) {
-            if (isNumeric(searchString)) {
+            if (Utils.isNumeric(searchString)) {
                 filterOnId(searchString);
-            } else if (isKanji(searchString.charAt(0))) {
+            } else if (Utils.isKanji(searchString.charAt(0))) {
                 filterOnKanji(searchString);
             } else {
                 filterOnKeyword(searchString);
@@ -198,15 +196,6 @@ public class KanjiListAdapter extends BaseAdapter {
         applyFilters();
         updatePrimitiveList();
         notifyDataSetChanged();
-    }
-
-    private boolean isNumeric(String value) {
-        return value.matches("\\d+");
-    }
-
-    private boolean isKanji(char value) {
-        return Character.UnicodeBlock.of(value)
-                == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS;
     }
 
     private void updateFilteredList(String filterText) {
@@ -267,7 +256,7 @@ public class KanjiListAdapter extends BaseAdapter {
     private void filterOnUserKeyword(String filterText) {
         for (Integer heisigId : userKeywordMap.keySet()) {
             String userKeyword = userKeywordMap.get(heisigId);
-            if(userKeyword.toLowerCase(Locale.getDefault()).contains(filterText)) {
+            if (userKeyword.toLowerCase(Locale.getDefault()).contains(filterText)) {
                 filteredHeisigKanjiSet.add(heisigId);
             }
         }
@@ -369,7 +358,7 @@ public class KanjiListAdapter extends BaseAdapter {
                 boolean storyMatch = isStoryMatch(storyFilter, heisigKanji);
                 boolean keywordMatch = isKeywordMatch(keywordFilter, heisigKanji);
 
-                if(!joyoMatch || !storyMatch || !keywordMatch) {
+                if (!joyoMatch || !storyMatch || !keywordMatch) {
                     filteredOutKanji.add(heisigKanji);
                 }
             }
@@ -467,5 +456,19 @@ public class KanjiListAdapter extends BaseAdapter {
         } else {
             viewHolder.storyIndicator.setVisibility(View.INVISIBLE);
         }
+    }
+
+    /**
+     * This prevents wasted cpu cycles by only inflating the view once
+     * http://www.javacodegeeks.com/2013/09/android-viewholder-pattern-example.html
+     */
+    static class ViewHolderItem {
+        TextView heisig;
+        TextView kanji;
+        TextView keyword;
+        TextView primitives;
+        TextView joyoIndicator;
+        TextView storyIndicator;
+        TextView keywordIndicator;
     }
 }
