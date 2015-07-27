@@ -17,6 +17,7 @@ import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.HeisigToPrimitive;
 import com.diarmaidlindsay.koohii.model.Keyword;
 import com.diarmaidlindsay.koohii.model.Primitive;
+import com.diarmaidlindsay.koohii.utils.ToastUtil;
 import com.diarmaidlindsay.koohii.utils.Utils;
 
 import java.util.*;
@@ -162,7 +163,7 @@ public class KanjiListAdapter extends BaseAdapter {
                     intent.putExtra("filteredIdList", HeisigKanji.getIds1Indexed(filteredHeisigKanjiList));
                     ((KanjiListActivity) mContext).startActivityForResult(intent, KanjiDetailActivity.ACTIVITY_CODE);
                 } else {
-                    Toast.makeText(mContext, "Context was not KanjiListActivity", Toast.LENGTH_SHORT).show();
+                    ToastUtil.makeText(mContext, "Context was not KanjiListActivity", Toast.LENGTH_SHORT).show();
                 }
             }
         });

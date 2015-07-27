@@ -2,8 +2,8 @@
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:colorBackground">@color/amber_b2</item>
-        <item name="android:background">@color/amber_b2</item>
+        <item name="android:colorBackground">@color/ka_bright2</item>
+        <item name="android:background">@color/ka_bright2</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="actionBarStyle">@style/MyActionBar</item>
         <!-- Customize your theme here. -->
@@ -21,14 +21,14 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:typeface">monospace</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">@color/amber_d2</item>
+        <item name="android:background">@color/ka_dark2</item>
     </style>
     <style name="DetailItem" parent="@android:style/TextAppearance.Medium">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">@color/amber_b2</item>
+        <item name="android:background">@color/ka_bright2</item>
     </style>
     <style name="SampleTitle" parent="@android:style/TextAppearance.Small">
         <item name="android:layout_width">fill_parent</item>
@@ -36,14 +36,14 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:typeface">monospace</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">@color/amber_d2</item>
+        <item name="android:background">@color/ka_dark2</item>
     </style>
     <style name="SampleItem" parent="@android:style/TextAppearance.Small">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">@color/amber_b2</item>
+        <item name="android:background">@color/ka_bright2</item>
     </style>
     <style name="GreyItalicSmallText" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@android:color/darker_gray</item>
@@ -55,7 +55,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">@color/amber</item>
+        <item name="android:background">@color/ka_neutral</item>
     </style>
 
     <style name="fileChooserName">

@@ -13,6 +13,6 @@
             android:horizontalSpacing="10dp"
             android:stretchMode="columnWidth"
             android:gravity="center"
-            android:background="@color/amber_d1"/>
+            android:background="@color/ka_dark1"/>
 
 </LinearLayout>

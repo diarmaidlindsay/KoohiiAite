@@ -20,6 +20,7 @@ import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
 import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.Story;
+import com.diarmaidlindsay.koohii.utils.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,7 +219,7 @@ public class StoryFragment extends Fragment {
                 success = true;
         }
 
-        Toast.makeText(getActivity(), success ? "Keyword Changed" : "Error! Keyword not Changed",
+        ToastUtil.makeText(getActivity(), success ? "Keyword Changed" : "Error! Keyword not Changed",
                 Toast.LENGTH_SHORT).show();
         if(success) {
             userKeyword = keywordText;
@@ -240,7 +241,7 @@ public class StoryFragment extends Fragment {
             updateParentActivity();
         }
 
-        Toast.makeText(getActivity(), success ? "Keyword Reset" : "Error! Keyword not Changed",
+        ToastUtil.makeText(getActivity(), success ? "Keyword Reset" : "Error! Keyword not Changed",
                 Toast.LENGTH_SHORT).show();
         dataSource.close();
     }

@@ -14,6 +14,7 @@ import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.ImportStoryAdapter;
 import com.diarmaidlindsay.koohii.interfaces.OnCSVParseCompleted;
 import com.diarmaidlindsay.koohii.interfaces.OnDatabaseOperationCompleted;
+import com.diarmaidlindsay.koohii.utils.ToastUtil;
 import com.diarmaidlindsay.koohii.utils.Utils;
 import com.ipaulpro.afilechooser.FileChooserActivity;
 import com.ipaulpro.afilechooser.utils.FileUtils;
@@ -108,10 +109,10 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
     public void onImportCompleted(List<Integer> affectedIds) {
         if (affectedIds.size() > 0) {
             setResult(affectedIds);
-            Toast.makeText(this, affectedIds.size() + " Stories and Keywords updated", Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(this, affectedIds.size() + " Stories and Keywords updated", Toast.LENGTH_SHORT).show();
 
         } else {
-            Toast.makeText(this, "Failed to write to database", Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(this, "Failed to write to database", Toast.LENGTH_LONG).show();
             setResult(RESULT_CANCELED);
         }
         resetView();
@@ -125,11 +126,11 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
                 listAdapter.notifyDataSetChanged();
                 buttonConfirm.setEnabled(true);
                 buttonCancel.setEnabled(true);
-                Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
+                ToastUtil.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
             }
             importCount.setText(listAdapter.getCount() + " stories found for import.");
         } else {
-            Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(this, "Failed to read CSV file", Toast.LENGTH_LONG).show();
         }
     }
 }

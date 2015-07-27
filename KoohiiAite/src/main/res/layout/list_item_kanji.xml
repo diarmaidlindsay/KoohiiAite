@@ -13,7 +13,7 @@
             android:paddingRight="5dp"
             android:paddingEnd="5dp"
             android:textColor="@android:color/white"
-            android:background="@color/amber_d2"
+            android:background="@color/ka_dark2"
             android:textSize="36sp"
             android:maxLines="1"
             android:layout_gravity="center_vertical"
@@ -37,8 +37,8 @@
                     android:text="@string/unSet"
                     android:paddingRight="10dp"
                     android:paddingEnd="10dp"
-                    android:background="@color/amber_d2"
-                    android:textColor="@color/amber_b1"
+                    android:background="@color/ka_dark2"
+                    android:textColor="@color/ka_bright1"
                     android:maxLines="1"
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
@@ -48,8 +48,8 @@
                     android:id="@+id/keyword_list_item"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="@string/unSet"
-                    android:background="@color/amber_d2"
-                    android:textColor="@color/amber_b2"
+                    android:background="@color/ka_dark2"
+                    android:textColor="@color/ka_bright2"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"/>
@@ -60,7 +60,7 @@
                 android:id="@+id/primitives_list_item"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/unSet"
-                android:background="@color/amber"
+                android:background="@color/ka_neutral"
                 android:textColor="@android:color/black"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
@@ -68,7 +68,7 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/amber_d2"
+                android:background="@color/ka_dark2"
                 android:orientation="horizontal">
 
             <TextView
@@ -76,8 +76,8 @@
                     android:layout_width="match_parent"
                     android:layout_weight=".33"
                     android:layout_height="match_parent"
-                    android:background="@color/amber_d2"
-                    android:textColor="@color/amber"
+                    android:background="@color/ka_dark2"
+                    android:textColor="@color/ka_neutral"
                     android:text="@string/list_indicator_joyo"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:gravity="center"/>
@@ -87,8 +87,8 @@
                     android:layout_width="match_parent"
                     android:layout_weight=".33"
                     android:layout_height="match_parent"
-                    android:background="@color/amber_d2"
-                    android:textColor="@color/amber"
+                    android:background="@color/ka_dark2"
+                    android:textColor="@color/ka_neutral"
                     android:text="@string/list_indicator_keyword"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:gravity="center"/>
@@ -98,8 +98,8 @@
                     android:layout_width="match_parent"
                     android:layout_weight=".33"
                     android:layout_height="match_parent"
-                    android:background="@color/amber_d2"
-                    android:textColor="@color/amber"
+                    android:background="@color/ka_dark2"
+                    android:textColor="@color/ka_neutral"
                     android:text="@string/list_indicator_story"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:gravity="center"/>

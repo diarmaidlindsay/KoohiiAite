@@ -34,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.diarmaidlindsay.koohii.R;
+import com.diarmaidlindsay.koohii.utils.ToastUtil;
 
 import java.io.File;
 
@@ -56,7 +57,7 @@ public class FileChooserActivity extends FragmentActivity implements
     private BroadcastReceiver mStorageListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
+            ToastUtil.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
             finishWithResult(null);
         }
     };
@@ -198,8 +199,8 @@ public class FileChooserActivity extends FragmentActivity implements
                 finishWithResult(file);
             }
         } else {
-            Toast.makeText(FileChooserActivity.this, R.string.error_selecting_file,
-                    Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(FileChooserActivity.this, R.string.error_selecting_file,
+                    Toast.LENGTH_LONG).show();
         }
     }
 
