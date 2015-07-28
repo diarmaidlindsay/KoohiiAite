@@ -3,7 +3,7 @@
 
     <string name="action_settings">Settings</string>
     <string name="search_title">Search</string>
-    <string name="search_hint">Primitives, Keyword, Frame #, Kanji</string>
+    <string name="search_hint">Primitives, Keyword, Kanji, Frame #</string>
     <string name="unSet">unSet</string>
     <string name="default_results_text">All items displayed</string>
     <string name="fragment_kanji_label">Kanji</string>
@@ -34,7 +34,7 @@
     <string name="filter_label_joyo">Is Joyo</string>
     <string name="filter_label_keyword">Has Custom Keyword</string>
     <string name="filter_label_story">Has Story</string>
-    <string name="filter_hint">Filter</string>
+    <string name="filter_hint">Filter…</string>
     <string name="filter_state_joyo">Joyo[%s]</string>
     <string name="filter_state_keyword">Keyword[%s]</string>
     <string name="filter_state_story">Story[%s]</string>

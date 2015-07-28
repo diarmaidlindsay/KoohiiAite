@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:colorBackground">@color/ka_bright2</item>
         <item name="android:background">@color/ka_bright2</item>
         <item name="android:textColor">@android:color/black</item>
+        <item name="android:actionMenuTextColor">@android:color/black</item>
+        <!-- Support library compatibility -->
         <item name="actionBarStyle">@style/MyActionBar</item>
-        <!-- Customize your theme here. -->
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/ka_bright2</item>
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/ka_neutral</item>
+        <!-- colorAccent is used as the default value for colorControlActivated which is used to tint widgets -->
+        <!-- it seems to be activated when I press a widget -->
+        <item name="colorAccent">@android:color/holo_red_dark</item>
+        <item name="colorControlNormal">@android:color/holo_blue_dark</item>
     </style>
     <style name="MyActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
         <item name="titleTextStyle">@style/MyTitleTextStyle</item>

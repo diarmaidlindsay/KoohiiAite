@@ -1,7 +1,6 @@
 package com.diarmaidlindsay.koohii.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,42 +25,10 @@ public class KanjiListFilterAdapter extends ArrayAdapter<String> {
     private FilterState keywordFilter = FilterState.UNSET;
     private FilterState storyFilter = FilterState.UNSET;
 
-    public enum FilterState {
-        UNSET(0),
-        YES(1),
-        NO(2);
-
-        private final int stateNum;
-
-        FilterState(int stateNum) {
-            this.stateNum = stateNum;
-        }
-
-        public static FilterState getStateFor(int stateNum) {
-            for (FilterState state : values()) {
-                if (state.stateNum == stateNum) {
-                    return state;
-                }
-            }
-            Log.e("FilterState", "Couldn't find given filter state : " + stateNum);
-            return UNSET;
-        }
-
-        public int getStateNum() {
-            return stateNum;
-        }
-    }
-
     public KanjiListFilterAdapter(Context context, int resource, String[] objects) {
         super(context, resource, objects);
         layoutInflater = LayoutInflater.from(context);
         mContext = context;
-    }
-
-    static class ViewHolderItem {
-        MultiStateToggleButton joyoButton;
-        MultiStateToggleButton keywordButton;
-        MultiStateToggleButton storyButton;
     }
 
     @Override
@@ -72,8 +39,7 @@ public class KanjiListFilterAdapter extends ArrayAdapter<String> {
     @Override
     public View getView(int pos, View cnvtView, ViewGroup prnt) {
         TextView text = new TextView(getContext());
-        text.setText("Filter...");
-        text.setTextColor(Color.WHITE);
+        text.setText(R.string.filter_hint);
         return text;
     }
 
@@ -136,23 +102,55 @@ public class KanjiListFilterAdapter extends ArrayAdapter<String> {
         return joyoFilter;
     }
 
-    public FilterState getKeywordFilter() {
-        return keywordFilter;
-    }
-
-    public FilterState getStoryFilter() {
-        return storyFilter;
-    }
-
     public void setJoyoFilter(Integer value) {
         joyoFilter = FilterState.getStateFor(value);
+    }
+
+    public FilterState getKeywordFilter() {
+        return keywordFilter;
     }
 
     public void setKeywordFilter(Integer value) {
         keywordFilter = FilterState.getStateFor(value);
     }
 
+    public FilterState getStoryFilter() {
+        return storyFilter;
+    }
+
     public void setStoryFilter(Integer value) {
         storyFilter = FilterState.getStateFor(value);
+    }
+
+    public enum FilterState {
+        UNSET(0),
+        YES(1),
+        NO(2);
+
+        private final int stateNum;
+
+        FilterState(int stateNum) {
+            this.stateNum = stateNum;
+        }
+
+        public static FilterState getStateFor(int stateNum) {
+            for (FilterState state : values()) {
+                if (state.stateNum == stateNum) {
+                    return state;
+                }
+            }
+            Log.e("FilterState", "Couldn't find given filter state : " + stateNum);
+            return UNSET;
+        }
+
+        public int getStateNum() {
+            return stateNum;
+        }
+    }
+
+    static class ViewHolderItem {
+        MultiStateToggleButton joyoButton;
+        MultiStateToggleButton keywordButton;
+        MultiStateToggleButton storyButton;
     }
 }

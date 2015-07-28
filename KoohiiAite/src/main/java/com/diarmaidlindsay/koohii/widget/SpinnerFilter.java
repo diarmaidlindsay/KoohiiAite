@@ -1,13 +1,13 @@
 package com.diarmaidlindsay.koohii.widget;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatSpinner;
 import android.util.AttributeSet;
-import android.widget.Spinner;
 
 /**
  * For the filter in the kanji list view
  */
-public class SpinnerFilter extends Spinner {
+public class SpinnerFilter extends AppCompatSpinner {
     private OnSpinnerEventsListener mListener;
     private boolean mOpenInitiated = false;
 
