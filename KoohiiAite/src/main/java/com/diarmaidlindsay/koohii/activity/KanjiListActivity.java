@@ -70,25 +70,7 @@ public class KanjiListActivity extends AppCompatActivity {
         joyoFilterState = (TextView) findViewById(R.id.joyo_filter_state);
         keywordFilterState = (TextView) findViewById(R.id.keyword_filter_state);
         storyFilterState = (TextView) findViewById(R.id.story_filter_state);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        // mSpin is our custom Spinner
-        if (spinnerFilter.hasBeenOpened() && hasFocus) {
-            spinnerFilter.performClosedEvent();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_kanji_list, menu);
-
-        MenuItem filterItem = menu.findItem(R.id.filter_spinner);
-        spinnerFilter = (SpinnerFilter) filterItem.getActionView();
-        spinnerFilter.setAdapter(kanjiListFilterAdapter);
+        //created here because must be re-created if list activity is destroyed
         spinnerListener = new OnSpinnerEventsListener() {
             //if filter values changed, we should perform a search with new values
             boolean changed;
@@ -115,11 +97,30 @@ public class KanjiListActivity extends AppCompatActivity {
 
             @Override
             public void onSpinnerClosed() {
-                if(changed) {
+                if (changed) {
                     mHandler.postDelayed(mFilterTask, 0);
                 }
             }
         };
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // mSpin is our custom Spinner
+        if (spinnerFilter != null && spinnerFilter.hasBeenOpened() && hasFocus) {
+            spinnerFilter.performClosedEvent();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_kanji_list, menu);
+
+        MenuItem filterItem = menu.findItem(R.id.filter_spinner);
+        spinnerFilter = (SpinnerFilter) filterItem.getActionView();
+        spinnerFilter.setAdapter(kanjiListFilterAdapter);
         spinnerFilter.setSpinnerEventsListener(spinnerListener);
 
         // we want to be able to filter the search results!

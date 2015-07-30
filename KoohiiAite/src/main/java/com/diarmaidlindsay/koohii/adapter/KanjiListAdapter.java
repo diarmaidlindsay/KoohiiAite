@@ -437,25 +437,26 @@ public class KanjiListAdapter extends BaseAdapter {
      * were modified in detail view
      */
     public void updateIndicatorVisibilityWithId(int heisigId) {
+        if (viewHolder != null) {
+            HeisigKanji theKanji = masterList.get(heisigId - 1); //convert to 0-indexed
 
-        HeisigKanji theKanji = masterList.get(heisigId - 1); //convert to 0-indexed
+            if (theKanji.isJoyo()) {
+                viewHolder.joyoIndicator.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.joyoIndicator.setVisibility(View.INVISIBLE);
+            }
 
-        if (theKanji.isJoyo()) {
-            viewHolder.joyoIndicator.setVisibility(View.VISIBLE);
-        } else {
-            viewHolder.joyoIndicator.setVisibility(View.INVISIBLE);
-        }
+            if (userKeywordMap.get(heisigId) != null) {
+                viewHolder.keywordIndicator.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.keywordIndicator.setVisibility(View.INVISIBLE);
+            }
 
-        if (userKeywordMap.get(heisigId) != null) {
-            viewHolder.keywordIndicator.setVisibility(View.VISIBLE);
-        } else {
-            viewHolder.keywordIndicator.setVisibility(View.INVISIBLE);
-        }
-
-        if (storyList.get(heisigId - 1)) {
-            viewHolder.storyIndicator.setVisibility(View.VISIBLE);
-        } else {
-            viewHolder.storyIndicator.setVisibility(View.INVISIBLE);
+            if (storyList.get(heisigId - 1)) {
+                viewHolder.storyIndicator.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.storyIndicator.setVisibility(View.INVISIBLE);
+            }
         }
     }
 

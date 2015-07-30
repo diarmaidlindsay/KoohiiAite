@@ -14,6 +14,7 @@ import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
 import com.diarmaidlindsay.koohii.interfaces.OnCSVParseCompleted;
 import com.diarmaidlindsay.koohii.interfaces.OnDatabaseOperationCompleted;
+import com.diarmaidlindsay.koohii.model.CSVEntry;
 import com.diarmaidlindsay.koohii.model.Keyword;
 import com.diarmaidlindsay.koohii.model.Story;
 import com.diarmaidlindsay.koohii.utils.Utils;
@@ -42,6 +43,10 @@ public class ImportStoryAdapter extends BaseAdapter {
         this.databaseListener = databaseListener;
         this.csvListener = csvListener;
         layoutInflater = LayoutInflater.from(context);
+    }
+
+    public void setStories(List<CSVEntry> stories) {
+        importedStories.addAll(stories);
     }
 
     @Override
@@ -122,24 +127,6 @@ public class ImportStoryAdapter extends BaseAdapter {
         TextView story;
     }
 
-    private class CSVEntry {
-        String id;
-        String kanji;
-        String keyword;
-        String publicFlag;
-        String lastEdited;
-        String story;
-
-        public CSVEntry(String id, String kanji, String keyword, String publicFlag, String lastEdited, String story) {
-            this.id = id;
-            this.kanji = kanji;
-            this.keyword = keyword.replaceAll("^\"|\"$", ""); //trim enclosing quotations from my_stories.csv
-            this.publicFlag = publicFlag;
-            this.lastEdited = lastEdited;
-            this.story = story.replaceAll("^\"|\"$", ""); //trim enclosing quotations from my_stories.csv
-        }
-    }
-
     /**
      * Write the imported CSV to the device database
      */
@@ -198,7 +185,7 @@ public class ImportStoryAdapter extends BaseAdapter {
     /**
      * Populate adapter table with the given my_stories.csv
      */
-    public class ReadCSVTask extends AsyncTask<File, Void, Boolean> {
+    public class ReadCSVTask extends AsyncTask<File, Void, List<CSVEntry>> {
         ProgressDialog progress;
 
         @Override
@@ -208,9 +195,11 @@ public class ImportStoryAdapter extends BaseAdapter {
         }
 
         @Override
-        protected Boolean doInBackground(File... params) {
+        protected List<CSVEntry> doInBackground(File... params) {
+            List<CSVEntry> entries = new ArrayList<>();
+
             if (params.length != 1) {
-                return false;
+                return entries;
             }
             BufferedReader br = null;
             String line;
@@ -225,13 +214,12 @@ public class ImportStoryAdapter extends BaseAdapter {
                     String[] row = line.split(csvSplitBy, 6);
                     //first row is the column headers, we should ignore
                     if (row.length == 6 && Utils.isNumeric(row[0])) {
-                        importedStories.add(new CSVEntry(row[0], row[1], row[2], row[3], row[4], row[5]));
+                        entries.add(new CSVEntry(row[0], row[1], row[2], row[3], row[4], row[5]));
                     }
                 }
 
             } catch (IOException e) {
                 e.printStackTrace();
-                return false;
             } finally {
                 if (br != null) {
                     try {
@@ -239,19 +227,18 @@ public class ImportStoryAdapter extends BaseAdapter {
                     } catch (IOException e) {
                         e.printStackTrace();
                         //noinspection ReturnInsideFinallyBlock
-                        return false;
                     }
                 }
             }
-            return true;
+            return entries;
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
+        protected void onPostExecute(List<CSVEntry> parsedEntries) {
             if (progress.isShowing()) {
                 progress.dismiss();
             }
-            csvListener.onParsingCompleted(aBoolean);
+            csvListener.onParsingCompleted(parsedEntries);
         }
     }
 }

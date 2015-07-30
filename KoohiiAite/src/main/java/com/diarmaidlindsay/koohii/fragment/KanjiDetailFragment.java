@@ -36,6 +36,6 @@ public class KanjiDetailFragment extends Fragment {
 
     public int getCurrentPagerIndex()
     {
-        return vPager.getCurrentItem();
+        return vPager == null ? -1 : vPager.getCurrentItem();
     }
 }

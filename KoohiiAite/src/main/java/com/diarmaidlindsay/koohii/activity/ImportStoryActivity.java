@@ -14,6 +14,7 @@ import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.adapter.ImportStoryAdapter;
 import com.diarmaidlindsay.koohii.interfaces.OnCSVParseCompleted;
 import com.diarmaidlindsay.koohii.interfaces.OnDatabaseOperationCompleted;
+import com.diarmaidlindsay.koohii.model.CSVEntry;
 import com.diarmaidlindsay.koohii.utils.ToastUtil;
 import com.diarmaidlindsay.koohii.utils.Utils;
 import com.ipaulpro.afilechooser.FileChooserActivity;
@@ -120,14 +121,13 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
     }
 
     @Override
-    public void onParsingCompleted(boolean success) {
-        if (success) {
-            if (listAdapter.getCount() > 0) {
-                listAdapter.notifyDataSetChanged();
-                buttonConfirm.setEnabled(true);
-                buttonCancel.setEnabled(true);
-                ToastUtil.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
-            }
+    public void onParsingCompleted(List<CSVEntry> parsedEntries) {
+        if (parsedEntries.size() > 0) {
+            listAdapter.setStories(parsedEntries);
+            listAdapter.notifyDataSetChanged();
+            buttonConfirm.setEnabled(true);
+            buttonCancel.setEnabled(true);
+            ToastUtil.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
             importCount.setText(listAdapter.getCount() + " stories found for import.");
         } else {
             ToastUtil.makeText(this, "Failed to read CSV file", Toast.LENGTH_LONG).show();
