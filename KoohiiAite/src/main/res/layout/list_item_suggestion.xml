@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/white"/>
+        android:textColor="@color/ka_dark2"/>
 
     <View style="@style/Divider"/>
 </LinearLayout>

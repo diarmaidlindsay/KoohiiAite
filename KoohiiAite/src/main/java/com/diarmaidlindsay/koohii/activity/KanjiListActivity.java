@@ -80,7 +80,7 @@ public class KanjiListActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     kanjiListAdapter.search(searchView.getQuery().toString());
-                    result.setText(kanjiListAdapter.getCount() + " items displayed");
+                    result.setText(String.format("%d items displayed", kanjiListAdapter.getCount()));
                 }
             };
             private Handler mHandler = new Handler();
@@ -221,7 +221,7 @@ public class KanjiListActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     kanjiListAdapter.search(text);
-                    result.setText(kanjiListAdapter.getCount() + " items displayed");
+                    result.setText(String.format("%d items displayed", kanjiListAdapter.getCount()));
                 }
             };
             private Handler mHandler = new Handler();
