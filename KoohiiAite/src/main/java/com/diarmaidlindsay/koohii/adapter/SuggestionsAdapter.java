@@ -38,13 +38,19 @@ public class SuggestionsAdapter extends SimpleCursorAdapter {
     {
         final MatrixCursor cursor = new MatrixCursor(new String[]{ BaseColumns._ID, "keywordPrimitive" });
 
+        //if there is a comma, only get suggestions for last part of query string
+        if(query.contains(",")) {
+            String[] queries = query.split(",");
+            query = queries[queries.length-1];
+        }
+
         if(query.length() < 2) {
             suggestionsList.clear();
             previousQuery = null;
             changeCursor(cursor);
             return;
         }
-        query = query.toLowerCase();
+        query = query.toLowerCase().trim();
         Set<String> suggestionsSet = new HashSet<>();
 
         //some text was deleted so we should fall back to suggest from all primitives and keywords
