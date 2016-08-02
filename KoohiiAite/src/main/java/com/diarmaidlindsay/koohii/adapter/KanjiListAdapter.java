@@ -215,7 +215,7 @@ public class KanjiListAdapter extends BaseAdapter {
     /**
      * Called every time there is a filter operation.
      */
-    public void updatePrimitiveList() {
+    private void updatePrimitiveList() {
         if (filteredHeisigKanjiList.size() > 0) {
             HeisigToPrimitiveDataSource heisigToPrimitiveDataSource = new HeisigToPrimitiveDataSource(mContext);
             heisigToPrimitiveDataSource.open();
@@ -267,11 +267,14 @@ public class KanjiListAdapter extends BaseAdapter {
      * Iterate over masterList
      */
     private void filterOnKanji(String filterText) {
-        for (HeisigKanji kanji : masterList) {
-            String kanjiChar = kanji.getKanji();
+        for(char kanjiCharacterFilter : filterText.toCharArray()) {
+            for (HeisigKanji kanji : masterList) {
+                String kanjiChar = kanji.getKanji();
 
-            if (kanjiChar.equals(filterText)) {
-                filteredHeisigKanjiSet.add(kanji.getId());
+                if (kanjiChar.equals(String.valueOf(kanjiCharacterFilter))) {
+                    filteredHeisigKanjiSet.add(kanji.getId());
+                    break;
+                }
             }
         }
     }
@@ -342,7 +345,7 @@ public class KanjiListAdapter extends BaseAdapter {
      * If all 3 filters match, the kanji should be displayed, else it should be
      * removed from the filteredHeisigKanjiList.
      */
-    public void applyFilters() {
+    private void applyFilters() {
         if (mContext instanceof KanjiListActivity) {
             KanjiListFilterAdapter.FilterState joyoFilter =
                     ((KanjiListActivity) mContext).getJoyoFilter();
@@ -464,7 +467,7 @@ public class KanjiListAdapter extends BaseAdapter {
      * This prevents wasted cpu cycles by only inflating the view once
      * http://www.javacodegeeks.com/2013/09/android-viewholder-pattern-example.html
      */
-    static class ViewHolderItem {
+    private static class ViewHolderItem {
         TextView heisig;
         TextView kanji;
         TextView keyword;
