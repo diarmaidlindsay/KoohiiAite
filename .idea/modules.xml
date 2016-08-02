@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/KoohiiAite.iml" filepath="$PROJECT_DIR$/KoohiiAite.iml" />
-      <module fileurl="file://$PROJECT_DIR$/KoohiiAite/KoohiiAite-KoohiiAite.iml" filepath="$PROJECT_DIR$/KoohiiAite/KoohiiAite-KoohiiAite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KoohiiAite.iml" filepath="$PROJECT_DIR$/.idea/modules/KoohiiAite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/KoohiiAite/KoohiiAite-KoohiiAite.iml" filepath="$PROJECT_DIR$/.idea/modules/KoohiiAite/KoohiiAite-KoohiiAite.iml" />
     </modules>
   </component>
 </project>
