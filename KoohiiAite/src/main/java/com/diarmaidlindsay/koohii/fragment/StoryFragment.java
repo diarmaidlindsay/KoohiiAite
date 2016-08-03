@@ -1,11 +1,16 @@
 package com.diarmaidlindsay.koohii.fragment;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +21,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
+import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
 import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
 import com.diarmaidlindsay.koohii.model.HeisigKanji;
+import com.diarmaidlindsay.koohii.model.Keyword;
 import com.diarmaidlindsay.koohii.model.Story;
 import com.diarmaidlindsay.koohii.utils.ToastUtil;
 
@@ -111,6 +118,7 @@ public class StoryFragment extends Fragment {
         textViewKanji.setText(kanji);
 
         textViewStory.setText(formatStory(storyText), TextView.BufferType.SPANNABLE);
+        textViewStory.setMovementMethod(LinkMovementMethod.getInstance());
         updateWidgets();
         return view;
     }
@@ -120,11 +128,20 @@ public class StoryFragment extends Fragment {
      * as with kanji.koohii.com
      */
     private SpannableString formatStory(String storyText) {
+        KeywordDataSource keywordDao = new KeywordDataSource(getActivity());
+        UserKeywordDataSource userKeywordDao = new UserKeywordDataSource(getActivity());
+        keywordDao.open();
+        userKeywordDao.open();
+//        List<Keyword> allKeywords = new KeywordDataSource(getActivity()).getAllKeywords();
+//        Map<Integer, String> allUserKeywords = new UserKeywordDataSource(getActivity()).getAllUserKeywords();
         SpannableString formattedStory = new SpannableString(storyText);
         List<StoryFormat> italicSpanStarts = new ArrayList<>();
         List<StoryFormat> italicSpanEnds = new ArrayList<>();
         List<StoryFormat> boldSpanStarts = new ArrayList<>();
         List<StoryFormat> boldSpanEnds = new ArrayList<>();
+        //TODO : where there is kanji or number surrounded by curly braces, make it clickable
+        List<StoryFormat> braceSpanStarts = new ArrayList<>();
+        List<StoryFormat> braceSpanEnds = new ArrayList<>();
 
         //remove double quotes in stories ("")
         storyText = storyText.replaceAll("\"\"", "\"");
@@ -168,10 +185,21 @@ public class StoryFragment extends Fragment {
         //any time the keyword is mentioned in the story, mark it as bold
         //we can use plain integer array to hold indexes instead of StoryFormat objects because indexes don't need adjustment
         ArrayList<Integer> keywordSpanStarts = new ArrayList<>();
-        Pattern p = Pattern.compile(userKeyword == null ? originalKeyword.toLowerCase() : userKeyword.toLowerCase());
-        Matcher m = p.matcher(storyText.toLowerCase());
-        while (m.find()) {
-            keywordSpanStarts.add(m.start());
+        Pattern keywordPattern = Pattern.compile(userKeyword == null ? originalKeyword.toLowerCase() : userKeyword.toLowerCase());
+        Matcher keywordMatcher = keywordPattern.matcher(storyText.toLowerCase());
+        while (keywordMatcher.find()) {
+            keywordSpanStarts.add(keywordMatcher.start());
+        }
+
+        //any time there is all uppercase words in the story, try to match with a keyword or user keywork and make it clickable if so
+        ArrayList<Integer> uppercaseSpanStarts = new ArrayList<>();
+        ArrayList<Integer> uppercaseSpanEnds = new ArrayList<>();
+        String regEx = "[A-Z]+";
+        Pattern uppercasePattern = Pattern.compile(regEx);
+        Matcher uppercaseMatcher = uppercasePattern.matcher(storyText);
+        while (uppercaseMatcher.find()) {
+            uppercaseSpanStarts.add(uppercaseMatcher.start());
+            uppercaseSpanEnds.add(uppercaseMatcher.end());
         }
 
         formattedStory = new SpannableString(storyText);
@@ -188,6 +216,10 @@ public class StoryFragment extends Fragment {
         for (int i = 0; i < boldSpanStarts.size(); i++) {
             int indexStarts = boldSpanStarts.get(i).index - boldSpanStarts.get(i).order;
             int indexEnds = boldSpanEnds.get(i).index - boldSpanEnds.get(i).order;
+            if(indexEnds - indexStarts < 2) {
+                //ignore words of length 1 for example "I"
+                continue;
+            }
             //if the text to be bolded is a keyword, we'll do that in the next loop instead
             if (!keywordSpanStarts.contains(indexStarts)) {
                 formattedStory.setSpan(new TextAppearanceSpan(getActivity(), R.style.storyHash),
@@ -195,14 +227,60 @@ public class StoryFragment extends Fragment {
             }
         }
 
+        //make uppercase which match a keyword or user keyword clickable
+        for (int i = 0; i < uppercaseSpanStarts.size(); i++) {
+            int start = uppercaseSpanStarts.get(i);
+            int end = uppercaseSpanEnds.get(i);
+            String uppercaseWord = storyText.substring(start, end);
+            if(uppercaseWord.length() < 2) {
+                //ignore words of length 1 for example "I"
+                continue;
+            }
+            final Keyword matchingKeyword = keywordDao.getKeywordMatching(uppercaseWord);
+            Keyword matchingUserKeyword = userKeywordDao.getKeywordMatching(uppercaseWord);
+            ClickableSpan span = null;
+            //prioritise user keyword
+            if (matchingUserKeyword != null) {
+                Log.d("StoryFragment", "Matching User Keyword : " + uppercaseWord);
+                span = getSpanForKeyword(matchingUserKeyword);
+            }
+            else if (matchingKeyword != null) {
+                Log.d("StoryFragment", "Matching Keyword : " + uppercaseWord);
+                span = getSpanForKeyword(matchingKeyword);
+
+            }
+            if(span != null) {
+                formattedStory.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
         int keywordLength = userKeyword == null ? originalKeyword.length() : userKeyword.length();
         //mark keyword occurances as bold
         for (Integer start : keywordSpanStarts) {
+            if(keywordLength < 2) {
+                //ignore words of length 1 for example "I"
+                continue;
+            }
             formattedStory.setSpan(new TextAppearanceSpan(getActivity(), R.style.storyHash),
                     start, start + keywordLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-
+        keywordDao.close();
+        userKeywordDao.close();
         return formattedStory;
+    }
+
+    private ClickableSpan getSpanForKeyword(final Keyword matchingKeyword) {
+        return new ClickableSpan() {
+            @Override
+            public void onClick(View textView) {
+                //launch a new KanjiDetailView
+                Intent intent = new Intent(getActivity(), KanjiDetailActivity.class);
+                intent.putExtra("filteredListIndex", 0);
+                intent.putExtra("filteredIdList", new String[] {Integer.toString(matchingKeyword.getHeisigId())});
+                //TODO : startActivityForResult just like in KanjiListAdapter so that any changes made is passed back to KanjiListActivityq
+                getActivity().startActivity(intent);
+            }
+        };
     }
 
     private void submitKeyword(int heisigId, String keywordText, boolean update)
@@ -286,12 +364,12 @@ public class StoryFragment extends Fragment {
     }
 
     private class StoryFormat {
-        public int index;
-        public int order;
+        int index;
+        int order;
         //string will shorten when hashes and asterixes are removed
         //so use the order to adjust the index afterwards
 
-        public StoryFormat(int index, int order) {
+        StoryFormat(int index, int order) {
             this.index = index;
             this.order = order;
         }

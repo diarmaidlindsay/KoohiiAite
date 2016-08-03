@@ -51,6 +51,18 @@ public class UserKeywordDataSource extends CommonDataSource {
         return keyword;
     }
 
+    public Keyword getKeywordMatching(String keywordText) {
+        Keyword keyword = null;
+        String sql = "SELECT * FROM "+DatabaseAssetHelper.TABLE_USER_KEYWORD+" WHERE "+COLUMN_KEYWORD+" = '" + keywordText + "'COLLATE NOCASE";
+        Cursor cursor = database.rawQuery(sql, null);
+        cursor.moveToFirst();
+        if(cursor.getCount() > 0) {
+            keyword = cursorToKeyword(cursor);
+        }
+        cursor.close();
+        return keyword;
+    }
+
     private Keyword cursorToKeyword(Cursor cursor) {
         return new Keyword(
                 cursor.getInt(0),
