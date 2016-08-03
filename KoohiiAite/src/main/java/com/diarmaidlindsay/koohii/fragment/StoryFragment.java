@@ -10,7 +10,6 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.activity.KanjiDetailActivity;
+import com.diarmaidlindsay.koohii.database.dao.HeisigKanjiDataSource;
 import com.diarmaidlindsay.koohii.database.dao.KeywordDataSource;
 import com.diarmaidlindsay.koohii.database.dao.StoryDataSource;
 import com.diarmaidlindsay.koohii.database.dao.UserKeywordDataSource;
@@ -28,9 +28,12 @@ import com.diarmaidlindsay.koohii.model.HeisigKanji;
 import com.diarmaidlindsay.koohii.model.Keyword;
 import com.diarmaidlindsay.koohii.model.Story;
 import com.diarmaidlindsay.koohii.utils.ToastUtil;
+import com.diarmaidlindsay.koohii.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -130,10 +133,10 @@ public class StoryFragment extends Fragment {
     private SpannableString formatStory(String storyText) {
         KeywordDataSource keywordDao = new KeywordDataSource(getActivity());
         UserKeywordDataSource userKeywordDao = new UserKeywordDataSource(getActivity());
+        HeisigKanjiDataSource heisigKanjiDataSource = new HeisigKanjiDataSource(getActivity());
         keywordDao.open();
         userKeywordDao.open();
-//        List<Keyword> allKeywords = new KeywordDataSource(getActivity()).getAllKeywords();
-//        Map<Integer, String> allUserKeywords = new UserKeywordDataSource(getActivity()).getAllUserKeywords();
+        heisigKanjiDataSource.open();
         SpannableString formattedStory = new SpannableString(storyText);
         List<StoryFormat> italicSpanStarts = new ArrayList<>();
         List<StoryFormat> italicSpanEnds = new ArrayList<>();
@@ -142,6 +145,7 @@ public class StoryFragment extends Fragment {
         //TODO : where there is kanji or number surrounded by curly braces, make it clickable
         List<StoryFormat> braceSpanStarts = new ArrayList<>();
         List<StoryFormat> braceSpanEnds = new ArrayList<>();
+        Map<String, Integer> kanjiToHeisigId = new HashMap<>();
 
         //remove double quotes in stories ("")
         storyText = storyText.replaceAll("\"\"", "\"");
@@ -170,12 +174,49 @@ public class StoryFragment extends Fragment {
                     isBold = false;
                     boldSpanEnds.add(new StoryFormat(i, order++));
                 }
+            } else if (c == '{') {
+                braceSpanStarts.add(new StoryFormat(i, order++));
+            } else if (c == '}') {
+                /*  subtract last braceSpanStarts from i (which is a brace end)..
+                    {不} (kanji)
+                    567 = 2 (7-5)
+                    order += 1; (the last brace)
+                    {675} (heisig_id)
+                    56789 = 4 (9-5)
+                    order += 3; (7, 5 and the last brace)
+                 */
+                //everything within the braces will be reduced to a length of 1 (a single kanji) we must account for the missing indices
+                int orderMod = i - braceSpanStarts.get(braceSpanStarts.size()-1).index - 1;
+                braceSpanEnds.add(new StoryFormat(i, order+=orderMod));
             }
         }
 
         //if malformatted, return original text
         if ((italicSpanEnds.size() != italicSpanStarts.size()) || boldSpanStarts.size() != boldSpanEnds.size()) {
             return formattedStory;
+        }
+
+        //go through all braces and if it contains a heisig_id, replace with the kanji, else remove the brackts
+        if(braceSpanStarts.size() > 0) {
+            for(int i = 0; i < braceSpanStarts.size(); i++) {
+                StoryFormat start = braceSpanStarts.get(i);
+                //if it's a heisig_id, look up the kanji
+                if(!Utils.isKanji(storyText.charAt(start.index+1))) {
+                    Integer heisigId = Integer.parseInt(storyText.substring(start.index+1, braceSpanEnds.get(i).index));
+                    HeisigKanji kanji = heisigKanjiDataSource.getKanjiFor(heisigId);
+                    kanjiToHeisigId.put(kanji.getKanji(), kanji.getId());
+                } else {
+                    //it's already a kanji, presumably, so just take away the brackets around it
+                    String kanjiString = String.valueOf(storyText.charAt(start.index+1));
+                    HeisigKanji kanji = heisigKanjiDataSource.getHeisigFor(kanjiString);
+                    kanjiToHeisigId.put(kanji.getKanji(), kanji.getId());
+                }
+            }
+        }
+
+        for(String kanji : kanjiToHeisigId.keySet()) {
+            storyText = storyText.replaceFirst(String.valueOf(kanjiToHeisigId.get(kanji)), kanji);
+            storyText = storyText.replaceFirst("\\{"+kanji+"\\}", kanji);
         }
 
         //remove hashes and asterixes, string will shorten, we must take this into account with the indexes
@@ -227,6 +268,7 @@ public class StoryFragment extends Fragment {
             }
         }
 
+        //TODO : Match multiple word keywords first - eg, "SORT OF THING" in 0510
         //make uppercase which match a keyword or user keyword clickable
         for (int i = 0; i < uppercaseSpanStarts.size(); i++) {
             int start = uppercaseSpanStarts.get(i);
@@ -241,17 +283,24 @@ public class StoryFragment extends Fragment {
             ClickableSpan span = null;
             //prioritise user keyword
             if (matchingUserKeyword != null) {
-                Log.d("StoryFragment", "Matching User Keyword : " + uppercaseWord);
                 span = getSpanForKeyword(matchingUserKeyword);
             }
             else if (matchingKeyword != null) {
-                Log.d("StoryFragment", "Matching Keyword : " + uppercaseWord);
                 span = getSpanForKeyword(matchingKeyword);
 
             }
             if(span != null) {
                 formattedStory.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+        }
+
+        //make all kanji which were surrounded by braces clickable
+        for (StoryFormat braceSpanStart : braceSpanStarts) {
+            int kanjiIndex = braceSpanStart.index - braceSpanStart.order;
+            String kanji = String.valueOf(storyText.charAt(kanjiIndex));
+            int heisigId = kanjiToHeisigId.get(kanji);
+            ClickableSpan span = getSpanForHeisigId(heisigId);
+            formattedStory.setSpan(span, kanjiIndex, kanjiIndex + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         int keywordLength = userKeyword == null ? originalKeyword.length() : userKeyword.length();
@@ -266,21 +315,25 @@ public class StoryFragment extends Fragment {
         }
         keywordDao.close();
         userKeywordDao.close();
+        heisigKanjiDataSource.close();
         return formattedStory;
     }
 
-    private ClickableSpan getSpanForKeyword(final Keyword matchingKeyword) {
+    private ClickableSpan getSpanForHeisigId(final int heisigId) {
         return new ClickableSpan() {
             @Override
-            public void onClick(View textView) {
-                //launch a new KanjiDetailView
+            public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), KanjiDetailActivity.class);
                 intent.putExtra("filteredListIndex", 0);
-                intent.putExtra("filteredIdList", new String[] {Integer.toString(matchingKeyword.getHeisigId())});
+                intent.putExtra("filteredIdList", new String[] {String.valueOf(heisigId)});
                 //TODO : startActivityForResult just like in KanjiListAdapter so that any changes made is passed back to KanjiListActivityq
                 getActivity().startActivity(intent);
             }
         };
+    }
+
+    private ClickableSpan getSpanForKeyword(final Keyword matchingKeyword) {
+        return getSpanForHeisigId(matchingKeyword.getHeisigId());
     }
 
     private void submitKeyword(int heisigId, String keywordText, boolean update)
