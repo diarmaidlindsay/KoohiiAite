@@ -19,12 +19,12 @@ import java.util.List;
 public class KanjiDetailActivity extends AppCompatActivity {
 
     public static final int ACTIVITY_CODE = 1;
-    int currentIndex;
-    String[] filteredIdList;
-    List<Integer> changedIds = new ArrayList<>();
-    List<String> changedKeywords = new ArrayList<>();
-    MenuItem prevButton;
-    MenuItem nextButton;
+    private int currentIndex;
+    private String[] filteredIdList;
+    private List<Integer> changedIds = new ArrayList<>();
+    private List<String> changedKeywords = new ArrayList<>();
+    private MenuItem prevButton;
+    private MenuItem nextButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,14 +131,19 @@ public class KanjiDetailActivity extends AppCompatActivity {
         if (prevButton != null && nextButton != null) {
             if (currentIndex == 0) {
                 prevButton.setEnabled(false);
+                prevButton.getIcon().setAlpha(130);
             } else {
                 prevButton.setEnabled(true);
+                prevButton.getIcon().setAlpha(255);
             }
 
             if (currentIndex == (filteredIdList.length - 1)) {
                 nextButton.setEnabled(false);
+                nextButton.getIcon().setAlpha(130);
+
             } else {
                 nextButton.setEnabled(true);
+                nextButton.getIcon().setAlpha(255);
             }
         }
 
