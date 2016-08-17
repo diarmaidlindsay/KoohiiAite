@@ -51,7 +51,19 @@ public class KeywordDataSource extends CommonDataSource {
 
     public Keyword getKeywordMatching(String keywordText) {
         Keyword keyword = null;
-        String sql = "SELECT * FROM "+DatabaseAssetHelper.TABLE_KEYWORD+" WHERE "+COLUMN_KEYWORD+" = '" + keywordText + "'COLLATE NOCASE";
+        String sql = "SELECT * FROM "+DatabaseAssetHelper.TABLE_KEYWORD+" WHERE "+COLUMN_KEYWORD+" = '" + keywordText + "' COLLATE NOCASE";
+        Cursor cursor = database.rawQuery(sql, null);
+        cursor.moveToFirst();
+        if(cursor.getCount() > 0) {
+            keyword = cursorToKeyword(cursor);
+        }
+        cursor.close();
+        return keyword;
+    }
+
+    public Keyword getKeywordStartingWith(String keywordText) {
+        Keyword keyword = null;
+        String sql = "SELECT * FROM "+DatabaseAssetHelper.TABLE_KEYWORD+" WHERE "+COLUMN_KEYWORD+" LIKE '" + keywordText + "%' COLLATE NOCASE";
         Cursor cursor = database.rawQuery(sql, null);
         cursor.moveToFirst();
         if(cursor.getCount() > 0) {

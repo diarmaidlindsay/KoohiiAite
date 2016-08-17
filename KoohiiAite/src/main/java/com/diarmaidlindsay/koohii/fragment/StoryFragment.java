@@ -142,7 +142,6 @@ public class StoryFragment extends Fragment {
         List<StoryFormat> italicSpanEnds = new ArrayList<>();
         List<StoryFormat> boldSpanStarts = new ArrayList<>();
         List<StoryFormat> boldSpanEnds = new ArrayList<>();
-        //TODO : where there is kanji or number surrounded by curly braces, make it clickable
         List<StoryFormat> braceSpanStarts = new ArrayList<>();
         List<StoryFormat> braceSpanEnds = new ArrayList<>();
         Map<String, Integer> kanjiToHeisigId = new HashMap<>();
@@ -268,11 +267,76 @@ public class StoryFragment extends Fragment {
             }
         }
 
+        //after first processing for multi-length keywords
+        ArrayList<Integer> uppercaseSpanStartsNoMLK = new ArrayList<>(uppercaseSpanStarts);
+        ArrayList<Integer> uppercaseSpanEndsNoMLK = new ArrayList<>(uppercaseSpanEnds);
         //TODO : Match multiple word keywords first - eg, "SORT OF THING" in 0510
-        //make uppercase which match a keyword or user keyword clickable
-        for (int i = 0; i < uppercaseSpanStarts.size(); i++) {
+        for(int i = 0; i < uppercaseSpanStarts.size() - 1; i++) {
             int start = uppercaseSpanStarts.get(i);
             int end = uppercaseSpanEnds.get(i);
+            String uppercaseWord = storyText.substring(start, end);
+
+            Keyword matchingKeyword = null;
+            Keyword matchingUserKeyword = null;
+
+            //start from the next word
+            for(int j = i+1; j < uppercaseSpanStarts.size(); j++) {
+                int startNext = uppercaseSpanStarts.get(j);
+                int endNext = uppercaseSpanEnds.get(j);
+                String adjacentWord = storyText.substring(startNext, endNext);
+
+                //look at the next uppercase word eg... uppercaseWord = RICE
+                //adjacentWord = PLANT
+                // RICE PLANT = match!
+
+                if(keywordDao.getKeywordStartingWith(uppercaseWord + " " + adjacentWord) == null &&
+                        userKeywordDao.getKeywordStartingWith(uppercaseWord + " " + adjacentWord) == null) {
+                    //don't wipe out the non null matching keywords if the next adjacent word would cause a non-match
+                    break;
+                }
+
+                matchingKeyword = keywordDao.getKeywordStartingWith(uppercaseWord + " " + adjacentWord);
+                matchingUserKeyword = userKeywordDao.getKeywordStartingWith(uppercaseWord + " " + adjacentWord);
+
+                if(matchingKeyword != null || matchingUserKeyword != null) {
+                    uppercaseWord = uppercaseWord + " " + adjacentWord;
+                    //remove the indexes of the matched multi-length keywords, and move onto the next
+                    end = endNext;
+                    uppercaseSpanStartsNoMLK.set(j, -1);
+                    uppercaseSpanEndsNoMLK.set(j, -1);
+                } else {
+                    //no match was found, move onto next
+                    break;
+                }
+            }
+
+            //we found a multi-length keyword
+            if(uppercaseWord.contains(" ")) {
+                uppercaseSpanStartsNoMLK.set(i, -1);
+                uppercaseSpanEndsNoMLK.set(i, -1);
+                ClickableSpan span = null;
+                //prioritise user keyword
+                if (matchingUserKeyword != null) {
+                    span = getSpanForKeyword(matchingUserKeyword);
+                }
+                else if (matchingKeyword != null) {
+                    span = getSpanForKeyword(matchingKeyword);
+
+                }
+                if(span != null) {
+                    formattedStory.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+        }
+
+        //make uppercase which match a keyword or user keyword clickable
+        for (int i = 0; i < uppercaseSpanStartsNoMLK.size(); i++) {
+            int start = uppercaseSpanStartsNoMLK.get(i);
+            if(start == -1) {
+                //this means an index which was removed because it was a multi word keyword
+                continue;
+            }
+            int end = uppercaseSpanEndsNoMLK.get(i);
             String uppercaseWord = storyText.substring(start, end);
             if(uppercaseWord.length() < 2) {
                 //ignore words of length 1 for example "I"
