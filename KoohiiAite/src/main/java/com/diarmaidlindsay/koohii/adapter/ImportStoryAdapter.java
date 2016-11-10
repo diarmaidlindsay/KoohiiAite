@@ -102,10 +102,15 @@ public class ImportStoryAdapter extends BaseAdapter {
         final List<Story> newStories = new ArrayList<>();
         final List<Keyword> newKeywords = new ArrayList<>();
         final List<Integer> affectedIds = new ArrayList<>();
+        //should be 3007
+        final int LAST_HEISIG_ID = originalKeywords.get(originalKeywords.size()-1).getHeisigId();
 
         for (CSVEntry entry : importedStories) {
             int id = Integer.parseInt(entry.id);
 
+            if(id < 1 || id > LAST_HEISIG_ID) {
+                continue;
+            }
             affectedIds.add(id);
             //only add keyword if it differs from original one
             if (!originalKeywords.get(id - 1).getKeywordText().equals(entry.keyword)) {
