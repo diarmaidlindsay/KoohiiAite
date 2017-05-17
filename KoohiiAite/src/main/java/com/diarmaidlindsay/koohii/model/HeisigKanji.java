@@ -24,6 +24,12 @@ public class HeisigKanji {
         this.joyo = joyo!=0;
     }
 
+    public HeisigKanji() {
+        this.id = 0;
+        this.kanji = "";
+        this.joyo = false;
+    }
+
     public int getId() {
         return id;
     }

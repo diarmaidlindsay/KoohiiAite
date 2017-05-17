@@ -362,9 +362,11 @@ public class StoryFragment extends Fragment {
         for (StoryFormat braceSpanStart : braceSpanStarts) {
             int kanjiIndex = braceSpanStart.index - braceSpanStart.order;
             String kanji = String.valueOf(storyText.charAt(kanjiIndex));
-            int heisigId = kanjiToHeisigId.get(kanji);
-            ClickableSpan span = getSpanForHeisigId(heisigId);
-            formattedStory.setSpan(span, kanjiIndex, kanjiIndex + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if(kanjiToHeisigId.containsKey(kanji)) {
+                int heisigId = kanjiToHeisigId.get(kanji);
+                ClickableSpan span = getSpanForHeisigId(heisigId);
+                formattedStory.setSpan(span, kanjiIndex, kanjiIndex + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
 
         int keywordLength = userKeyword == null ? originalKeyword.length() : userKeyword.length();
