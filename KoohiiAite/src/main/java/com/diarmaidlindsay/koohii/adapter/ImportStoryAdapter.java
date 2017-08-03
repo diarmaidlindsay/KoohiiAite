@@ -3,6 +3,7 @@ package com.diarmaidlindsay.koohii.adapter;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +31,12 @@ import java.util.List;
  * Adapter for the List View in the Activity which displays importedStories CSV
  */
 public class ImportStoryAdapter extends BaseAdapter {
-    OnDatabaseOperationCompleted databaseListener;
-    OnCSVParseCompleted csvListener;
+    private OnDatabaseOperationCompleted databaseListener;
+    private OnCSVParseCompleted csvListener;
 
-    List<CSVEntry> importedStories = new ArrayList<>();
+    private final String TAG = ImportStoryAdapter.class.getName();
+
+    private List<CSVEntry> importedStories = new ArrayList<>();
     private ViewHolderItem viewHolder;
     private Context mContext;
     private LayoutInflater layoutInflater;
@@ -109,6 +112,7 @@ public class ImportStoryAdapter extends BaseAdapter {
             int id = Integer.parseInt(entry.id);
 
             if(id < 1 || id > LAST_HEISIG_ID) {
+                Log.d(TAG, "Skipped id "+id+" because its not in the standard Heisig ID set");
                 continue;
             }
             affectedIds.add(id);
@@ -207,15 +211,15 @@ public class ImportStoryAdapter extends BaseAdapter {
                 return entries;
             }
             BufferedReader br = null;
+            CSVLineReader lr;
             String line;
             String csvSplitBy = ",";
             clearStories();
             try {
                 br = new BufferedReader(new FileReader(params[0]));
+                lr = new CSVLineReader(br);
 
-                while ((line = br.readLine()) != null) {
-
-                    //match maximum of 5 commas
+                while ((line = lr.readLine()) != null) {
                     String[] row = line.split(csvSplitBy, 6);
                     //first row is the column headers, we should ignore
                     if (row.length == 6 && Utils.isNumeric(row[0])) {
@@ -244,6 +248,45 @@ public class ImportStoryAdapter extends BaseAdapter {
                 progress.dismiss();
             }
             csvListener.onParsingCompleted(parsedEntries);
+        }
+    }
+
+    public class CSVLineReader {
+        private BufferedReader br;
+        CSVLineReader(BufferedReader br) {
+            this.br = br;
+            try {
+                //skip first line (header row)
+                br.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        String readLine() throws IOException {
+            //read the first character
+            int i = br.read();
+            //if it's the end of the stream then return null
+            if (i < 0) {
+                return null;
+            }
+            StringBuilder sb = new StringBuilder();
+            //add first character to newly created StringBuffer
+            sb.append((char)i);
+            //if the character which was added was not a newline character...
+            if (i != '\r' && i != '\n') {
+                //read and keep adding next character (and continue reading)
+                while (0 <= (i = br.read())) {
+                    //Terminate line if "\r is encountered
+                    if (i == '\r' && sb.charAt(sb.length()-1) == '"') {
+                        sb.append("\r\n");
+                        return sb.toString();
+                    } else {
+                        sb.append((char)i);
+                    }
+                }
+            }
+
+            return sb.toString();
         }
     }
 }
