@@ -8,6 +8,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import com.diarmaidlindsay.koohii.R;
 import com.diarmaidlindsay.koohii.fragment.KanjiDetailFragment;
 import com.diarmaidlindsay.koohii.utils.Utils;
@@ -90,7 +91,7 @@ public class KanjiDetailActivity extends AppCompatActivity {
      */
     private int getCurrentPagerIndex() {
         List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
-        if (fragmentList != null) {
+        if (fragmentList != null && !fragmentList.isEmpty()) {
             Fragment fragment = fragmentList.get(fragmentList.size() - 1);
             if (fragment instanceof KanjiDetailFragment) {
                 return ((KanjiDetailFragment) fragment).getCurrentPagerIndex();
