@@ -1,17 +1,22 @@
-# Crashlytics configuations
-com_crashlytics_export_strings.xml
+#built application files
+*.apk
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+out/
 
 # Local configuration file (sdk path, etc)
 local.properties
 
-# Gradle generated files
-.gradle/
-
 # Signing files
 .signing/
-
-# User-specific configurations
-.idea/
 
 # OS-specific files
 .DS_Store
@@ -22,12 +27,12 @@ local.properties
 ehthumbs.db
 Thumbs.db
 
-# Generated files
-bin/
-gen/
-out/
+# Android Studio
+*.iml
+.idea
 
-# Gradle files
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+.gradle
 build/
 
 # Local configuration file (sdk path, etc)
@@ -44,15 +49,7 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# IntelliJ
-.idea/tasks.xml
-.idea/dictionaries
-
-# Keystore files
-# Uncomment the following line if you do not want to check your keystore files in.
-#*.jks
-
-# External native build folder generated in Android Studio 2.2 and later
+#NDK
 .externalNativeBuild
 
 # Google Services (e.g. APIs or Firebase)
