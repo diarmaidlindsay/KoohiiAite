@@ -19,6 +19,7 @@ package com.ipaulpro.afilechooser;
 import android.content.Context;
 import android.os.FileObserver;
 import android.support.v4.content.AsyncTaskLoader;
+
 import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.io.File;

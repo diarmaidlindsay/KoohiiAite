@@ -33,8 +33,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import com.diarmaidlindsay.koohii.R;
-import com.diarmaidlindsay.koohii.utils.ToastUtil;
+import tech.diarmaid.koohiiaite.R;
+import tech.diarmaid.koohiiaite.utils.ToastUtil;
 
 import java.io.File;
 

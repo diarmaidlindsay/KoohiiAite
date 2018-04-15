@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import com.diarmaidlindsay.koohii.R;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,8 +35,8 @@ import java.util.List;
  */
 public class FileListAdapter extends BaseAdapter {
 
-    private final static int ICON_FOLDER = R.drawable.ic_folder;
-    private final static int ICON_FILE = R.drawable.ic_file;
+    private final static int ICON_FOLDER = tech.diarmaid.koohiiaite.R.drawable.ic_folder;
+    private final static int ICON_FILE = tech.diarmaid.koohiiaite.R.drawable.ic_file;
 
     private final LayoutInflater mInflater;
 
@@ -100,7 +99,7 @@ public class FileListAdapter extends BaseAdapter {
         View row = convertView;
 
         if (row == null)
-            row = mInflater.inflate(R.layout.file, parent, false);
+            row = mInflater.inflate(tech.diarmaid.koohiiaite.R.layout.file, parent, false);
 
         TextView view = (TextView) row;
 

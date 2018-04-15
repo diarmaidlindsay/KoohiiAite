@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.diarmaidlindsay.koohii.activity.KanjiDetailActivity">
+      tools:context=".activity.KanjiDetailActivity">
     <item android:id="@+id/action_previous"
           android:icon="@drawable/arrow_back"
           android:title="@string/detail_menu_prev"

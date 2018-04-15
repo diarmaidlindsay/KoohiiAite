@@ -24,7 +24,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.ListView;
-import com.diarmaidlindsay.koohii.R;
 
 import java.io.File;
 import java.util.List;
@@ -82,7 +81,7 @@ public class FileListFragment extends ListFragment implements
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        setEmptyText(getString(R.string.empty_directory));
+        setEmptyText(getString(tech.diarmaid.koohiiaite.R.string.empty_directory));
         setListAdapter(mAdapter);
         setListShown(false);
 

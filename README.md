@@ -15,8 +15,8 @@ called kanji.koohii.com exists to help students share kanji stories, even relabe
 
 I personally use this website daily as part of my studies, but often when attempting to read or recognise kanji
 I do not have access to a PC. I might be on a train or on the street in Japan, and truthfully the kanji.koohii.com
-website was not created for mobile browsing, so it is quite inconvient to lookup kanji on a smartphone.
+website was not created for mobile browsing, so it is quite inconvenient to lookup kanji on a smartphone.
 Besides that, the website is lacking features such as the ability to look up kanji by its components.
 
-This has motived me to create a companion application, KoohiiAite, to address these shortcomings, and make it
+This has motivated me to create a companion application, KoohiiAite, to address these shortcomings, and make it
 simple for Heisig students to quickly lookup kanji and read/write stories wherever they happen to be.
