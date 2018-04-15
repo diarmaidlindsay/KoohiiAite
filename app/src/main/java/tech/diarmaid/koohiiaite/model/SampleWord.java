@@ -4,13 +4,13 @@ package tech.diarmaid.koohiiaite.model;
  * Represent an entry in the sample_word table
  */
 public class SampleWord {
-    int id;
-    int heisigId;
-    String kanjiWord;
-    String hiraganaReading;
-    String englishMeaning;
-    String category;
-    int frequency;
+    private int id;
+    private int heisigId;
+    private String kanjiWord;
+    private String hiraganaReading;
+    private String englishMeaning;
+    private String category;
+    private int frequency;
 
     public SampleWord(int id, int heisigId, String kanjiWord, String hiraganaReading, String englishMeaning, String category, int frequency) {
         this.id = id;

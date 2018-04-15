@@ -1,5 +1,4 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
@@ -11,7 +10,7 @@
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/ka_dark2"/>
+        android:textColor="@color/ka_dark2" />
 
-    <View style="@style/Divider"/>
+    <View style="@style/Divider" />
 </LinearLayout>

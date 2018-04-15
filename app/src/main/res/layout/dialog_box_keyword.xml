@@ -1,46 +1,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_height="wrap_content"
-              android:layout_width="match_parent"
-              android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
 
     <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/keyword_dialog_edittext"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/keyword_dialog_edittext"
+        android:hint="@string/keyword_hint"/>
 
     <RelativeLayout
-            android:layout_width="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:text="@string/button_submit"
+            android:id="@+id/keyword_dialog_submit_button"
+            android:layout_alignParentStart="true" />
 
         <Button
-                style="@style/KoohiiButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_submit"
-                android:id="@+id/keyword_dialog_submit_button"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                />
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_default"
+            android:id="@+id/keyword_dialog_default_button"
+            android:layout_centerHorizontal="true" />
 
         <Button
-                style="@style/KoohiiButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_default"
-                android:id="@+id/keyword_dialog_default_button"
-                android:layout_centerHorizontal="true"
-                />
-
-        <Button
-                style="@style/KoohiiButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_cancel"
-                android:id="@+id/keyword_dialog_cancel_button"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                />
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_cancel"
+            android:id="@+id/keyword_dialog_cancel_button"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
 </LinearLayout>

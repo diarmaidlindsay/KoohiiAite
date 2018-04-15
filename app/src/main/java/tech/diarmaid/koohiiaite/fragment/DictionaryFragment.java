@@ -7,14 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
+import tech.diarmaid.koohiiaite.R;
 import tech.diarmaid.koohiiaite.database.dao.FrequencyDataSource;
 import tech.diarmaid.koohiiaite.database.dao.MeaningDataSource;
 import tech.diarmaid.koohiiaite.database.dao.ReadingDataSource;
-import tech.diarmaid.koohiiaite.R;
 import tech.diarmaid.koohiiaite.model.Meaning;
 import tech.diarmaid.koohiiaite.model.Reading;
-
-import java.util.List;
 
 /**
  * For display of dictionary derived information
@@ -25,11 +25,11 @@ public class DictionaryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail_dictionary, container, false);
 
-        TextView textViewKanji = (TextView) view.findViewById(R.id.kanji_detail);
-        TextView textViewFrequency = (TextView) view.findViewById(R.id.frequency_detail);
-        TextView textViewOnYomi = (TextView) view.findViewById(R.id.onyomi_detail);
-        TextView textViewKunYomi = (TextView) view.findViewById(R.id.kunyomi_detail);
-        TextView textViewMeanings = (TextView) view.findViewById(R.id.meanings_detail);
+        TextView textViewKanji = view.findViewById(R.id.kanji_detail);
+        TextView textViewFrequency = view.findViewById(R.id.frequency_detail);
+        TextView textViewOnYomi = view.findViewById(R.id.onyomi_detail);
+        TextView textViewKunYomi = view.findViewById(R.id.kunyomi_detail);
+        TextView textViewMeanings = view.findViewById(R.id.meanings_detail);
 
         Bundle args = getArguments();
         int heisigIdInt = args.getInt("heisigId", 0);

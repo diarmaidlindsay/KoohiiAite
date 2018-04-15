@@ -1,93 +1,103 @@
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="false"
+    android:orientation="vertical"
+    android:paddingBottom="10dp">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:focusable="false"
-        android:orientation="vertical"
-        android:paddingBottom="10dp">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-                <TextView
-                        android:gravity="start"
-                        android:text="@string/sample_fragment_freq_label"
-                        style="@style/SampleTitle"/>
+            <TextView
+                android:gravity="start"
+                android:text="@string/sample_fragment_freq_label"
+                style="@style/SampleTitle" />
 
-                <TextView
-                        android:gravity="start"
-                        style="@style/SampleItem"
-                        android:text="@string/unSet"
-                        android:id="@+id/sample_frequency"/>
+            <TextView
+                android:gravity="start"
+                style="@style/SampleItem"
+                android:text="@string/unSet"
+                android:id="@+id/sample_frequency" />
 
-            </LinearLayout>
-            <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                <TextView
-                        android:gravity="end"
-                        android:text="@string/sample_fragment_kanji_label"
-                        style="@style/SampleTitle"/>
-                <TextView
-                        android:gravity="end"
-                        style="@style/SampleItem"
-                        android:text="@string/unSet"
-                        android:id="@+id/sample_kanji"/>
-            </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                <TextView
-                        android:gravity="start"
-                        android:text="@string/sample_fragment_category_label"
-                        style="@style/SampleTitle"/>
-                <TextView
-                        android:gravity="start"
-                        style="@style/SampleItem"
-                        android:text="@string/unSet"
-                        android:id="@+id/sample_category"/>
-            </LinearLayout>
-            <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                <TextView
-                        android:gravity="end"
-                        android:text="@string/sample_fragment_hiragana_label"
-                        style="@style/SampleTitle"/>
-                <TextView
-                        android:gravity="end"
-                        style="@style/SampleItem"
-                        android:text="@string/unSet"
-                        android:id="@+id/sample_hiragana"/>
-            </LinearLayout>
-        </LinearLayout>
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
-                    android:text="@string/sample_fragment_english_label"
-                    style="@style/SampleTitle"/>
+                android:gravity="end"
+                android:text="@string/sample_fragment_kanji_label"
+                style="@style/SampleTitle" />
 
             <TextView
+                android:gravity="end"
                 style="@style/SampleItem"
                 android:text="@string/unSet"
-                android:id="@+id/sample_english"/>
+                android:id="@+id/sample_kanji" />
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:gravity="start"
+                android:text="@string/sample_fragment_category_label"
+                style="@style/SampleTitle" />
+
+            <TextView
+                android:gravity="start"
+                style="@style/SampleItem"
+                android:text="@string/unSet"
+                android:id="@+id/sample_category" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:gravity="end"
+                android:text="@string/sample_fragment_hiragana_label"
+                style="@style/SampleTitle" />
+
+            <TextView
+                android:gravity="end"
+                style="@style/SampleItem"
+                android:text="@string/unSet"
+                android:id="@+id/sample_hiragana" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:text="@string/sample_fragment_english_label"
+            style="@style/SampleTitle" />
+
+        <TextView
+            style="@style/SampleItem"
+            android:text="@string/unSet"
+            android:id="@+id/sample_english" />
+    </LinearLayout>
 </LinearLayout>

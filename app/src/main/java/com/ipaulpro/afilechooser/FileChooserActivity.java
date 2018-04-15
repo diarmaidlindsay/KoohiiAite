@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
@@ -33,10 +32,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import tech.diarmaid.koohiiaite.R;
-import tech.diarmaid.koohiiaite.utils.ToastUtil;
 
 import java.io.File;
+
+import tech.diarmaid.koohiiaite.R;
+import tech.diarmaid.koohiiaite.utils.ToastUtil;
 
 /**
  * Main Activity that handles the FileListFragments
@@ -50,8 +50,6 @@ public class FileChooserActivity extends FragmentActivity implements
     public static final String PATH = "path";
     public static final String EXTERNAL_BASE_PATH = Environment
             .getExternalStorageDirectory().getAbsolutePath();
-
-    private static final boolean HAS_ACTIONBAR = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     private FragmentManager mFragmentManager;
     private BroadcastReceiver mStorageListener = new BroadcastReceiver() {
@@ -114,20 +112,17 @@ public class FileChooserActivity extends FragmentActivity implements
         }
 
         setTitle(mPath);
-        if (HAS_ACTIONBAR)
-            invalidateOptionsMenu();
+        invalidateOptionsMenu();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (HAS_ACTIONBAR) {
-            boolean hasBackStack = mFragmentManager.getBackStackEntryCount() > 0;
+        boolean hasBackStack = mFragmentManager.getBackStackEntryCount() > 0;
 
-            ActionBar actionBar = getActionBar();
-            if (actionBar != null) {
-                actionBar.setDisplayHomeAsUpEnabled(hasBackStack);
-                actionBar.setHomeButtonEnabled(hasBackStack);
-            }
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(hasBackStack);
+            actionBar.setHomeButtonEnabled(hasBackStack);
         }
 
         return true;

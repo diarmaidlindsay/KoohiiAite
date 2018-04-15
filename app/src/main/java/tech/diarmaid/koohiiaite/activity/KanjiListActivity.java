@@ -16,14 +16,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Locale;
+
+import tech.diarmaid.koohiiaite.R;
 import tech.diarmaid.koohiiaite.adapter.KanjiListAdapter;
 import tech.diarmaid.koohiiaite.adapter.KanjiListFilterAdapter;
 import tech.diarmaid.koohiiaite.adapter.SuggestionsAdapter;
 import tech.diarmaid.koohiiaite.widget.KanjiSearchView;
 import tech.diarmaid.koohiiaite.widget.OnSpinnerEventsListener;
 import tech.diarmaid.koohiiaite.widget.SpinnerFilter;
-
-import tech.diarmaid.koohiiaite.R;
 
 /**
  *  Koohii Aite uses Heisig Old Edition
@@ -62,16 +63,16 @@ public class KanjiListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_kanji_list);
 
-        kanjiList = (ListView) findViewById(R.id.kanjiListView);
+        kanjiList = findViewById(R.id.kanjiListView);
         suggestionAdapter = getCursorAdapter();
         String[] spinnerValues = {"n/a, Yes, No"};
         kanjiListFilterAdapter = new KanjiListFilterAdapter(this, R.id.filter_spinner, spinnerValues);
         kanjiListAdapter = new KanjiListAdapter(this, savedInstanceState);
         kanjiList.setAdapter(kanjiListAdapter);
-        result = (TextView) findViewById(R.id.result);
-        joyoFilterState = (TextView) findViewById(R.id.joyo_filter_state);
-        keywordFilterState = (TextView) findViewById(R.id.keyword_filter_state);
-        storyFilterState = (TextView) findViewById(R.id.story_filter_state);
+        result = findViewById(R.id.result);
+        joyoFilterState = findViewById(R.id.joyo_filter_state);
+        keywordFilterState = findViewById(R.id.keyword_filter_state);
+        storyFilterState = findViewById(R.id.story_filter_state);
         //created here because must be re-created if list activity is destroyed
         spinnerListener = new OnSpinnerEventsListener() {
             //if filter values changed, we should perform a search with new values
@@ -82,7 +83,7 @@ public class KanjiListActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     kanjiListAdapter.search(searchView.getQuery().toString());
-                    result.setText(String.format("%d items displayed", kanjiListAdapter.getCount()));
+                    result.setText(String.format(Locale.ENGLISH, "%d items displayed", kanjiListAdapter.getCount()));
                 }
             };
             private Handler mHandler = new Handler();
@@ -223,7 +224,7 @@ public class KanjiListActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     kanjiListAdapter.search(text);
-                    result.setText(String.format("%d items displayed", kanjiListAdapter.getCount()));
+                    result.setText(String.format(Locale.ENGLISH,"%d items displayed", kanjiListAdapter.getCount()));
                 }
             };
             private Handler mHandler = new Handler();

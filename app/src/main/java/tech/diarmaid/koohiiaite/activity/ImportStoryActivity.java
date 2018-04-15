@@ -24,12 +24,14 @@ import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 import tech.diarmaid.koohiiaite.R;
 import tech.diarmaid.koohiiaite.adapter.ImportStoryAdapter;
 import tech.diarmaid.koohiiaite.interfaces.OnCSVParseCompleted;
 import tech.diarmaid.koohiiaite.interfaces.OnDatabaseOperationCompleted;
 import tech.diarmaid.koohiiaite.model.CSVEntry;
+import tech.diarmaid.koohiiaite.task.ReadCSVTask;
 import tech.diarmaid.koohiiaite.utils.ToastUtil;
 import tech.diarmaid.koohiiaite.utils.Utils;
 
@@ -56,11 +58,11 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
 
         setContentView(R.layout.activity_import_story);
 
-        buttonChooseFile = (Button) findViewById(R.id.button_choose_file);
-        buttonConfirm = (Button) findViewById(R.id.button_confirm_import);
-        buttonCancel = (Button) findViewById(R.id.button_cancel_import);
-        listCSVContent = (ListView) findViewById(R.id.import_story_listView);
-        importCount = (TextView) findViewById(R.id.story_import_count);
+        buttonChooseFile = findViewById(R.id.button_choose_file);
+        buttonConfirm = findViewById(R.id.button_confirm_import);
+        buttonCancel = findViewById(R.id.button_cancel_import);
+        listCSVContent = findViewById(R.id.import_story_listView);
+        importCount = findViewById(R.id.story_import_count);
         buttonChooseFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,7 +86,7 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
             }
         });
 
-        listAdapter = new ImportStoryAdapter(this, this, this);
+        listAdapter = new ImportStoryAdapter(this, this);
         listCSVContent.setAdapter(listAdapter);
 
         buttonCancel.setEnabled(listAdapter.getCount() > 0);
@@ -158,7 +160,7 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
 
             if (path != null) {
                 //execute task
-                ImportStoryAdapter.ReadCSVTask csvTask = listAdapter.new ReadCSVTask();
+                ReadCSVTask csvTask = new ReadCSVTask(this, this, listAdapter);
                 csvTask.execute(new File(path)); //then go to onParsingCompleted
             }
         }
@@ -192,7 +194,7 @@ public class ImportStoryActivity extends AppCompatActivity implements OnDatabase
             buttonConfirm.setEnabled(true);
             buttonCancel.setEnabled(true);
             ToastUtil.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show();
-            importCount.setText(String.format("%d stories found for import.", listAdapter.getCount()));
+            importCount.setText(String.format(Locale.ENGLISH, "%d stories found for import.", listAdapter.getCount()));
         } else {
             ToastUtil.makeText(this, "Failed to read CSV file", Toast.LENGTH_LONG).show();
         }

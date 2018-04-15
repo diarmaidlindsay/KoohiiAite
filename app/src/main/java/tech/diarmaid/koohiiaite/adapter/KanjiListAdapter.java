@@ -3,6 +3,7 @@ package tech.diarmaid.koohiiaite.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,15 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import tech.diarmaid.koohiiaite.R;
+import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity;
+import tech.diarmaid.koohiiaite.activity.KanjiListActivity;
 import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource;
 import tech.diarmaid.koohiiaite.database.dao.HeisigToPrimitiveDataSource;
 import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource;
@@ -22,11 +32,6 @@ import tech.diarmaid.koohiiaite.model.Keyword;
 import tech.diarmaid.koohiiaite.model.Primitive;
 import tech.diarmaid.koohiiaite.utils.ToastUtil;
 import tech.diarmaid.koohiiaite.utils.Utils;
-import tech.diarmaid.koohiiaite.R;
-import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity;
-import tech.diarmaid.koohiiaite.activity.KanjiListActivity;
-
-import java.util.*;
 
 /**
  * Adapter for Main Kanji ListView
@@ -37,7 +42,7 @@ public class KanjiListAdapter extends BaseAdapter {
 
     private List<HeisigKanji> masterList; //list of all HeisigKanjis
     private List<Keyword> keywordList; //list of all Keywords
-    private Map<Integer, String> userKeywordMap; //HashMap of User Keywords (id, text)
+    private SparseArray<String> userKeywordMap; //HashMap of User Keywords (id, text)
     private List<Primitive> primitiveList; //list of all Primitives
     //to save memory, only story booleans to indicate whether a list item has a story
     private List<Boolean> storyList;
@@ -113,13 +118,13 @@ public class KanjiListAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.list_item_kanji, parent, false);
             viewHolder = new ViewHolderItem();
-            viewHolder.heisig = (TextView) convertView.findViewById(R.id.heisig_id_list_item);
-            viewHolder.kanji = (TextView) convertView.findViewById(R.id.kanji_list_item);
-            viewHolder.keyword = (TextView) convertView.findViewById(R.id.keyword_list_item);
-            viewHolder.primitives = (TextView) convertView.findViewById(R.id.primitives_list_item);
-            viewHolder.joyoIndicator = (TextView) convertView.findViewById(R.id.list_indicator_joyo);
-            viewHolder.storyIndicator = (TextView) convertView.findViewById(R.id.list_indicator_story);
-            viewHolder.keywordIndicator = (TextView) convertView.findViewById(R.id.list_indicator_keyword);
+            viewHolder.heisig = convertView.findViewById(R.id.heisig_id_list_item);
+            viewHolder.kanji = convertView.findViewById(R.id.kanji_list_item);
+            viewHolder.keyword = convertView.findViewById(R.id.keyword_list_item);
+            viewHolder.primitives = convertView.findViewById(R.id.primitives_list_item);
+            viewHolder.joyoIndicator = convertView.findViewById(R.id.list_indicator_joyo);
+            viewHolder.storyIndicator = convertView.findViewById(R.id.list_indicator_story);
+            viewHolder.keywordIndicator = convertView.findViewById(R.id.list_indicator_keyword);
 
             convertView.setTag(viewHolder);
         } else {
@@ -261,10 +266,12 @@ public class KanjiListAdapter extends BaseAdapter {
      * Iterate over user keywords
      */
     private void filterOnUserKeyword(String filterText) {
-        for (Integer heisigId : userKeywordMap.keySet()) {
-            String userKeyword = userKeywordMap.get(heisigId);
+        int mapSize = userKeywordMap.size();
+        for (int i = 0; i < mapSize; i++) {
+            int kanjiIndex = userKeywordMap.keyAt(i);
+            String userKeyword = userKeywordMap.get(kanjiIndex);
             if (userKeyword.toLowerCase(Locale.getDefault()).contains(filterText)) {
-                filteredHeisigKanjiSet.add(heisigId);
+                filteredHeisigKanjiSet.add(kanjiIndex);
             }
         }
     }

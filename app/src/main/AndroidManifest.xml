@@ -9,7 +9,7 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
         <activity
-                android:name="tech.diarmaid.koohiiaite.activity.KanjiListActivity"
+                android:name=".activity.KanjiListActivity"
                 android:label="@string/app_name"
                 android:launchMode="singleTop"
                 android:configChanges="orientation|keyboardHidden|screenSize">
@@ -24,31 +24,19 @@
             </meta-data>
         </activity>
         <activity
-                android:name="tech.diarmaid.koohiiaite.activity.KanjiDetailActivity"
+                android:name=".activity.KanjiDetailActivity"
                 android:label="@string/app_name"
-                android:parentActivityName="tech.diarmaid.koohiiaite.activity.KanjiListActivity"
+                android:parentActivityName=".activity.KanjiListActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="tech.diarmaid.koohiiaite.activity.KanjiListActivity"/>
         </activity>
         <activity
-                android:name="tech.diarmaid.koohiiaite.activity.PrimitiveListActivity"
+                android:name=".activity.PrimitiveListActivity"
                 android:label="@string/title_primitives"
-                android:parentActivityName="tech.diarmaid.koohiiaite.activity.KanjiListActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="tech.diarmaid.koohiiaite.activity.KanjiListActivity"/>
+                android:parentActivityName=".activity.KanjiListActivity">
         </activity>
-        <activity android:name="tech.diarmaid.koohiiaite.activity.ImportStoryActivity"
+        <activity android:name=".activity.ImportStoryActivity"
                   android:label="@string/title_import_story"
-                  android:parentActivityName="tech.diarmaid.koohiiaite.activity.KanjiListActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="tech.diarmaid.koohiiaite.activity.KanjiListActivity"/>
+                  android:parentActivityName=".activity.KanjiListActivity">
         </activity>
         <activity
                 android:name="com.ipaulpro.afilechooser.FileChooserActivity"

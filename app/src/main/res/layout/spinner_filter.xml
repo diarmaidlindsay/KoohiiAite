@@ -1,36 +1,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_height="match_parent"
+    xmlns:mstb="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+
+    <TextView
         android:layout_width="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:text="@string/filter_label_joyo" />
+
+    <org.honorato.multistatetogglebutton.MultiStateToggleButton
+        android:id="@+id/toggle_joyo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        mstb:values="@array/values_array_filter" />
 
     <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_label_joyo"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/filter_label_keyword" />
+
     <org.honorato.multistatetogglebutton.MultiStateToggleButton
-            android:id="@+id/toggle_joyo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/values_array_filter" />
+        android:id="@+id/toggle_keyword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        mstb:values="@array/values_array_filter" />
 
     <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_label_keyword"/>
-    <org.honorato.multistatetogglebutton.MultiStateToggleButton
-            android:id="@+id/toggle_keyword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/values_array_filter" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/filter_label_story" />
 
-    <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_label_story"/>
     <org.honorato.multistatetogglebutton.MultiStateToggleButton
-            android:id="@+id/toggle_story"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/values_array_filter" />
+        android:id="@+id/toggle_story"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        mstb:values="@array/values_array_filter" />
 
 </LinearLayout>

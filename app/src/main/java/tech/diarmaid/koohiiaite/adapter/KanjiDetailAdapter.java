@@ -7,27 +7,28 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource;
+import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource;
+import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource;
 import tech.diarmaid.koohiiaite.fragment.DictionaryFragment;
 import tech.diarmaid.koohiiaite.fragment.KoohiiFragment;
 import tech.diarmaid.koohiiaite.fragment.SampleWordsFragment;
 import tech.diarmaid.koohiiaite.fragment.StoryFragment;
 import tech.diarmaid.koohiiaite.model.HeisigKanji;
 import tech.diarmaid.koohiiaite.model.Keyword;
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource;
-import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource;
+
+import static tech.diarmaid.koohiiaite.utils.Constants.KANJI_DETAIL_TABS;
 
 /**
  * Invoked when user clicks a list item in the KanjiListActivity
  */
 public class KanjiDetailAdapter extends FragmentPagerAdapter {
-    StoryFragment storyFragment;
-    DictionaryFragment dictionaryFragment;
-    SampleWordsFragment sampleWordsFragment;
-    KoohiiFragment koohiiFragment;
+    private StoryFragment storyFragment;
+    private DictionaryFragment dictionaryFragment;
+    private SampleWordsFragment sampleWordsFragment;
+    private KoohiiFragment koohiiFragment;
 
-    Context mContext;
-    Bundle arguments;
-    private final int NUM_ITEMS = 4;
+    private Context mContext;
+    private Bundle arguments;
 
     public KanjiDetailAdapter(FragmentManager fragmentManager, Bundle arguments, Context context) {
         super(fragmentManager);
@@ -75,7 +76,7 @@ public class KanjiDetailAdapter extends FragmentPagerAdapter {
     // Returns total number of pages
     @Override
     public int getCount() {
-        return NUM_ITEMS;
+        return KANJI_DETAIL_TABS;
     }
 
     // Returns the fragment to display for that page

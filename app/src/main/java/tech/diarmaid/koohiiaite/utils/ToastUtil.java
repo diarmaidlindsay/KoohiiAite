@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import tech.diarmaid.koohiiaite.R;
 
 /**
@@ -20,7 +21,7 @@ public class ToastUtil {
                 (ViewGroup) activity.findViewById(R.id.custom_toast_layout));
 
         // set a message
-        TextView textView = (TextView) layout.findViewById(R.id.toast_text);
+        TextView textView = layout.findViewById(R.id.toast_text);
         textView.setText(text);
 
         // Toast...

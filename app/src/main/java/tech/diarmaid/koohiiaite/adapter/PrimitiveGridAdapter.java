@@ -9,10 +9,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import tech.diarmaid.koohiiaite.R;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import tech.diarmaid.koohiiaite.R;
 
 /**
  * For Primitives Grid accessed from Main Activity Settings menu
@@ -20,7 +21,6 @@ import java.io.InputStream;
 public class PrimitiveGridAdapter extends BaseAdapter {
 
     public String[] filenames;
-    private ViewHolderItem viewHolder;
     private LayoutInflater layoutInflater;
     private Context mContext;
 
@@ -115,11 +115,12 @@ public class PrimitiveGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolderItem viewHolder;
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.grid_item_primitive, parent, false);
             viewHolder = new ViewHolderItem();
-            viewHolder.primitiveImage = (ImageView) convertView.findViewById(R.id.primitive_image);
-            viewHolder.primitiveLabel = (TextView) convertView.findViewById(R.id.primitive_label);
+            viewHolder.primitiveImage = convertView.findViewById(R.id.primitive_image);
+            viewHolder.primitiveLabel = convertView.findViewById(R.id.primitive_label);
 
             convertView.setTag(viewHolder);
         } else {

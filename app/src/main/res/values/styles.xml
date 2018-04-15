@@ -18,13 +18,16 @@
         <item name="colorAccent">@android:color/holo_red_dark</item>
         <item name="colorControlNormal">@android:color/holo_blue_dark</item>
     </style>
+
     <style name="MyActionButtonStyle">
         <!-- Provide space between Prev and Next buttons on the Kanji Detail page -->
         <item name="android:padding">20dp</item>
     </style>
+
     <style name="MyActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
         <item name="titleTextStyle">@style/MyTitleTextStyle</item>
     </style>
+
     <style name="MyTitleTextStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@android:color/black</item>
     </style>
@@ -37,6 +40,7 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@color/ka_dark2</item>
     </style>
+
     <style name="DetailItem" parent="@android:style/TextAppearance.Medium">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -44,6 +48,7 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@color/ka_bright2</item>
     </style>
+
     <style name="SampleTitle" parent="@android:style/TextAppearance.Small">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -52,6 +57,7 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@color/ka_dark2</item>
     </style>
+
     <style name="SampleItem" parent="@android:style/TextAppearance.Small">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -59,10 +65,12 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@color/ka_bright2</item>
     </style>
+
     <style name="GreyItalicSmallText" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@android:color/darker_gray</item>
         <item name="android:textStyle">italic</item>
     </style>
+
     <style name="KoohiiButton" parent="@android:style/TextAppearance.Medium">
         <item name="android:textAllCaps">false</item>
         <item name="android:layout_width">fill_parent</item>

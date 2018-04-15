@@ -2,10 +2,9 @@ package tech.diarmaid.koohiiaite.database.dao;
 
 import android.content.Context;
 import android.database.Cursor;
-import tech.diarmaid.koohiiaite.database.DatabaseAssetHelper;
+import android.util.SparseIntArray;
 
-import java.util.HashMap;
-import java.util.Map;
+import tech.diarmaid.koohiiaite.database.DatabaseAssetHelper;
 
 /**
  * DAO for kanji_frequency table
@@ -20,9 +19,9 @@ public class FrequencyDataSource extends CommonDataSource {
         super(context);
     }
 
-    public Map<Integer, Integer> getAllKanjiFrequency()
+    public SparseIntArray getAllKanjiFrequency()
     {
-        Map<Integer, Integer> allFrequency = new HashMap<>();
+        SparseIntArray allFrequency = new SparseIntArray();
 
         Cursor cursor = database.query(DatabaseAssetHelper.TABLE_FREQUENCY,
                 allColumns, null, null, null, null, null);

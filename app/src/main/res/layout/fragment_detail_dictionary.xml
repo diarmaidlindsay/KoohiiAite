@@ -1,60 +1,59 @@
-<ScrollView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10sp"
-            android:id="@+id/dictionary_fragment_layout">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10sp"
+        android:id="@+id/dictionary_fragment_layout">
 
         <TextView
-                android:text="@string/fragment_kanji_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/fragment_kanji_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:textSize="50sp"
-                android:text="@string/unSet"
-                android:id="@+id/kanji_detail"/>
+            style="@style/DetailItem"
+            android:textSize="50sp"
+            android:text="@string/unSet"
+            android:id="@+id/kanji_detail" />
 
         <TextView
-                android:text="@string/dictionary_fragment_frequency_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/dictionary_fragment_frequency_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:text="@string/unSet"
-                android:id="@+id/frequency_detail"/>
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/frequency_detail" />
 
         <TextView
-                android:text="@string/dictionary_fragment_onyomi_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/dictionary_fragment_onyomi_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:text="@string/unSet"
-                android:id="@+id/onyomi_detail"/>
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/onyomi_detail" />
 
         <TextView
-                android:text="@string/dictionary_fragment_kunyomi_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/dictionary_fragment_kunyomi_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:text="@string/unSet"
-                android:id="@+id/kunyomi_detail"/>
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/kunyomi_detail" />
 
         <TextView
-                android:text="@string/dictionary_fragment_meanings_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/dictionary_fragment_meanings_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:text="@string/unSet"
-                android:id="@+id/meanings_detail"/>
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/meanings_detail" />
 
     </LinearLayout>
 </ScrollView>

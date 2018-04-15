@@ -8,18 +8,16 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import tech.diarmaid.koohiiaite.database.dao.SampleWordDataSource;
-import tech.diarmaid.koohiiaite.model.SampleWord;
+import java.util.List;
 
 import tech.diarmaid.koohiiaite.R;
-
-import java.util.List;
+import tech.diarmaid.koohiiaite.database.dao.SampleWordDataSource;
+import tech.diarmaid.koohiiaite.model.SampleWord;
 
 /**
  * Adapter for the Sample words tab of the Kanji Detail view
  */
 public class KanjiSampleWordsAdapter extends BaseAdapter {
-    private ViewHolderItem viewHolder;
     private Context mContext;
 
     private List<SampleWord> sampleWordList;
@@ -60,14 +58,15 @@ public class KanjiSampleWordsAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolderItem viewHolder;
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.list_item_sample_word, parent, false);
             viewHolder = new ViewHolderItem();
-            viewHolder.kanji = (TextView) convertView.findViewById(R.id.sample_kanji);
-            viewHolder.hiragana = (TextView) convertView.findViewById(R.id.sample_hiragana);
-            viewHolder.english = (TextView) convertView.findViewById(R.id.sample_english);
-            viewHolder.category = (TextView) convertView.findViewById(R.id.sample_category);
-            viewHolder.frequency = (TextView) convertView.findViewById(R.id.sample_frequency);
+            viewHolder.kanji = convertView.findViewById(R.id.sample_kanji);
+            viewHolder.hiragana = convertView.findViewById(R.id.sample_hiragana);
+            viewHolder.english = convertView.findViewById(R.id.sample_english);
+            viewHolder.category = convertView.findViewById(R.id.sample_category);
+            viewHolder.frequency = convertView.findViewById(R.id.sample_frequency);
 
             convertView.setTag(viewHolder);
         } else {

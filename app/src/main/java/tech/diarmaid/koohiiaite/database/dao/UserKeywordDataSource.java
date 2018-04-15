@@ -3,13 +3,12 @@ package tech.diarmaid.koohiiaite.database.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.SparseArray;
+
+import java.util.List;
 
 import tech.diarmaid.koohiiaite.database.DatabaseAssetHelper;
 import tech.diarmaid.koohiiaite.model.Keyword;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * DAO for User Keyword table
@@ -24,8 +23,8 @@ public class UserKeywordDataSource extends CommonDataSource {
         super(context);
     }
 
-    public Map<Integer, String> getAllUserKeywords() {
-        Map<Integer, String> keywordList = new HashMap<>();
+    public SparseArray<String> getAllUserKeywords() {
+        SparseArray<String> keywordList = new SparseArray<>();
         String orderBy = COLUMN_ID + " ASC";
 
         Cursor cursor = database.query(DatabaseAssetHelper.TABLE_USER_KEYWORD,

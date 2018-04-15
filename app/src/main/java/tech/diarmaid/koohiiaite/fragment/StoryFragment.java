@@ -3,6 +3,7 @@ package tech.diarmaid.koohiiaite.fragment;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -19,24 +20,24 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource;
-import tech.diarmaid.koohiiaite.database.dao.StoryDataSource;
-import tech.diarmaid.koohiiaite.R;
-import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity;
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource;
-import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource;
-import tech.diarmaid.koohiiaite.model.HeisigKanji;
-import tech.diarmaid.koohiiaite.model.Keyword;
-import tech.diarmaid.koohiiaite.model.Story;
-import tech.diarmaid.koohiiaite.utils.ToastUtil;
-import tech.diarmaid.koohiiaite.utils.Utils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import tech.diarmaid.koohiiaite.R;
+import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity;
+import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource;
+import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource;
+import tech.diarmaid.koohiiaite.database.dao.StoryDataSource;
+import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource;
+import tech.diarmaid.koohiiaite.model.HeisigKanji;
+import tech.diarmaid.koohiiaite.model.Keyword;
+import tech.diarmaid.koohiiaite.model.Story;
+import tech.diarmaid.koohiiaite.utils.ToastUtil;
+import tech.diarmaid.koohiiaite.utils.Utils;
 
 /**
  * For display of the Story related to the heisig id
@@ -50,13 +51,13 @@ public class StoryFragment extends Fragment {
     private String originalKeyword;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail_story, container, false);
 
-        TextView textViewHeisigId = (TextView) view.findViewById(R.id.heisig_id_detail);
-        TextView textViewKanji = (TextView) view.findViewById(R.id.kanji_detail);
-        buttonKeyword = (Button) view.findViewById(R.id.keyword_detail);
-        TextView textViewStory = (TextView) view.findViewById(R.id.story_detail);
+        TextView textViewHeisigId = view.findViewById(R.id.heisig_id_detail);
+        TextView textViewKanji = view.findViewById(R.id.kanji_detail);
+        buttonKeyword = view.findViewById(R.id.keyword_detail);
+        TextView textViewStory = view.findViewById(R.id.story_detail);
 
         Bundle args = getArguments();
         heisigIdInt = args.getInt("heisigId", 0);
@@ -74,10 +75,10 @@ public class StoryFragment extends Fragment {
                 dialog.setContentView(R.layout.dialog_box_keyword);
                 dialog.setTitle(R.string.dialog_title_edit_keyword);
 
-                final EditText keywordEditText = (EditText) dialog.findViewById(R.id.keyword_dialog_edittext);
-                Button submitButton = (Button) dialog.findViewById(R.id.keyword_dialog_submit_button);
-                Button buttonDefault = (Button) dialog.findViewById(R.id.keyword_dialog_default_button);
-                Button cancelButton = (Button) dialog.findViewById(R.id.keyword_dialog_cancel_button);
+                final EditText keywordEditText = dialog.findViewById(R.id.keyword_dialog_edittext);
+                Button submitButton = dialog.findViewById(R.id.keyword_dialog_submit_button);
+                Button buttonDefault = dialog.findViewById(R.id.keyword_dialog_default_button);
+                Button cancelButton = dialog.findViewById(R.id.keyword_dialog_cancel_button);
 
                 keywordEditText.setText(userKeyword == null ? originalKeyword : userKeyword);
                 keywordEditText.setSelectAllOnFocus(true);

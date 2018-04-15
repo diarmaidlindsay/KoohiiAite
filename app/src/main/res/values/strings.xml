@@ -54,4 +54,6 @@
     <string name="error_selecting_file">Error selecting File</string>
     <string name="internal_storage">Internal storage</string>
     <string name="button_koohii">Open %s in Koohii</string>
+    <string name="description_primitive_image">Primitive Image</string>
+    <string name="keyword_hint">New Keyword</string>
 </resources>

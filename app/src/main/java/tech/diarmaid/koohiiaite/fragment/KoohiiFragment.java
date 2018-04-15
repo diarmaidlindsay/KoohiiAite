@@ -3,6 +3,7 @@ package tech.diarmaid.koohiiaite.fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -20,12 +21,12 @@ import tech.diarmaid.koohiiaite.R;
 public class KoohiiFragment extends Fragment {
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle args = getArguments();
         final String kanji = args.getString("kanji");
 
         View view = inflater.inflate(R.layout.fragment_detail_koohii, container, false);
-        Button koohiiButton = (Button) view.findViewById(R.id.button_open_koohii);
+        Button koohiiButton = view.findViewById(R.id.button_open_koohii);
         String buttonString = String.format(getString(R.string.button_koohii), kanji);
         koohiiButton.setText(buttonString);
 

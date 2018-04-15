@@ -1,52 +1,51 @@
-<ScrollView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10sp"
-            android:id="@+id/story_fragment_layout">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10sp"
+        android:id="@+id/story_fragment_layout">
 
         <TextView
-                android:text="@string/fragment_kanji_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/fragment_kanji_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:textSize="50sp"
-                android:text="@string/unSet"
-                android:id="@+id/kanji_detail"/>
+            style="@style/DetailItem"
+            android:textSize="50sp"
+            android:text="@string/unSet"
+            android:id="@+id/kanji_detail" />
 
         <TextView
-                android:text="@string/story_fragment_heisigid_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/story_fragment_heisigid_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:text="@string/unSet"
-                android:id="@+id/heisig_id_detail"/>
+            style="@style/DetailItem"
+            android:text="@string/unSet"
+            android:id="@+id/heisig_id_detail" />
 
         <TextView
-                android:text="@string/story_fragment_keyword_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/story_fragment_keyword_label"
+            style="@style/DetailTitle" />
 
         <Button
-                style="@style/KoohiiButton"
-                android:text="@string/unSet"
-                android:id="@+id/keyword_detail"/>
+            style="@style/KoohiiButton"
+            android:text="@string/unSet"
+            android:id="@+id/keyword_detail" />
 
         <TextView
-                android:text="@string/story_fragment_story_label"
-                style="@style/DetailTitle"/>
+            android:text="@string/story_fragment_story_label"
+            style="@style/DetailTitle" />
 
         <TextView
-                style="@style/DetailItem"
-                android:gravity="start"
-                android:text="@string/unSet"
-                android:id="@+id/story_detail"/>
+            style="@style/DetailItem"
+            android:gravity="start"
+            android:text="@string/unSet"
+            android:id="@+id/story_detail" />
     </LinearLayout>
 
 </ScrollView>
