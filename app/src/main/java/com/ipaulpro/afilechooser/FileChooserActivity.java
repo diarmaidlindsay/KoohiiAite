@@ -36,7 +36,6 @@ import android.widget.Toast;
 import java.io.File;
 
 import tech.diarmaid.koohiiaite.R;
-import tech.diarmaid.koohiiaite.utils.ToastUtil;
 
 /**
  * Main Activity that handles the FileListFragments
@@ -55,7 +54,8 @@ public class FileChooserActivity extends FragmentActivity implements
     private BroadcastReceiver mStorageListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ToastUtil.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
+//            ToastUtil.INSTANCE.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
             finishWithResult(null);
         }
     };
@@ -194,7 +194,9 @@ public class FileChooserActivity extends FragmentActivity implements
                 finishWithResult(file);
             }
         } else {
-            ToastUtil.makeText(FileChooserActivity.this, R.string.error_selecting_file,
+//            ToastUtil.INSTANCE.makeText(FileChooserActivity.this, R.string.error_selecting_file,
+//                    Toast.LENGTH_LONG).show();
+            Toast.makeText(FileChooserActivity.this, R.string.error_selecting_file,
                     Toast.LENGTH_LONG).show();
         }
     }

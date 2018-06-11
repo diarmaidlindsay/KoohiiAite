@@ -2,6 +2,7 @@ package tech.diarmaid.koohiiaite.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 /**
@@ -9,6 +10,7 @@ import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
  * when application is first loaded
  */
 public class DatabaseAssetHelper extends SQLiteAssetHelper {
+    //TODO : Get rid of this memory leak ASAP when refactoring DB
     private static DatabaseAssetHelper sInstance;
 
     private static final String DATABASE_NAME = "koohii.sqlite3.db";
