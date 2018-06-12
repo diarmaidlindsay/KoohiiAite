@@ -2,7 +2,6 @@
     <string name="app_name">KoohiiAite</string>
 
     <string name="action_settings">Settings</string>
-    <string name="search_title">Search</string>
     <string name="search_hint">Primitives, Keyword, Kanji, Frame #</string>
     <string name="unSet">unSet</string>
     <string name="default_results_text">All items displayed</string>
@@ -13,7 +12,6 @@
     <string name="dictionary_fragment_onyomi_label">音読み (On-Yomi)</string>
     <string name="dictionary_fragment_kunyomi_label">訓読み (Kun-Yomi)</string>
     <string name="dictionary_fragment_meanings_label">Meanings</string>
-    <string name="dictionary_fragment_sample_words_label">Sample Words</string>
     <string name="dictionary_fragment_frequency_label">Frequency</string>
     <string name="sample_fragment_freq_label">Freq</string>
     <string name="sample_fragment_kanji_label">Kanji Reading</string>
@@ -50,9 +48,7 @@
     </string-array>
     <string name="empty_directory">Empty Directory</string>
     <string name="storage_removed">Storage was removed or unmounted.</string>
-    <string name="choose_file">Select a file</string>
     <string name="error_selecting_file">Error selecting File</string>
-    <string name="internal_storage">Internal storage</string>
     <string name="button_koohii">Open %s in Koohii</string>
     <string name="description_primitive_image">Primitive Image</string>
     <string name="keyword_hint">New Keyword</string>

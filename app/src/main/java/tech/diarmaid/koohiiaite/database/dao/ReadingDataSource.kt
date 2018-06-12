@@ -38,6 +38,6 @@ class ReadingDataSource(context: Context) : CommonDataSource(context) {
     }
 
     private fun cursorToReading(cursor: Cursor): Reading {
-        return Reading(cursor.getInt(0), cursor.getInt(1), cursor.getString(2), cursor.getInt(3))
+        return Reading(cursor.getInt(0), cursor.getInt(1), cursor.getString(2))
     }
 }

@@ -11,12 +11,11 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.widget.Button
 import android.widget.ListView
-import android.widget.TextView
 import android.widget.Toast
 import com.ipaulpro.afilechooser.FileChooserActivity
 import com.ipaulpro.afilechooser.utils.FileUtils
+import kotlinx.android.synthetic.main.activity_import_story.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.ImportStoryAdapter
 import tech.diarmaid.koohiiaite.interfaces.OnCSVParseCompleted
@@ -35,41 +34,32 @@ import java.util.*
  */
 class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, OnCSVParseCompleted {
     private var listCSVContent: ListView? = null //the csv file's valid rows
-    private var buttonChooseFile: Button? = null //open file browser
-    private var buttonConfirm: Button? = null //write to database
-    private var buttonCancel: Button? = null //clear table, disable confirm button
-    private var importCount: TextView? = null //display amount of stories to be imported
     private lateinit var listAdapter: ImportStoryAdapter
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_import_story)
 
-        buttonChooseFile = findViewById(R.id.button_choose_file)
-        buttonConfirm = findViewById(R.id.button_confirm_import)
-        buttonCancel = findViewById(R.id.button_cancel_import)
         listCSVContent = findViewById(R.id.import_story_listView)
-        importCount = findViewById(R.id.story_import_count)
-        buttonChooseFile?.setOnClickListener { checkPermission() }
+        button_choose_file.setOnClickListener { checkPermission() }
 
-        buttonCancel?.setOnClickListener {
+        button_cancel_import.setOnClickListener {
             resetView()
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
 
         listAdapter = ImportStoryAdapter(this, this)
-        buttonConfirm?.setOnClickListener { listAdapter.writeToDatabase() }
+        button_confirm_import.setOnClickListener { listAdapter.writeToDatabase() }
         listCSVContent?.adapter = listAdapter
-        buttonCancel?.isEnabled = listAdapter.count > 0
-        buttonConfirm?.isEnabled = listAdapter.count > 0
+        button_cancel_import.isEnabled = listAdapter.count > 0
+        button_confirm_import.isEnabled = listAdapter.count > 0
     }
 
     private fun resetView() {
         listAdapter.clearStories()
-        buttonConfirm?.isEnabled = false
-        buttonCancel?.isEnabled = false
+        button_confirm_import.isEnabled = false
+        button_cancel_import.isEnabled = false
         listAdapter.notifyDataSetChanged()
     }
 
@@ -99,7 +89,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         when (requestCode) {
             PERMISSION_REQUEST_READ_STORAGE -> {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // http://stackoverflow.com/a/32473449/4653788
                     // Need to restart the process to grant write to SD permissions
                     // Schedule start after 1 second
@@ -144,11 +134,9 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     override fun onImportCompleted(affectedIds: List<Int>) {
         if (affectedIds.isNotEmpty()) {
             setResult(affectedIds)
-//            ToastUtil.makeText(this, affectedIds.size.toString() + " Stories and Keywords updated", Toast.LENGTH_SHORT).show()
             Toast.makeText(this, affectedIds.size.toString() + " Stories and Keywords updated", Toast.LENGTH_SHORT).show()
 
         } else {
-//            ToastUtil.makeText(this, "Failed to write to database", Toast.LENGTH_LONG).show()
             Toast.makeText(this, "Failed to write to database", Toast.LENGTH_LONG).show()
             setResult(Activity.RESULT_CANCELED)
         }
@@ -160,13 +148,11 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         if (parsedEntries.isNotEmpty()) {
             listAdapter.setStories(parsedEntries)
             listAdapter.notifyDataSetChanged()
-            buttonConfirm?.isEnabled = true
-            buttonCancel?.isEnabled = true
-//            ToastUtil.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show()
+            button_confirm_import.isEnabled = true
+            button_cancel_import.isEnabled = true
             Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show()
-            importCount?.text = String.format(Locale.getDefault(), "%d stories found for import.", listAdapter.count)
+            story_import_count.text = String.format(Locale.getDefault(), "%d stories found for import.", listAdapter.count)
         } else {
-//            ToastUtil.makeText(this, "Failed to read CSV file", Toast.LENGTH_LONG).show()
             Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_LONG).show()
         }
     }

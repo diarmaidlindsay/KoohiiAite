@@ -19,6 +19,7 @@ package com.ipaulpro.afilechooser;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -100,13 +101,14 @@ public class FileListFragment extends ListFragment implements
         }
     }
 
+    @NonNull
     @Override
     public Loader<List<File>> onCreateLoader(int id, Bundle args) {
         return new FileLoader(getActivity(), mPath);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<File>> loader, List<File> data) {
+    public void onLoadFinished(@NonNull Loader<List<File>> loader, List<File> data) {
         mAdapter.setListItems(data);
 
         if (isResumed())
@@ -116,7 +118,7 @@ public class FileListFragment extends ListFragment implements
     }
 
     @Override
-    public void onLoaderReset(Loader<List<File>> loader) {
+    public void onLoaderReset(@NonNull Loader<List<File>> loader) {
         mAdapter.clear();
     }
 

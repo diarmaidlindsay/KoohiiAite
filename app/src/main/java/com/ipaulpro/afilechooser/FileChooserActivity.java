@@ -47,14 +47,13 @@ public class FileChooserActivity extends FragmentActivity implements
         OnBackStackChangedListener, FileListFragment.Callbacks {
 
     public static final String PATH = "path";
-    public static final String EXTERNAL_BASE_PATH = Environment
+    private static final String EXTERNAL_BASE_PATH = Environment
             .getExternalStorageDirectory().getAbsolutePath();
 
     private FragmentManager mFragmentManager;
-    private BroadcastReceiver mStorageListener = new BroadcastReceiver() {
+    private final BroadcastReceiver mStorageListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            ToastUtil.INSTANCE.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
             Toast.makeText(context, R.string.storage_removed, Toast.LENGTH_LONG).show();
             finishWithResult(null);
         }
@@ -194,8 +193,6 @@ public class FileChooserActivity extends FragmentActivity implements
                 finishWithResult(file);
             }
         } else {
-//            ToastUtil.INSTANCE.makeText(FileChooserActivity.this, R.string.error_selecting_file,
-//                    Toast.LENGTH_LONG).show();
             Toast.makeText(FileChooserActivity.this, R.string.error_selecting_file,
                     Toast.LENGTH_LONG).show();
         }

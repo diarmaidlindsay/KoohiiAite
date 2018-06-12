@@ -2,8 +2,6 @@ package tech.diarmaid.koohiiaite.database.dao
 
 import android.content.Context
 import android.database.Cursor
-import android.util.SparseIntArray
-
 import tech.diarmaid.koohiiaite.database.DatabaseAssetHelper
 
 /**
@@ -14,24 +12,6 @@ class FrequencyDataSource(context: Context) : CommonDataSource(context) {
     private val columnId = "heisig_id"
     private val columnFrequency = "frequency"
     private val allColumns = arrayOf(columnId, columnFrequency)
-
-    val allKanjiFrequency: SparseIntArray
-        get() {
-            val allFrequency = SparseIntArray()
-
-            val cursor = database.query(DatabaseAssetHelper.TABLE_FREQUENCY,
-                    allColumns, null, null, null, null, null)
-            if (cursor != null) {
-                cursor.moveToFirst()
-                while (!cursor.isAfterLast) {
-                    val freq = cursorToFrequency(cursor)
-                    allFrequency.put(freq.id, freq.frequency)
-                    cursor.moveToNext()
-                }
-                cursor.close()
-            }
-            return allFrequency
-        }
 
     fun getFrequencyFor(heisigId: Int): Int? {
         val cursor = database.query(DatabaseAssetHelper.TABLE_FREQUENCY,

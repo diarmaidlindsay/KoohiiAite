@@ -49,7 +49,7 @@ class PrimitiveGridAdapter(private val mContext: Context) : BaseAdapter() {
         filename = filename.substring(filename.indexOf("-") + 1, filename.lastIndexOf("."))
 
         val parts = filename.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (parts.size == 0)
+        if (parts.isEmpty())
             return splitCamelCase(filename)
 
         val sb = StringBuilder()

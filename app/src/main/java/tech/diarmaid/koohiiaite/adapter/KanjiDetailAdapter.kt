@@ -102,12 +102,12 @@ class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments
 
     // Returns the page title for the top indicator
     override fun getPageTitle(position: Int): CharSequence? {
-        when (position) {
-            0 -> return "Story"
-            1 -> return "Dictionary"
-            2 -> return "Sample Words"
-            3 -> return "Koohii"
-            else -> return "Undefined"
+        return when (position) {
+            0 -> "Story"
+            1 -> "Dictionary"
+            2 -> "Sample Words"
+            3 -> "Koohii"
+            else -> "Undefined"
         }
     }
 

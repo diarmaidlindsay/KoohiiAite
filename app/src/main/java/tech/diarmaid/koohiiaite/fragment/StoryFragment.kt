@@ -389,8 +389,6 @@ class StoryFragment : Fragment() {
                 success = true
         }
 
-//        ToastUtil.makeText(activity!!, if (success) "Keyword Changed" else "Error! Keyword not Changed",
-//                Toast.LENGTH_SHORT).show()
         Toast.makeText(activity!!, if (success) "Keyword Changed" else "Error! Keyword not Changed",
                 Toast.LENGTH_SHORT).show()
         if (success) {
@@ -412,8 +410,6 @@ class StoryFragment : Fragment() {
             updateParentActivity()
         }
 
-//        ToastUtil.makeText(activity!!, if (success) "Keyword Reset" else "Error! Keyword not Changed",
-//                Toast.LENGTH_SHORT).show()
         Toast.makeText(activity!!, if (success) "Keyword Reset" else "Error! Keyword not Changed",
                 Toast.LENGTH_SHORT).show()
         dataSource.close()
@@ -425,7 +421,7 @@ class StoryFragment : Fragment() {
         val story = dataSource.getStoryForHeisigKanjiId(heisigId)
         dataSource.close()
 
-        return if (story == null) "" else story.storyText
+        return story?.storyText ?: ""
     }
 
     private fun updateWidgets() {

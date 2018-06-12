@@ -40,16 +40,16 @@ import java.util.Comparator;
 public class FileUtils {
     public static final String MIME_TYPE_AUDIO = "audio/*";
     public static final String MIME_TYPE_TEXT = "text/*";
-    public static final String MIME_TYPE_IMAGE = "image/*";
+    private static final String MIME_TYPE_IMAGE = "image/*";
     public static final String MIME_TYPE_VIDEO = "video/*";
     public static final String MIME_TYPE_APP = "application/*";
-    public static final String HIDDEN_PREFIX = ".";
+    private static final String HIDDEN_PREFIX = ".";
     /**
      * TAG for log messages.
      */
-    static final String TAG = "FileUtils";
+    private static final String TAG = "FileUtils";
     private static final boolean DEBUG = false; // Set to true to enable logging
-    public static Comparator<File> sComparator = new Comparator<File>() {
+    public static final Comparator<File> sComparator = new Comparator<File>() {
         @Override
         public int compare(File f1, File f2) {
             // Sort alphabetically by lower case, which is much cleaner
@@ -60,7 +60,7 @@ public class FileUtils {
     /**
      * File (not directories) filter.
      */
-    public static FileFilter sFileFilter = new FileFilter() {
+    public static final FileFilter sFileFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
             final String fileName = file.getName();
@@ -71,7 +71,7 @@ public class FileUtils {
     /**
      * Folder (directories) filter.
      */
-    public static FileFilter sDirFilter = new FileFilter() {
+    public static final FileFilter sDirFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
             final String fileName = file.getName();
@@ -89,7 +89,7 @@ public class FileUtils {
      * @return Extension including the dot("."); "" if there is no extension;
      * null if uri was null.
      */
-    public static String getExtension(String uri) {
+    private static String getExtension(String uri) {
         if (uri == null) {
             return null;
         }
@@ -106,14 +106,14 @@ public class FileUtils {
     /**
      * @return Whether the URI is a local one.
      */
-    public static boolean isLocal(String url) {
+    private static boolean isLocal(String url) {
         return url != null && !url.startsWith("http://") && !url.startsWith("https://");
     }
 
     /**
      * @return True if Uri is a MediaStore Uri.
      */
-    public static boolean isMediaUri(Uri uri) {
+    private static boolean isMediaUri(Uri uri) {
         return "media".equalsIgnoreCase(uri.getAuthority());
     }
 
@@ -122,7 +122,7 @@ public class FileUtils {
      *
      * @return uri
      */
-    public static Uri getUri(File file) {
+    private static Uri getUri(File file) {
         if (file != null) {
             return Uri.fromFile(file);
         }
@@ -156,7 +156,7 @@ public class FileUtils {
     /**
      * @return The MIME type for the given file.
      */
-    public static String getMimeType(File file) {
+    private static String getMimeType(File file) {
         if (file != null) {
             String extension = getExtension(file.getName());
 
@@ -170,7 +170,7 @@ public class FileUtils {
     /**
      * @return The MIME type for the give Uri.
      */
-    public static String getMimeType(Context context, Uri uri) {
+    private static String getMimeType(Context context, Uri uri) {
         String path = getPath(context, uri);
         File file = null;
         if (path != null) {
@@ -214,7 +214,7 @@ public class FileUtils {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is Google Photos.
      */
-    public static boolean isGooglePhotosUri(Uri uri) {
+    private static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
@@ -224,12 +224,9 @@ public class FileUtils {
      *
      * @param context       The context.
      * @param uri           The Uri to query.
-     * @param selection     (Optional) Filter used in the query.
-     * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
-    public static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
+    private static String getDataColumn(Context context, Uri uri) {
 
         Cursor cursor = null;
         final String column = "_data";
@@ -238,7 +235,7 @@ public class FileUtils {
         };
 
         try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+            cursor = context.getContentResolver().query(uri, projection, null, null,
                     null);
             if (cursor != null && cursor.moveToFirst()) {
                 if (DEBUG)
@@ -287,7 +284,7 @@ public class FileUtils {
             if (isGooglePhotosUri(uri))
                 return uri.getLastPathSegment();
 
-            return getDataColumn(context, uri, null, null);
+            return getDataColumn(context, uri);
         }
         // File
         else if ("file".equalsIgnoreCase(uri.getScheme())) {
@@ -361,7 +358,7 @@ public class FileUtils {
      * Attempt to retrieve the thumbnail of given Uri from the MediaStore. This
      * should not be called on the UI thread.
      */
-    public static Bitmap getThumbnail(Context context, Uri uri, String mimeType) {
+    private static Bitmap getThumbnail(Context context, Uri uri, String mimeType) {
         if (DEBUG)
             Log.d(TAG, "Attempting to get thumbnail");
 
@@ -371,37 +368,35 @@ public class FileUtils {
         }
 
         Bitmap bm = null;
-        if (uri != null) {
-            final ContentResolver resolver = context.getContentResolver();
-            Cursor cursor = null;
-            try {
-                cursor = resolver.query(uri, null, null, null, null);
-                if (cursor.moveToFirst()) {
-                    final int id = cursor.getInt(0);
-                    if (DEBUG)
-                        Log.d(TAG, "Got thumb ID: " + id);
-
-                    if (mimeType.contains("video")) {
-                        bm = MediaStore.Video.Thumbnails.getThumbnail(
-                                resolver,
-                                id,
-                                MediaStore.Video.Thumbnails.MINI_KIND,
-                                null);
-                    } else if (mimeType.contains(FileUtils.MIME_TYPE_IMAGE)) {
-                        bm = MediaStore.Images.Thumbnails.getThumbnail(
-                                resolver,
-                                id,
-                                MediaStore.Images.Thumbnails.MINI_KIND,
-                                null);
-                    }
-                }
-            } catch (Exception e) {
+        final ContentResolver resolver = context.getContentResolver();
+        Cursor cursor = null;
+        try {
+            cursor = resolver.query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int id = cursor.getInt(0);
                 if (DEBUG)
-                    Log.e(TAG, "getThumbnail", e);
-            } finally {
-                if (cursor != null)
-                    cursor.close();
+                    Log.d(TAG, "Got thumb ID: " + id);
+
+                if (mimeType.contains("video")) {
+                    bm = MediaStore.Video.Thumbnails.getThumbnail(
+                            resolver,
+                            id,
+                            MediaStore.Video.Thumbnails.MINI_KIND,
+                            null);
+                } else if (mimeType.contains(FileUtils.MIME_TYPE_IMAGE)) {
+                    bm = MediaStore.Images.Thumbnails.getThumbnail(
+                            resolver,
+                            id,
+                            MediaStore.Images.Thumbnails.MINI_KIND,
+                            null);
+                }
             }
+        } catch (Exception e) {
+            if (DEBUG)
+                Log.e(TAG, "getThumbnail", e);
+        } finally {
+            if (cursor != null)
+                cursor.close();
         }
         return bm;
     }

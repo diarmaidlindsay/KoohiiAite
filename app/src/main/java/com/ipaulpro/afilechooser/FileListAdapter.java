@@ -33,7 +33,7 @@ import java.util.List;
  * @author paulburke (ipaulpro)
  * @version 2013-12-11
  */
-public class FileListAdapter extends BaseAdapter {
+class FileListAdapter extends BaseAdapter {
 
     private final static int ICON_FOLDER = tech.diarmaid.koohiiaite.R.drawable.ic_folder;
     private final static int ICON_FILE = tech.diarmaid.koohiiaite.R.drawable.ic_file;

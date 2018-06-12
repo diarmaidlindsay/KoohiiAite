@@ -34,7 +34,7 @@ import java.util.List;
  * @author paulburke (ipaulpro)
  * @version 2013-12-11
  */
-public class FileLoader extends AsyncTaskLoader<List<File>> {
+class FileLoader extends AsyncTaskLoader<List<File>> {
 
     private static final int FILE_OBSERVER_MASK = FileObserver.CREATE
             | FileObserver.DELETE | FileObserver.DELETE_SELF
@@ -44,7 +44,7 @@ public class FileLoader extends AsyncTaskLoader<List<File>> {
     private FileObserver mFileObserver;
 
     private List<File> mData;
-    private String mPath;
+    private final String mPath;
 
     public FileLoader(Context context, String path) {
         super(context);
@@ -138,7 +138,7 @@ public class FileLoader extends AsyncTaskLoader<List<File>> {
         onReleaseResources(data);
     }
 
-    protected void onReleaseResources(List<File> data) {
+    private void onReleaseResources(List<File> data) {
 
         if (mFileObserver != null) {
             mFileObserver.stopWatching();

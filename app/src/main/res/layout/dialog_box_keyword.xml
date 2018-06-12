@@ -1,42 +1,51 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <EditText
+        android:id="@+id/keyword_dialog_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/keyword_dialog_edittext"
-        android:hint="@string/keyword_hint"/>
+        android:hint="@string/keyword_hint"
+        android:inputType="text" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
-            style="@style/KoohiiButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_submit"
-            android:id="@+id/keyword_dialog_submit_button"
-            android:layout_alignParentStart="true" />
-
-        <Button
-            style="@style/KoohiiButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_default"
-            android:id="@+id/keyword_dialog_default_button"
-            android:layout_centerHorizontal="true" />
-
-        <Button
-            style="@style/KoohiiButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_cancel"
             android:id="@+id/keyword_dialog_cancel_button"
-            android:layout_alignParentEnd="true" />
-    </RelativeLayout>
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_cancel" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/keyword_dialog_default_button"
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_default" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/keyword_dialog_submit_button"
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_submit" />
+
+    </LinearLayout>
 
 </LinearLayout>

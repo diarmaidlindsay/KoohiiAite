@@ -21,11 +21,7 @@ import java.util.*
 class ReadCSVTask(context: Context, private val csvListener: OnCSVParseCompleted, private val importStoryAdapter: ImportStoryAdapter //TODO : Decouple this class and instead pass the method itself, functional programming style
 ) : AsyncTask<File, Void, List<CSVEntry>>() {
     private var progress: ProgressDialog? = null
-    private val context: WeakReference<Context>
-
-    init {
-        this.context = WeakReference(context)
-    }
+    private val context: WeakReference<Context> = WeakReference(context)
 
     override fun onPreExecute() {
         progress = ProgressDialog.show(context.get(), "Reading CSV",
@@ -51,7 +47,7 @@ class ReadCSVTask(context: Context, private val csvListener: OnCSVParseCompleted
                 val row = line.split(csvSplitBy.toRegex(), 6).toTypedArray()
                 //first row is the column headers, we should ignore
                 if (row.size == 6 && Utils.isNumeric(row[0])) {
-                    entries.add(CSVEntry(row[0], row[1], row[2], row[3], row[4], row[5]))
+                    entries.add(CSVEntry(row[0], row[1], row[2], row[5]))
                 }
             }
 

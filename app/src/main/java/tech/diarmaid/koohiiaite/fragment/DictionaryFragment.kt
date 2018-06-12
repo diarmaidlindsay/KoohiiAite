@@ -48,7 +48,7 @@ class DictionaryFragment : Fragment() {
         dataSource.open()
         val reading = dataSource.getMeaningForHeisigKanjiId(heisigId, type) //0 for onYomi, 1 for KunYomi
         dataSource.close()
-        return if (reading == null) "" else reading.readingText
+        return reading?.readingText ?: ""
     }
 
     private fun getMeaningFromDatabase(heisigId: Int): String {

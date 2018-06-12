@@ -131,20 +131,20 @@ class KanjiDetailActivity : AppCompatActivity() {
     private fun updateButtonEnablement() {
         if (prevButton != null && nextButton != null) {
             if (currentIndex == 0) {
-                prevButton!!.isEnabled = false
-                prevButton!!.icon.alpha = 130
+                prevButton?.isEnabled = false
+                prevButton?.icon?.alpha = 130
             } else {
-                prevButton!!.isEnabled = true
-                prevButton!!.icon.alpha = 255
+                prevButton?.isEnabled = true
+                prevButton?.icon?.alpha = 255
             }
 
-            if (currentIndex == filteredIdList!!.size - 1) {
-                nextButton!!.isEnabled = false
-                nextButton!!.icon.alpha = 130
+            if (currentIndex == filteredIdList?.size?.minus(1) ?: 0) {
+                nextButton?.isEnabled = false
+                nextButton?.icon?.alpha = 130
 
             } else {
-                nextButton!!.isEnabled = true
-                nextButton!!.icon.alpha = 255
+                nextButton?.isEnabled = true
+                nextButton?.icon?.alpha = 255
             }
         }
 
@@ -152,6 +152,6 @@ class KanjiDetailActivity : AppCompatActivity() {
 
     companion object {
 
-        val ACTIVITY_CODE = 1
+        const val ACTIVITY_CODE = 1
     }
 }

@@ -13,15 +13,6 @@ class HeisigKanji {
     var isJoyo: Boolean = false
         private set
 
-    val joyo: Int
-        get() = if (isJoyo) 1 else 0
-
-    constructor(id: Int, kanji: String, joyo: Boolean) {
-        this.id = id
-        this.kanji = kanji
-        this.isJoyo = joyo
-    }
-
     constructor(id: Int, kanji: String, joyo: Int) {
         this.id = id
         this.kanji = kanji
@@ -53,26 +44,13 @@ class HeisigKanji {
             return ids
         }
 
-        /**
-         * For indexing other collections, using the heisigId as the index
-         */
-        fun getIds0Indexed(list: List<HeisigKanji>): Array<String> {
-            val ids = ArrayList<String>()
-
-            for (hk in list) {
-                ids.add((hk.id - 1).toString())
-            }
-
-            return ids.toTypedArray()
-        }
-
         fun getHeisigKanjiMatchingIds(ids: MutableList<Int>, masterList: List<HeisigKanji>): List<HeisigKanji> {
             val filteredList = ArrayList<HeisigKanji>()
             ids.sort()
 
             for (id in ids) {
                 //convert to 0 notation when referencing java array
-                filteredList.add(masterList.get(id - 1))
+                filteredList.add(masterList[id - 1])
             }
 
             return filteredList

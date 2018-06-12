@@ -39,10 +39,9 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
     private val filteredHeisigKanjiList = ArrayList<HeisigKanji>() //filtered HeisigKanjis for display
     private var filteredHeisigToPrimitiveList: List<HeisigToPrimitive> = ArrayList() //filtered list of Primitives for display
 
-    private val layoutInflater: LayoutInflater
+    private val layoutInflater: LayoutInflater = LayoutInflater.from(mContext)
 
     init {
-        layoutInflater = LayoutInflater.from(mContext)
         initialiseDatasets()
         //only perform initial search if we're coming from fresh state
         if (savedInstanceState == null) {

@@ -18,7 +18,7 @@ import tech.diarmaid.koohiiaite.adapter.KanjiDetailAdapter
 class KanjiDetailFragment : Fragment() {
 
     var currentPagerIndex: Int = 0
-    var adapterViewPager : KanjiDetailAdapter? = null
+    private var adapterViewPager : KanjiDetailAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //fragment instance is retained across Activity re-creation (device rotation)

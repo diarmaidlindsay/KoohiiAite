@@ -3,7 +3,6 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:colorBackground">@color/ka_bright2</item>
-        <item name="android:background">@color/ka_bright2</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:actionMenuTextColor">@android:color/black</item>
         <item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>

@@ -14,8 +14,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
-import android.widget.ListView
-import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_kanji_list.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiListAdapter
 import tech.diarmaid.koohiiaite.adapter.KanjiListFilterAdapter
@@ -48,11 +47,6 @@ class KanjiListActivity : AppCompatActivity() {
     private var searchView: KanjiSearchView? = null
     private var spinnerFilter: SpinnerFilter? = null
     private var spinnerListener: OnSpinnerEventsListener? = null
-    private var result: TextView? = null
-    private var joyoFilterState: TextView? = null
-    private var keywordFilterState: TextView? = null
-    private var storyFilterState: TextView? = null
-    private var kanjiList: ListView? = null
 
     private var savedInstanceState: Bundle? = null
 
@@ -74,7 +68,7 @@ class KanjiListActivity : AppCompatActivity() {
             private var text: String = ""
             internal var mFilterTask: Runnable = Runnable {
                 kanjiListAdapter.search(text)
-                result?.text = String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
+                result.text = String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
             }
             private val mHandler = Handler()
 
@@ -83,7 +77,7 @@ class KanjiListActivity : AppCompatActivity() {
                 mHandler.removeCallbacks(mFilterTask)
                 mHandler.postDelayed(mFilterTask, 0)
                 hideKeyboard()
-                kanjiList?.requestFocus()
+                kanjiListView.requestFocus()
                 return true
             }
 
@@ -144,16 +138,11 @@ class KanjiListActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_kanji_list)
 
-        kanjiList = findViewById(R.id.kanjiListView)
         suggestionAdapter = cursorAdapter
         val spinnerValues = arrayOf("n/a, Yes, No")
         kanjiListFilterAdapter = KanjiListFilterAdapter(this, R.id.filter_spinner, spinnerValues)
         kanjiListAdapter = KanjiListAdapter(this, savedInstanceState)
-        kanjiList?.adapter = kanjiListAdapter
-        result = findViewById(R.id.result)
-        joyoFilterState = findViewById(R.id.joyo_filter_state)
-        keywordFilterState = findViewById(R.id.keyword_filter_state)
-        storyFilterState = findViewById(R.id.story_filter_state)
+        kanjiListView.adapter = kanjiListAdapter
         //created here because must be re-created if list activity is destroyed
         spinnerListener = object : OnSpinnerEventsListener {
             //if filter values changed, we should perform a search with new values
@@ -228,17 +217,17 @@ class KanjiListActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
 
-        when (id) {
-            R.id.action_settings -> return true
+        return when (id) {
+            R.id.action_settings -> true
             R.id.action_primitives -> {
                 showPrimitives()
-                return true
+                true
             }
             R.id.action_import_story -> {
                 importStory()
-                return true
+                true
             }
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -291,7 +280,7 @@ class KanjiListActivity : AppCompatActivity() {
                 //if we return from detail view, and something has changed, resubmit the search query by triggering the filter's onClosed listener
                 spinnerListener?.onSpinnerClosed()
             } else if (requestCode == RETURN_CODE_IMPORT_STORY_ACTIVITY) { //Import Stories Activity
-                var heisigIds: IntArray
+                val heisigIds: IntArray
                 if(data != null) {
                     heisigIds = data.getIntArrayExtra("heisigIds")
                 } else {
@@ -331,21 +320,21 @@ class KanjiListActivity : AppCompatActivity() {
         val no = "X"
 
         when (joyoFilter) {
-            FilterState.UNSET -> joyoFilterState?.text = String.format(joyo, unset)
-            FilterState.YES -> joyoFilterState?.text = String.format(joyo, yes)
-            FilterState.NO -> joyoFilterState?.text = String.format(joyo, no)
+            FilterState.UNSET -> joyo_filter_state?.text = String.format(joyo, unset)
+            FilterState.YES -> joyo_filter_state?.text = String.format(joyo, yes)
+            FilterState.NO -> joyo_filter_state?.text = String.format(joyo, no)
         }
 
         when (keywordFilter) {
-            FilterState.UNSET -> keywordFilterState?.text = String.format(keyword, unset)
-            FilterState.YES -> keywordFilterState?.text = String.format(keyword, yes)
-            FilterState.NO -> keywordFilterState?.text = String.format(keyword, no)
+            FilterState.UNSET -> keyword_filter_state?.text = String.format(keyword, unset)
+            FilterState.YES -> keyword_filter_state?.text = String.format(keyword, yes)
+            FilterState.NO -> keyword_filter_state?.text = String.format(keyword, no)
         }
 
         when (storyFilter) {
-            FilterState.UNSET -> storyFilterState?.text = String.format(story, unset)
-            FilterState.YES -> storyFilterState?.text = String.format(story, yes)
-            FilterState.NO -> storyFilterState?.text = String.format(story, no)
+            FilterState.UNSET -> story_filter_state?.text = String.format(story, unset)
+            FilterState.YES -> story_filter_state?.text = String.format(story, yes)
+            FilterState.NO -> story_filter_state?.text = String.format(story, no)
         }
     }
 

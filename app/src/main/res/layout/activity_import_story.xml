@@ -7,13 +7,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
         <Button
             style="@style/KoohiiButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button_choose_file"
-            android:text="@string/button_choose_file"
+            android:id="@+id/button_cancel_import"
+            android:text="@string/button_cancel"
             android:layout_weight=".33" />
 
         <Button
@@ -28,8 +27,8 @@
             style="@style/KoohiiButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button_cancel_import"
-            android:text="@string/button_cancel"
+            android:id="@+id/button_choose_file"
+            android:text="@string/button_choose_file"
             android:layout_weight=".33" />
 
     </LinearLayout>
