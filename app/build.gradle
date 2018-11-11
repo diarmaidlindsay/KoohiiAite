@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId "tech.diarmaid.koohiiaite"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -36,4 +36,6 @@ dependencies {
     implementation 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
     implementation 'org.honorato.multistatetogglebutton:multistatetogglebutton:0.2.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // Anko Commons
+    implementation "org.jetbrains.anko:anko-commons:$anko_version"
 }

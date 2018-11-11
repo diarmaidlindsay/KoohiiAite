@@ -7,7 +7,7 @@ import tech.diarmaid.koohiiaite.database.DatabaseAssetHelper
 /**
  * Common DAO methods
  */
-abstract class CommonDataSource internal constructor(context: Context) {
+abstract class CommonDataSource internal constructor(context: Context) : AutoCloseable {
     internal lateinit var database: SQLiteDatabase
     private val dbHelper: DatabaseAssetHelper = DatabaseAssetHelper.getInstance(context)
 
@@ -15,7 +15,7 @@ abstract class CommonDataSource internal constructor(context: Context) {
         database = dbHelper.writableDatabase
     }
 
-    fun close() {
+    override fun close() {
         dbHelper.close()
     }
 }

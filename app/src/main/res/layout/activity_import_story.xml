@@ -1,47 +1,56 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <Button
-            style="@style/KoohiiButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_cancel_import"
-            android:text="@string/button_cancel"
-            android:layout_weight=".33" />
 
         <Button
+            android:id="@+id/story_import_button_cancel_import"
             style="@style/KoohiiButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button_confirm_import"
-            android:text="@string/button_confirm"
-            android:layout_weight=".33" />
+            android:layout_weight=".33"
+            android:text="@string/button_cancel" />
 
         <Button
+            android:id="@+id/story_import_button_confirm_import"
             style="@style/KoohiiButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button_choose_file"
-            android:text="@string/button_choose_file"
-            android:layout_weight=".33" />
+            android:layout_weight=".33"
+            android:text="@string/button_confirm" />
+
+        <Button
+            android:id="@+id/story_import_button_choose_file"
+            style="@style/KoohiiButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight=".33"
+            android:text="@string/button_choose_file" />
 
     </LinearLayout>
 
-    <TextView
+    <ProgressBar
+        android:id="@+id/story_import_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/story_import_count" />
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/story_import_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <ListView
+        android:id="@+id/import_story_listView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/import_story_listView"
         android:clickable="false" />
 
 </LinearLayout>

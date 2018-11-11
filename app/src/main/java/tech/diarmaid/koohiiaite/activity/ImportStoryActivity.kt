@@ -1,31 +1,31 @@
 package tech.diarmaid.koohiiaite.activity
 
-import android.Manifest
 import android.app.Activity
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.widget.ListView
-import android.widget.Toast
-import com.ipaulpro.afilechooser.FileChooserActivity
-import com.ipaulpro.afilechooser.utils.FileUtils
+import android.util.Log
+import android.view.View
 import kotlinx.android.synthetic.main.activity_import_story.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.ImportStoryAdapter
+import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
+import tech.diarmaid.koohiiaite.database.dao.StoryDataSource
+import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource
 import tech.diarmaid.koohiiaite.interfaces.OnCSVParseCompleted
 import tech.diarmaid.koohiiaite.interfaces.OnDatabaseOperationCompleted
 import tech.diarmaid.koohiiaite.model.CSVEntry
-import tech.diarmaid.koohiiaite.task.ReadCSVTask
-import tech.diarmaid.koohiiaite.utils.Constants.PERMISSION_REQUEST_READ_STORAGE
+import tech.diarmaid.koohiiaite.model.Keyword
+import tech.diarmaid.koohiiaite.model.Story
+import tech.diarmaid.koohiiaite.utils.CSVLineReader
 import tech.diarmaid.koohiiaite.utils.Constants.REQUEST_CODE_FILE_CHOOSER
 import tech.diarmaid.koohiiaite.utils.Utils
-import java.io.File
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.util.*
 
 /**
@@ -33,97 +33,125 @@ import java.util.*
  * confirm or cancel the changes.
  */
 class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, OnCSVParseCompleted {
-    private var listCSVContent: ListView? = null //the csv file's valid rows
     private lateinit var listAdapter: ImportStoryAdapter
+    private var userKeywordDataSource: UserKeywordDataSource = UserKeywordDataSource(this)
+    private var storyDataSource: StoryDataSource = StoryDataSource(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_import_story)
 
-        listCSVContent = findViewById(R.id.import_story_listView)
-        button_choose_file.setOnClickListener { checkPermission() }
+        story_import_button_choose_file.setOnClickListener { openFileChooser() }
 
-        button_cancel_import.setOnClickListener {
+        story_import_button_cancel_import.setOnClickListener {
             resetView()
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
 
-        listAdapter = ImportStoryAdapter(this, this)
-        button_confirm_import.setOnClickListener { listAdapter.writeToDatabase() }
-        listCSVContent?.adapter = listAdapter
-        button_cancel_import.isEnabled = listAdapter.count > 0
-        button_confirm_import.isEnabled = listAdapter.count > 0
+        listAdapter = ImportStoryAdapter(this)
+        story_import_button_confirm_import.setOnClickListener { writeToDatabase(this) }
+        import_story_listView.adapter = listAdapter
+        story_import_button_cancel_import.isEnabled = listAdapter.count > 0
+        story_import_button_confirm_import.isEnabled = listAdapter.count > 0
     }
 
     private fun resetView() {
         listAdapter.clearStories()
-        button_confirm_import.isEnabled = false
-        button_cancel_import.isEnabled = false
+        story_import_button_confirm_import.isEnabled = false
+        story_import_button_cancel_import.isEnabled = false
         listAdapter.notifyDataSetChanged()
     }
 
-    private fun checkPermission() {
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+    private fun openFileChooser() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/comma-separated-values"
+        }
 
-            // No explanation needed, we can request the permission.
-            ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    PERMISSION_REQUEST_READ_STORAGE)
+        startActivityForResult(intent, REQUEST_CODE_FILE_CHOOSER)
+    }
 
-            // The callback method gets the result of the request.
-        } else {
-            openFileChooser()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_FILE_CHOOSER && resultCode == Activity.RESULT_OK) {
+            readCSV(listAdapter, data?.data, this)
         }
     }
 
-    private fun openFileChooser() {
-        val i = Intent(this, FileChooserActivity::class.java)
-        startActivityForResult(i, REQUEST_CODE_FILE_CHOOSER)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            PERMISSION_REQUEST_READ_STORAGE -> {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // http://stackoverflow.com/a/32473449/4653788
-                    // Need to restart the process to grant write to SD permissions
-                    // Schedule start after 1 second
-                    val pi = PendingIntent.getActivity(
-                            this,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_CANCEL_CURRENT)
-                    val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    am.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pi)
-
-                    // Stop now
-                    System.exit(0)
-                } else {
-                    Toast.makeText(this,
-                            "Please grant permission to read External Storage in order to Import CSV",
-                            Toast.LENGTH_LONG).show()
+    private fun readCSV(importStoryAdapter: ImportStoryAdapter, uri: Uri?, csvListener: OnCSVParseCompleted) {
+        story_import_status.text = getText(R.string.progress_status_csv)
+        story_import_progress_bar.visibility = View.VISIBLE
+        doAsync {
+            val entries = ArrayList<CSVEntry>()
+            val csvSplitBy = ","
+            importStoryAdapter.clearStories()
+            contentResolver?.openInputStream(uri).use { inputStream ->
+                BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                    val csvLineReader = CSVLineReader(reader)
+                    while (true) {
+                        val line = csvLineReader.readLine() ?: break
+                        val row = line.split(csvSplitBy.toRegex(), 6).toTypedArray()
+                        //first row is the column headers, we should ignore
+                        if (row.size == 6 && Utils.isNumeric(row[0])) {
+                            entries.add(CSVEntry(row[0], row[1], row[2], row[5]))
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == REQUEST_CODE_FILE_CHOOSER && resultCode == Activity.RESULT_OK) {
-            val uri = data.data
-            val path = FileUtils.getPath(this, uri)
-
-            if (path != null) {
-                //execute task
-                val csvTask = ReadCSVTask(this, this, listAdapter)
-                csvTask.execute(File(path)) //then go to onParsingCompleted
+            uiThread {
+                csvListener.onParsingCompleted(entries)
             }
         }
     }
+
+    private fun writeToDatabase(databaseListener: OnDatabaseOperationCompleted) {
+        val keywordDataSource = KeywordDataSource(this)
+        keywordDataSource.open()
+        val originalKeywords = keywordDataSource.allKeywords
+        keywordDataSource.close()
+
+        val newStories = ArrayList<Story>()
+        val newKeywords = ArrayList<Keyword>()
+        val affectedIds = ArrayList<Int>()
+        //should be 3007
+        val lastHeisigId = originalKeywords[originalKeywords.size - 1].heisigId
+
+        for (entry in listAdapter.importedStories) {
+            val id = Integer.parseInt(entry.id)
+
+            if (id < 1 || id > lastHeisigId) {
+                Log.d(this.javaClass.simpleName, "Skipped id $id because its not in the standard Heisig ID set")
+                continue
+            }
+            affectedIds.add(id)
+            //only add keyword if it differs from original one
+            if (originalKeywords[id - 1].keywordText != entry.keyword) {
+                val keyword = Keyword(id, entry.keyword)
+                newKeywords.add(keyword)
+            }
+            val story = Story(id, entry.story)
+            newStories.add(story)
+        }
+
+        story_import_status.text = getText(R.string.progress_status_database)
+        story_import_progress_bar.visibility = View.VISIBLE
+        doAsync {
+            storyDataSource.open()
+            storyDataSource.use {
+                it.insertStories(newStories)
+            }
+            userKeywordDataSource.open()
+            userKeywordDataSource.use {
+                it.insertKeywords(newKeywords)
+            }
+            uiThread {
+                databaseListener.onImportCompleted(affectedIds)
+            }
+        }
+
+    }
+
 
     private fun setResult(heisigIds: List<Int>) {
         val returnIntent = intent
@@ -131,13 +159,21 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         setResult(Activity.RESULT_OK, returnIntent)
     }
 
+    private fun setOperationInProgress(progress: Boolean) {
+        story_import_button_cancel_import.visibility = if(progress) View.VISIBLE else View.GONE
+        story_import_button_choose_file.visibility = if(progress) View.VISIBLE else View.GONE
+        story_import_button_confirm_import.visibility = if(progress) View.VISIBLE else View.GONE
+        story_import_progress_bar.visibility = if(progress) View.VISIBLE else View.GONE
+    }
+
     override fun onImportCompleted(affectedIds: List<Int>) {
+        story_import_progress_bar.visibility = View.GONE
+
         if (affectedIds.isNotEmpty()) {
             setResult(affectedIds)
-            Toast.makeText(this, affectedIds.size.toString() + " Stories and Keywords updated", Toast.LENGTH_SHORT).show()
-
+            toast(affectedIds.size.toString() + " Stories and Keywords updated")
         } else {
-            Toast.makeText(this, "Failed to write to database", Toast.LENGTH_LONG).show()
+            toast("Failed to write to database")
             setResult(Activity.RESULT_CANCELED)
         }
         resetView()
@@ -148,12 +184,13 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         if (parsedEntries.isNotEmpty()) {
             listAdapter.setStories(parsedEntries)
             listAdapter.notifyDataSetChanged()
-            button_confirm_import.isEnabled = true
-            button_cancel_import.isEnabled = true
-            Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show()
-            story_import_count.text = String.format(Locale.getDefault(), "%d stories found for import.", listAdapter.count)
+            story_import_button_confirm_import.isEnabled = true
+            story_import_button_cancel_import.isEnabled = true
+            toast("CSV file import successful")
+            story_import_progress_bar.visibility = View.GONE
+            story_import_status.text = String.format(Locale.getDefault(), "%d stories found for import.", listAdapter.count)
         } else {
-            Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_LONG).show()
+            toast("Failed to read CSV file")
         }
     }
 }

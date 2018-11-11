@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="tech.diarmaid.koohiiaite">
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application
             android:fullBackupContent="@xml/backup_rules"
             android:allowBackup="true"
@@ -19,6 +17,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <action android:name="android.intent.action.SEARCH"/>
+                <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
             <meta-data
                     android:name="android.app.searchable"
@@ -39,13 +38,6 @@
         <activity android:name=".activity.ImportStoryActivity"
                   android:label="@string/title_import_story"
                   android:parentActivityName=".activity.KanjiListActivity">
-        </activity>
-        <activity
-                android:name="com.ipaulpro.afilechooser.FileChooserActivity"
-                android:icon="@drawable/ic_chooser"
-                android:enabled="@bool/use_activity"
-                android:exported="true"
-                android:label="@string/title_choose_csv">
         </activity>
     </application>
 </manifest>
