@@ -4,12 +4,12 @@ import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.provider.BaseColumns
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SimpleCursorAdapter
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.cursoradapter.widget.SimpleCursorAdapter
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
 import tech.diarmaid.koohiiaite.database.dao.PrimitiveDataSource

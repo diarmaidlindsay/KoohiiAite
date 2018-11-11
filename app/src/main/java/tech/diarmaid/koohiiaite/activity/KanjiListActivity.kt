@@ -7,13 +7,13 @@ import android.content.Intent
 import android.database.Cursor
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.widget.CursorAdapter
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.cursoradapter.widget.CursorAdapter
 import kotlinx.android.synthetic.main.activity_kanji_list.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiListAdapter
@@ -66,7 +66,7 @@ class KanjiListActivity : AppCompatActivity() {
     val textListener: SearchView.OnQueryTextListener
         get() = object : SearchView.OnQueryTextListener {
             private var text: String = ""
-            internal var mFilterTask: Runnable = Runnable {
+            var mFilterTask: Runnable = Runnable {
                 kanjiListAdapter.search(text)
                 result.text = String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
             }
@@ -146,9 +146,9 @@ class KanjiListActivity : AppCompatActivity() {
         //created here because must be re-created if list activity is destroyed
         spinnerListener = object : OnSpinnerEventsListener {
             //if filter values changed, we should perform a search with new values
-            internal var changed: Boolean = false
+            var changed: Boolean = false
 
-            internal var mFilterTask: Runnable = Runnable {
+            var mFilterTask: Runnable = Runnable {
                 kanjiListAdapter.search(searchView?.query.toString())
                 result?.text = String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
             }

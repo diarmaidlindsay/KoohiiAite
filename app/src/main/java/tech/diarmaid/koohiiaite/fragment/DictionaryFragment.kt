@@ -1,11 +1,11 @@
 package tech.diarmaid.koohiiaite.fragment
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.database.dao.FrequencyDataSource
 import tech.diarmaid.koohiiaite.database.dao.MeaningDataSource

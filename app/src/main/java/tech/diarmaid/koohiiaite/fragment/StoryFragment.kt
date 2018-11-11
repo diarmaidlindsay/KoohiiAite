@@ -3,7 +3,6 @@ package tech.diarmaid.koohiiaite.fragment
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -18,6 +17,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity
 import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource

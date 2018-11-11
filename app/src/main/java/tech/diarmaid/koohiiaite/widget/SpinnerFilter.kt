@@ -1,8 +1,8 @@
 package tech.diarmaid.koohiiaite.widget
 
 import android.content.Context
-import android.support.v7.widget.AppCompatSpinner
 import android.util.AttributeSet
+import androidx.appcompat.widget.AppCompatSpinner
 
 /**
  * For the filter in the kanji list view

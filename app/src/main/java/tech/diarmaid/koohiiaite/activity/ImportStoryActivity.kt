@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_import_story.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
@@ -86,19 +86,22 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
             val entries = ArrayList<CSVEntry>()
             val csvSplitBy = ","
             importStoryAdapter.clearStories()
-            contentResolver?.openInputStream(uri).use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream)).use { reader ->
-                    val csvLineReader = CSVLineReader(reader)
-                    while (true) {
-                        val line = csvLineReader.readLine() ?: break
-                        val row = line.split(csvSplitBy.toRegex(), 6).toTypedArray()
-                        //first row is the column headers, we should ignore
-                        if (row.size == 6 && Utils.isNumeric(row[0])) {
-                            entries.add(CSVEntry(row[0], row[1], row[2], row[5]))
+            uri.let { it ->
+                contentResolver?.openInputStream(it as Uri).use { inputStream ->
+                    BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                        val csvLineReader = CSVLineReader(reader)
+                        while (true) {
+                            val line = csvLineReader.readLine() ?: break
+                            val row = line.split(csvSplitBy.toRegex(), 6).toTypedArray()
+                            //first row is the column headers, we should ignore
+                            if (row.size == 6 && Utils.isNumeric(row[0])) {
+                                entries.add(CSVEntry(row[0], row[1], row[2], row[5]))
+                            }
                         }
                     }
                 }
             }
+
             uiThread {
                 csvListener.onParsingCompleted(entries)
             }

@@ -1,8 +1,8 @@
 package tech.diarmaid.koohiiaite.widget
 
 import android.content.Context
-import android.support.v7.widget.SearchView
 import android.util.AttributeSet
+import androidx.appcompat.widget.SearchView
 
 /**
  * Override the search view so that we don't clear the search

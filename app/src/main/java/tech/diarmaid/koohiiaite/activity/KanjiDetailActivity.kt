@@ -3,10 +3,10 @@ package tech.diarmaid.koohiiaite.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.NavUtils
-import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NavUtils
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.fragment.KanjiDetailFragment
 import tech.diarmaid.koohiiaite.utils.Utils
@@ -28,7 +28,7 @@ class KanjiDetailActivity : AppCompatActivity() {
     private val currentPagerIndex: Int
         get() {
             val fragmentList = supportFragmentManager.fragments
-            if (fragmentList != null && !fragmentList.isEmpty()) {
+            if (!fragmentList.isEmpty()) {
                 val fragment = fragmentList[fragmentList.size - 1]
                 if (fragment is KanjiDetailFragment) {
                     return fragment.currentPagerIndex

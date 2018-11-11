@@ -1,7 +1,7 @@
 package tech.diarmaid.koohiiaite.activity
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_primitives_list.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.PrimitiveGridAdapter
