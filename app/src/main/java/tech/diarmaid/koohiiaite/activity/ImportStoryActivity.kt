@@ -81,7 +81,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
 
     private fun readCSV(importStoryAdapter: ImportStoryAdapter, uri: Uri?, csvListener: OnCSVParseCompleted) {
         story_import_status.text = getText(R.string.progress_status_csv)
-        story_import_progress_bar.visibility = View.VISIBLE
+        setOperationInProgress(true)
         doAsync {
             val entries = ArrayList<CSVEntry>()
             val csvSplitBy = ","
@@ -135,7 +135,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         }
 
         story_import_status.text = getText(R.string.progress_status_database)
-        story_import_progress_bar.visibility = View.VISIBLE
+        setOperationInProgress(true)
         doAsync {
             storyDataSource.open()
             storyDataSource.use {
@@ -149,9 +149,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
                 databaseListener.onImportCompleted(affectedIds)
             }
         }
-
     }
-
 
     private fun setResult(heisigIds: List<Int>) {
         val returnIntent = intent
@@ -160,15 +158,14 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun setOperationInProgress(progress: Boolean) {
-        story_import_button_cancel_import.visibility = if(progress) View.VISIBLE else View.GONE
-        story_import_button_choose_file.visibility = if(progress) View.VISIBLE else View.GONE
-        story_import_button_confirm_import.visibility = if(progress) View.VISIBLE else View.GONE
+        story_import_button_cancel_import.visibility = if(progress) View.GONE else View.VISIBLE
+        story_import_button_choose_file.visibility = if(progress) View.GONE else View.VISIBLE
+        story_import_button_confirm_import.visibility = if(progress) View.GONE else View.VISIBLE
         story_import_progress_bar.visibility = if(progress) View.VISIBLE else View.GONE
     }
 
     override fun onImportCompleted(affectedIds: List<Int>) {
-        story_import_progress_bar.visibility = View.GONE
-
+        setOperationInProgress(false)
         if (affectedIds.isNotEmpty()) {
             setResult(affectedIds)
             toast(affectedIds.size.toString() + " Stories and Keywords updated")
@@ -181,6 +178,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     override fun onParsingCompleted(parsedEntries: List<CSVEntry>) {
+        setOperationInProgress(false)
         if (parsedEntries.isNotEmpty()) {
             listAdapter.setStories(parsedEntries)
             listAdapter.notifyDataSetChanged()
