@@ -7,17 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 import tech.diarmaid.koohiiaite.R
-import tech.diarmaid.koohiiaite.database.dao.SampleWordDataSource
-import tech.diarmaid.koohiiaite.model.SampleWord
+import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.database.entity.SampleWord
 
 /**
  * Adapter for the Sample words tab of the Kanji Detail view
  */
 class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle) : BaseAdapter() {
 
-    private var sampleWordList: List<SampleWord>? = null
+    private var sampleWordList: List<SampleWord> = arrayListOf()
     private val heisigId: Int = args.getInt("heisigId")
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(mContext)
@@ -35,11 +38,11 @@ class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle) : Bas
     }
 
     override fun getCount(): Int {
-        return sampleWordList!!.size
+        return sampleWordList.size
     }
 
     override fun getItem(position: Int): Any {
-        return sampleWordList!![position]
+        return sampleWordList[position]
     }
 
     override fun getItemId(position: Int): Long {
@@ -75,8 +78,10 @@ class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle) : Bas
     }
 
     private fun initialiseDatasets() {
-        val dataSource = SampleWordDataSource(mContext)
-        dataSource.open()
-        sampleWordList = dataSource.getSampleWordsFor(heisigId)
+        GlobalScope.launch {
+            launch(Dispatchers.IO) {
+                sampleWordList = AppDatabase.getDatabase(mContext).sampleWordDao().getSampleWordsFor(heisigId)
+            }
+        }
     }
 }

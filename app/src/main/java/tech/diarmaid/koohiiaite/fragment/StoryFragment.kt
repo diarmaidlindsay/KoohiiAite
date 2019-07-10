@@ -17,15 +17,20 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity
-import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
-import tech.diarmaid.koohiiaite.database.dao.StoryDataSource
-import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource
-import tech.diarmaid.koohiiaite.model.HeisigKanji
-import tech.diarmaid.koohiiaite.model.Keyword
+import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.database.entity.HeisigKanji
+import tech.diarmaid.koohiiaite.database.entity.Keyword
+import tech.diarmaid.koohiiaite.database.entity.UserKeyword
 import tech.diarmaid.koohiiaite.utils.Utils
 import java.util.*
 import java.util.regex.Pattern
@@ -56,7 +61,11 @@ class StoryFragment : Fragment() {
         val kanji = args.getString("kanji")
         originalKeyword = args.getString("keyword")
         userKeyword = args.getString("userKeyword")
-        val storyText = getStoryFromDatabase(heisigIdInt)
+        getStoryFromDatabase(heisigIdInt).observe(context as AppCompatActivity, Observer {
+            it?.let{
+                textViewStory.setText(formatStory(it), TextView.BufferType.SPANNABLE)
+            }
+        })
 
         buttonKeyword!!.setOnClickListener {
             val dialog = Dialog(activity!!)
@@ -97,7 +106,6 @@ class StoryFragment : Fragment() {
         textViewHeisigId.text = heisigId
         textViewKanji.text = kanji
 
-        textViewStory.setText(formatStory(storyText), TextView.BufferType.SPANNABLE)
         textViewStory.movementMethod = LinkMovementMethod.getInstance()
         updateWidgets()
         return view
@@ -108,13 +116,11 @@ class StoryFragment : Fragment() {
      * as with kanji.koohii.com
      */
     private fun formatStory(aStoryText: String): SpannableString {
+        val db = context?.let { AppDatabase.getDatabase(it) }
         var storyText = aStoryText
-        val keywordDao = KeywordDataSource(activity!!)
-        val userKeywordDao = UserKeywordDataSource(activity!!)
-        val heisigKanjiDataSource = HeisigKanjiDataSource(activity!!)
-        keywordDao.open()
-        userKeywordDao.open()
-        heisigKanjiDataSource.open()
+        val keywordDao = db?.keywordDao()
+        val userKeywordDao = db?.userKeywordDao()
+        val heisigKanjiDao = db?.heisigKanjiDao()
         var formattedStory = SpannableString(storyText)
         val italicSpanStarts = ArrayList<StoryFormat>()
         val italicSpanEnds = ArrayList<StoryFormat>()
@@ -181,13 +187,16 @@ class StoryFragment : Fragment() {
                 //if it's a heisigId, look up the kanji
                 if (!Utils.isKanji(storyText[start.index + 1])) {
                     val heisigId = Integer.parseInt(storyText.substring(start.index + 1, braceSpanEnds[i].index))
-                    val kanji = heisigKanjiDataSource.getKanjiFor(heisigId)
-                    kanjiToHeisigId[kanji.kanji] = kanji.id
+                    heisigKanjiDao?.getKanjiFor(heisigId)?.let {
+                        kanjiToHeisigId[it.kanji] = it.heisigId
+                    }
+
                 } else {
                     //it's already a kanji, presumably, so just take away the brackets around it
                     val kanjiString = storyText[start.index + 1].toString()
-                    val kanji = heisigKanjiDataSource.getHeisigFor(kanjiString)
-                    kanjiToHeisigId[kanji.kanji] = kanji.id
+                    heisigKanjiDao?.getHeisigFor(kanjiString)?.let {
+                        kanjiToHeisigId[it.kanji] = it.heisigId
+                    }
                 }
             }
         }
@@ -204,7 +213,7 @@ class StoryFragment : Fragment() {
         //any time the keyword is mentioned in the story, mark it as bold
         //we can use plain integer array to hold indexes instead of StoryFormat objects because indexes don't need adjustment
         val keywordSpanStarts = ArrayList<Int>()
-        val keywordPattern = Pattern.compile(if (userKeyword == null) originalKeyword!!.toLowerCase() else userKeyword!!.toLowerCase())
+        val keywordPattern = Pattern.compile(if (userKeyword == null) originalKeyword?.toLowerCase() else userKeyword?.toLowerCase())
         val keywordMatcher = keywordPattern.matcher(storyText.toLowerCase())
         while (keywordMatcher.find()) {
             keywordSpanStarts.add(keywordMatcher.start())
@@ -256,7 +265,7 @@ class StoryFragment : Fragment() {
             var uppercaseWord = storyText.substring(start, end)
 
             var matchingKeyword: Keyword? = null
-            var matchingUserKeyword: Keyword? = null
+            var matchingUserKeyword: UserKeyword? = null
 
             //start from the next word
             for (j in i + 1 until uppercaseSpanStarts.size) {
@@ -268,13 +277,13 @@ class StoryFragment : Fragment() {
                 //adjacentWord = PLANT
                 // RICE PLANT = match!
 
-                if (keywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null && userKeywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null) {
+                if (keywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null && userKeywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null) {
                     //don't wipe out the non null matching keywords if the next adjacent word would cause a non-match
                     break
                 }
 
-                matchingKeyword = keywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord")
-                matchingUserKeyword = userKeywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord")
+                matchingKeyword = keywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord")
+                matchingUserKeyword = userKeywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord")
 
                 if (matchingKeyword != null || matchingUserKeyword != null) {
                     uppercaseWord = "$uppercaseWord $adjacentWord"
@@ -319,8 +328,8 @@ class StoryFragment : Fragment() {
                 //ignore words of length 1 for example "I"
                 continue
             }
-            val matchingKeyword = keywordDao.getKeywordMatching(uppercaseWord)
-            val matchingUserKeyword = userKeywordDao.getKeywordMatching(uppercaseWord)
+            val matchingKeyword = keywordDao?.getKeywordMatching(uppercaseWord)
+            val matchingUserKeyword = userKeywordDao?.getKeywordMatching(uppercaseWord)
             var span: ClickableSpan? = null
             //prioritise user keyword
             if (matchingUserKeyword != null) {
@@ -355,9 +364,6 @@ class StoryFragment : Fragment() {
             formattedStory.setSpan(TextAppearanceSpan(activity, R.style.storyHash),
                     start, start + keywordLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
-        keywordDao.close()
-        userKeywordDao.close()
-        heisigKanjiDataSource.close()
         return formattedStory
     }
 
@@ -368,7 +374,7 @@ class StoryFragment : Fragment() {
                 intent.putExtra("filteredListIndex", 0)
                 intent.putExtra("filteredIdList", arrayOf(heisigId.toString()))
                 //TODO : startActivityForResult just like in KanjiListAdapter so that any changes made is passed back to KanjiListActivity
-                activity!!.startActivity(intent)
+                activity?.startActivity(intent)
             }
         }
     }
@@ -377,33 +383,29 @@ class StoryFragment : Fragment() {
         return getSpanForHeisigId(matchingKeyword.heisigId)
     }
 
-    private fun submitKeyword(heisigId: Int, keywordText: String, update: Boolean) {
-        val dataSource = UserKeywordDataSource(activity!!)
-        dataSource.open()
-        var success = false
-        if (update) {
-            if (dataSource.updateKeyword(heisigId, keywordText))
-                success = true
-        } else {
-            if (dataSource.insertKeyword(heisigId, keywordText))
-                success = true
-        }
+    private fun getSpanForKeyword(matchingKeyword: UserKeyword): ClickableSpan {
+        return getSpanForHeisigId(matchingKeyword.heisigId)
+    }
 
-        Toast.makeText(activity!!, if (success) "Keyword Changed" else "Error! Keyword not Changed",
-                Toast.LENGTH_SHORT).show()
-        if (success) {
+    private fun submitKeyword(heisigId: Int, keywordText: String, update: Boolean) {
+        val dataSource = context?.let { AppDatabase.getDatabase(it).userKeywordDao() }
+//        var success = false
+        val keyword = UserKeyword(heisigId, keywordText)
+        dataSource?.insertKeywords(keyword)
+
+//        Toast.makeText(activity!!, if (success) "Keyword Changed" else "Error! Keyword not Changed",
+//                Toast.LENGTH_SHORT).show()
+//        if (success) {
             userKeyword = keywordText
             updateWidgets()
             updateParentActivity()
-        }
-        dataSource.close()
+//        }
     }
 
     private fun deleteKeyword(heisigId: Int) {
-        val dataSource = UserKeywordDataSource(activity!!)
-        dataSource.open()
+        val dataSource = context?.let { AppDatabase.getDatabase(it).userKeywordDao() }
         var success = false
-        if (dataSource.deleteKeyword(heisigId)) {
+        if (dataSource?.deleteKeyword(heisigId) != null) {
             userKeyword = null
             success = true
             updateWidgets()
@@ -412,16 +414,17 @@ class StoryFragment : Fragment() {
 
         Toast.makeText(activity!!, if (success) "Keyword Reset" else "Error! Keyword not Changed",
                 Toast.LENGTH_SHORT).show()
-        dataSource.close()
     }
 
-    private fun getStoryFromDatabase(heisigId: Int): String {
-        val dataSource = StoryDataSource(activity!!)
-        dataSource.open()
-        val story = dataSource.getStoryForHeisigKanjiId(heisigId)
-        dataSource.close()
-
-        return story?.storyText ?: ""
+    private fun getStoryFromDatabase(heisigId: Int): LiveData<String?> {
+        val data = MutableLiveData<String>()
+        GlobalScope.launch {
+            launch(Dispatchers.IO) {
+                val dataSource = context?.let { AppDatabase.getDatabase(it).storyDao() }
+                data.postValue(dataSource?.getStoryForHeisigKanjiId(heisigId)?.storyText)
+            }
+        }
+        return data
     }
 
     private fun updateWidgets() {

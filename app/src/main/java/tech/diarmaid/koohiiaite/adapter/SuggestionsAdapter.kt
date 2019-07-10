@@ -1,5 +1,6 @@
 package tech.diarmaid.koohiiaite.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -10,11 +11,14 @@ import android.text.style.ForegroundColorSpan
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.cursoradapter.widget.SimpleCursorAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
-import tech.diarmaid.koohiiaite.database.dao.PrimitiveDataSource
-import tech.diarmaid.koohiiaite.model.Keyword
-import tech.diarmaid.koohiiaite.model.Primitive
+import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.database.entity.Keyword
+import tech.diarmaid.koohiiaite.database.entity.Primitive
 import java.text.Normalizer
 import java.util.*
 
@@ -22,28 +26,29 @@ import java.util.*
  * For the suggestions list of the searchview inside the main kanji list activity
  */
 class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<String>, to: IntArray, flags: Int) : SimpleCursorAdapter(context, layout, c, from, to, flags) {
-    private val allKeywords: List<Keyword>
-    private val allPrimitives: List<Primitive>
-    private var suggestionsList: MutableList<String>? = null
+    private var allKeywords: List<Keyword> = arrayListOf()
+    private var allPrimitives: List<Primitive> = arrayListOf()
+    private var suggestionsList: MutableList<String>? = arrayListOf()
     private var previousQuery: String? = null
     private var queryNow: String? = null //should never become null
 
     init {
-        val primitiveDataSource = PrimitiveDataSource(context)
-        val keywordDataSource = KeywordDataSource(context)
-        primitiveDataSource.open()
-        keywordDataSource.open()
-        allKeywords = keywordDataSource.allKeywords
-        allPrimitives = primitiveDataSource.allPrimitives
-        suggestionsList = ArrayList()
-        keywordDataSource.close()
-        primitiveDataSource.close()
+        val primitiveDataSource = AppDatabase.getDatabase(context).primitiveDao()
+        val keywordDataSource = AppDatabase.getDatabase(context).keywordDao()
+        GlobalScope.launch {
+            val query = async(Dispatchers.IO) {
+                allKeywords = keywordDataSource.allKeywords()
+                allPrimitives = primitiveDataSource.allPrimitives()
+            }
+//            val blah = query.await()
+        }
     }
 
     override fun setViewText(v: TextView, text: String) {
         v.text = highlight(text, queryNow!!)
     }
 
+    @SuppressLint("RestrictedApi")
     private fun highlight(originalText: String, search: String): CharSequence {
         if (search.length < 2) {
             return originalText

@@ -2,12 +2,17 @@ package tech.diarmaid.koohiiaite.adapter
 
 import android.content.Context
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
-import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.fragment.DictionaryFragment
 import tech.diarmaid.koohiiaite.fragment.KoohiiFragment
 import tech.diarmaid.koohiiaite.fragment.SampleWordsFragment
@@ -24,40 +29,51 @@ class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments
     private var koohiiFragment: KoohiiFragment? = null
 
     init {
-        val heisigId = arguments.getInt("heisigId")
-        val keyword = getKeywordFromDatabase(heisigId)
-        val userKeyword = getUserKeywordFromDatabase(heisigId)
-        val kanji = getKanjiFromDatabase(heisigId)
-        arguments.putString("keyword", keyword)
-        arguments.putString("userKeyword", userKeyword)
-        arguments.putString("kanji", kanji)
+            val heisigId = arguments.getInt("heisigId")
+            getKeywordFromDatabase(heisigId).observe(mContext as AppCompatActivity, Observer {
+                arguments.putString("keyword", it)
+            })
+            getUserKeywordFromDatabase(heisigId).observe(mContext, Observer {
+                arguments.putString("userKeyword", it)
+            })
+            getKanjiFromDatabase(heisigId).observe(mContext, Observer {
+                arguments.putString("kanji", it)
+            })
+
+        //TODO : The getItem() method is being called BEFORE these db queries return
     }
 
-    private fun getKanjiFromDatabase(heisigId: Int): String {
-        val dataSource = HeisigKanjiDataSource(mContext)
-        dataSource.open()
-        val heisigKanji = dataSource.getKanjiFor(heisigId)
-        dataSource.close()
-
-        return heisigKanji.kanji
+    private fun getKanjiFromDatabase(heisigId: Int): LiveData<String> {
+        val data = MutableLiveData<String>()
+        GlobalScope.launch {
+            launch(Dispatchers.IO) {
+                val dataSource = AppDatabase.getDatabase(mContext).heisigKanjiDao()
+                data.postValue(dataSource.getKanjiFor(heisigId).kanji)
+            }
+        }
+        return data
     }
 
-    private fun getKeywordFromDatabase(heisigId: Int): String {
-        val dataSource = KeywordDataSource(mContext)
-        dataSource.open()
-        val keyword = dataSource.getKeywordFor(heisigId)
-        dataSource.close()
-
-        return keyword.keywordText
+    private fun getKeywordFromDatabase(heisigId: Int): LiveData<String> {
+        val data = MutableLiveData<String>()
+        GlobalScope.launch {
+            launch(Dispatchers.IO) {
+                val dataSource = AppDatabase.getDatabase(mContext).keywordDao()
+                data.postValue(dataSource.getKeywordFor(heisigId).keywordText)
+            }
+        }
+        return data
     }
 
-    private fun getUserKeywordFromDatabase(heisigId: Int): String? {
-        val dataSource = UserKeywordDataSource(mContext)
-        dataSource.open()
-        val keyword = dataSource.getKeywordFor(heisigId)
-        dataSource.close()
-
-        return keyword?.keywordText
+    private fun getUserKeywordFromDatabase(heisigId: Int): LiveData<String?> {
+        val data = MutableLiveData<String>()
+        GlobalScope.launch {
+            launch(Dispatchers.IO) {
+                val dataSource = AppDatabase.getDatabase(mContext).userKeywordDao()
+                data.postValue(dataSource.getKeywordFor(heisigId)?.keywordText)
+            }
+        }
+        return data
     }
 
     // Returns total number of pages

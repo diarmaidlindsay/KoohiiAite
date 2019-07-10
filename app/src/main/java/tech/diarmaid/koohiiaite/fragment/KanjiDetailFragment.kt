@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_detail.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiDetailAdapter
+import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
 
 /**
  * Allows next and previous navigation by swapping this fragment
@@ -19,6 +20,8 @@ class KanjiDetailFragment : Fragment() {
 
     var currentPagerIndex: Int = 0
     private var adapterViewPager : KanjiDetailAdapter? = null
+    private lateinit var viewModel: KanjiDetailViewModel
+    //TODO : Use the ViewModel to share data between fragments instead of args
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //fragment instance is retained across Activity re-creation (device rotation)
