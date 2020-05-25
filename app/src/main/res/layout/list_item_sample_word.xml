@@ -23,7 +23,6 @@
             <TextView
                 android:gravity="start"
                 style="@style/SampleItem"
-                android:text="@string/unSet"
                 android:id="@+id/sample_frequency" />
 
         </LinearLayout>
@@ -41,7 +40,6 @@
             <TextView
                 android:gravity="end"
                 style="@style/SampleItem"
-                android:text="@string/unSet"
                 android:id="@+id/sample_kanji" />
         </LinearLayout>
     </LinearLayout>
@@ -64,7 +62,6 @@
             <TextView
                 android:gravity="start"
                 style="@style/SampleItem"
-                android:text="@string/unSet"
                 android:id="@+id/sample_category" />
         </LinearLayout>
 
@@ -81,7 +78,6 @@
             <TextView
                 android:gravity="end"
                 style="@style/SampleItem"
-                android:text="@string/unSet"
                 android:id="@+id/sample_hiragana" />
         </LinearLayout>
     </LinearLayout>
@@ -97,7 +93,6 @@
 
         <TextView
             style="@style/SampleItem"
-            android:text="@string/unSet"
             android:id="@+id/sample_english" />
     </LinearLayout>
 </LinearLayout>

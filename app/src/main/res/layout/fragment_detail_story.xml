@@ -16,7 +16,6 @@
         <TextView
             style="@style/DetailItem"
             android:textSize="50sp"
-            android:text="@string/unSet"
             android:id="@+id/kanji_detail" />
 
         <TextView
@@ -25,7 +24,6 @@
 
         <TextView
             style="@style/DetailItem"
-            android:text="@string/unSet"
             android:id="@+id/heisig_id_detail" />
 
         <TextView
@@ -34,7 +32,6 @@
 
         <Button
             style="@style/KoohiiButton"
-            android:text="@string/unSet"
             android:id="@+id/keyword_detail" />
 
         <TextView
@@ -44,7 +41,6 @@
         <TextView
             style="@style/DetailItem"
             android:gravity="start"
-            android:text="@string/unSet"
             android:id="@+id/story_detail" />
     </LinearLayout>
 

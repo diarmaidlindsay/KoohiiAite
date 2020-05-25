@@ -1,6 +1,7 @@
 package tech.diarmaid.koohiiaite.fragment
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Spannable
@@ -9,6 +10,7 @@ import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.TextAppearanceSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,89 +19,144 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import kotlinx.android.synthetic.main.fragment_detail_story.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity
-import tech.diarmaid.koohiiaite.database.dao.HeisigKanjiDataSource
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
-import tech.diarmaid.koohiiaite.database.dao.StoryDataSource
-import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource
-import tech.diarmaid.koohiiaite.model.HeisigKanji
-import tech.diarmaid.koohiiaite.model.Keyword
+import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.database.entity.HeisigKanji
+import tech.diarmaid.koohiiaite.database.entity.Keyword
+import tech.diarmaid.koohiiaite.database.entity.UserKeyword
 import tech.diarmaid.koohiiaite.utils.Utils
+import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.coroutines.CoroutineContext
 
 /**
  * For display of the Story related to the heisig id
  * which was provided. Also allow editing of story.
  * Follow links from stories to other Kanji detail pages.
  */
-class StoryFragment : Fragment() {
-    private var buttonKeyword: Button? = null
+class StoryFragment() : Fragment(), CoroutineScope {
     private var heisigIdInt: Int = 0
     private var userKeyword: String? = null
     private var originalKeyword: String? = null
+    private var viewModel: KanjiDetailViewModel? = null
+    private var mContext: MutableLiveData<Context> = MutableLiveData()
+    private var keywordDialog: Dialog? = null
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_detail_story, container, false)
+        mContext.observe(viewLifecycleOwner, Observer { context ->
+            keywordDialog = Dialog(context as AppCompatActivity)
+            keywordDialog?.setContentView(R.layout.dialog_box_keyword)
+            keywordDialog?.setTitle(R.string.dialog_title_edit_keyword)
+        })
 
-        val textViewHeisigId = view.findViewById<TextView>(R.id.heisig_id_detail)
-        val textViewKanji = view.findViewById<TextView>(R.id.kanji_detail)
-        buttonKeyword = view.findViewById(R.id.keyword_detail)
-        val textViewStory = view.findViewById<TextView>(R.id.story_detail)
+        viewModel = ViewModelProvider(parentFragment as KanjiDetailFragment).get(KanjiDetailViewModel::class.java)
+        viewModel?.kanji?.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                kanji_detail?.text = it
+            }
+        })
+        viewModel?.keyword?.observe(viewLifecycleOwner, Observer {
+            originalKeyword = it
+        })
+        viewModel?.userKeyword?.observe(viewLifecycleOwner, Observer {
+            userKeyword = it
+        })
+        viewModel?.heisigId?.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                heisigIdInt = it
+                heisig_id_detail?.text = HeisigKanji.getHeisigIdAsString(heisigIdInt)
+            }
+        })
 
-        val args = arguments
-        heisigIdInt = args!!.getInt("heisigId", 0)
-
-        val heisigId = HeisigKanji.getHeisigIdAsString(heisigIdInt)
-        val kanji = args.getString("kanji")
-        originalKeyword = args.getString("keyword")
-        userKeyword = args.getString("userKeyword")
-        val storyText = getStoryFromDatabase(heisigIdInt)
-
-        buttonKeyword!!.setOnClickListener {
-            val dialog = Dialog(activity!!)
-            dialog.setContentView(R.layout.dialog_box_keyword)
-            dialog.setTitle(R.string.dialog_title_edit_keyword)
-
-            val keywordEditText = dialog.findViewById<EditText>(R.id.keyword_dialog_edittext)
-            val submitButton = dialog.findViewById<Button>(R.id.keyword_dialog_submit_button)
-            val buttonDefault = dialog.findViewById<Button>(R.id.keyword_dialog_default_button)
-            val cancelButton = dialog.findViewById<Button>(R.id.keyword_dialog_cancel_button)
-
-            keywordEditText.setText(if (userKeyword == null) originalKeyword else userKeyword)
-            keywordEditText.setSelectAllOnFocus(true)
-            buttonDefault.isEnabled = userKeyword != null
-
-            submitButton.setOnClickListener {
-                //only submit if user actually changes the keyword from original
-                if (keywordEditText.text.toString() != originalKeyword) {
-                    //if userKeyword not null that means there was a previous user keyword entered and we're updating it
-                    submitKeyword(heisigIdInt, keywordEditText.text.toString(), userKeyword != null)
+        viewModel?.let { viewModel ->
+            val allDataReady = {
+                Log.d("StoryFragment", "Kanji : ${viewModel.kanji.value} Keyword : ${viewModel.keyword.value} UserKeyword : ${viewModel.userKeyword.value} HeisigId : ${viewModel.heisigId.value} Context : ${mContext.value}")
+                arrayOf(viewModel.kanji.value, viewModel.keyword.value, viewModel.userKeyword.value, viewModel.heisigId.value, mContext.value)
+                        .takeIf { theList -> theList.all { theValue -> theValue != null } }?.apply {
+                            updateKeywordButton()
+                            getStoryFromDatabase(heisigIdInt).observe(viewLifecycleOwner, Observer { story ->
+                                story?.let {
+                                    var formattedStory = SpannableString("")
+                                    launch(Dispatchers.IO) {
+                                        formattedStory = formatStory(story)
+                                    }.invokeOnCompletion {
+                                        (context as? AppCompatActivity)?.runOnUiThread(Runnable {
+                                            story_detail?.setText(formattedStory, TextView.BufferType.SPANNABLE)
+                                        })
+                                    }
+                                }
+                            })
+                        }
+            }
+            //If using RX in future, switch to using Observable.zip, since its much neater than this
+            MediatorLiveData<String>().apply {
+                addSource(viewModel.kanji) {
+                    allDataReady()
                 }
-                dialog.dismiss()
-            }
-
-            buttonDefault.setOnClickListener {
-                deleteKeyword(heisigIdInt)
-                dialog.dismiss()
-            }
-
-            cancelButton.setOnClickListener { dialog.dismiss() }
-
-            dialog.show()
-            dialog.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
-            dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+                addSource(viewModel.keyword) {
+                    allDataReady()
+                }
+                addSource(viewModel.userKeyword) {
+                    allDataReady()
+                }
+                addSource(viewModel.heisigId) {
+                    allDataReady()
+                }
+                addSource(mContext) {
+                    allDataReady()
+                }
+            }.observe(viewLifecycleOwner, Observer {
+                // don't have to do anything with the last string
+            })
         }
 
-        // Load the results into the TextViews
-        textViewHeisigId.text = heisigId
-        textViewKanji.text = kanji
+        view.findViewById<Button>(R.id.keyword_detail).setOnClickListener {
+            val keywordEditText = keywordDialog?.findViewById<EditText>(R.id.keyword_dialog_edittext)
+            val submitButton = keywordDialog?.findViewById<Button>(R.id.keyword_dialog_submit_button)
+            val buttonDefault = keywordDialog?.findViewById<Button>(R.id.keyword_dialog_default_button)
+            val cancelButton = keywordDialog?.findViewById<Button>(R.id.keyword_dialog_cancel_button)
 
-        textViewStory.setText(formatStory(storyText), TextView.BufferType.SPANNABLE)
-        textViewStory.movementMethod = LinkMovementMethod.getInstance()
-        updateWidgets()
+            keywordEditText?.setSelectAllOnFocus(true)
+            buttonDefault?.isEnabled = userKeyword.isNullOrBlank().not()
+
+            submitButton?.setOnClickListener {
+                //only submit if user actually changes the keyword from original
+                if (keywordEditText?.text.toString() != originalKeyword) {
+                    //if userKeyword not null that means there was a previous user keyword entered and we're updating it
+                    submitKeyword(heisigIdInt, keywordEditText?.text.toString(), userKeyword.isNullOrBlank().not())
+                }
+                keywordDialog?.dismiss()
+            }
+
+            buttonDefault?.setOnClickListener {
+                deleteKeyword(heisigIdInt)
+                keywordDialog?.dismiss()
+            }
+
+            cancelButton?.setOnClickListener { keywordDialog?.dismiss() }
+
+            keywordDialog?.show()
+            keywordDialog?.window!!.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            keywordDialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        }
+
+        story_detail?.movementMethod = LinkMovementMethod.getInstance()
         return view
     }
 
@@ -108,13 +165,11 @@ class StoryFragment : Fragment() {
      * as with kanji.koohii.com
      */
     private fun formatStory(aStoryText: String): SpannableString {
+        val db = context?.let { AppDatabase.getDatabase(it) }
         var storyText = aStoryText
-        val keywordDao = KeywordDataSource(activity!!)
-        val userKeywordDao = UserKeywordDataSource(activity!!)
-        val heisigKanjiDataSource = HeisigKanjiDataSource(activity!!)
-        keywordDao.open()
-        userKeywordDao.open()
-        heisigKanjiDataSource.open()
+        val keywordDao = db?.keywordDao()
+        val userKeywordDao = db?.userKeywordDao()
+        val heisigKanjiDao = db?.heisigKanjiDao()
         var formattedStory = SpannableString(storyText)
         val italicSpanStarts = ArrayList<StoryFormat>()
         val italicSpanEnds = ArrayList<StoryFormat>()
@@ -181,13 +236,16 @@ class StoryFragment : Fragment() {
                 //if it's a heisigId, look up the kanji
                 if (!Utils.isKanji(storyText[start.index + 1])) {
                     val heisigId = Integer.parseInt(storyText.substring(start.index + 1, braceSpanEnds[i].index))
-                    val kanji = heisigKanjiDataSource.getKanjiFor(heisigId)
-                    kanjiToHeisigId[kanji.kanji] = kanji.id
+                    heisigKanjiDao?.getKanjiFor(heisigId)?.let {
+                        kanjiToHeisigId[it.kanji] = it.heisigId
+                    }
+
                 } else {
                     //it's already a kanji, presumably, so just take away the brackets around it
                     val kanjiString = storyText[start.index + 1].toString()
-                    val kanji = heisigKanjiDataSource.getHeisigFor(kanjiString)
-                    kanjiToHeisigId[kanji.kanji] = kanji.id
+                    heisigKanjiDao?.getHeisigFor(kanjiString)?.let {
+                        kanjiToHeisigId[it.kanji] = it.heisigId
+                    }
                 }
             }
         }
@@ -204,8 +262,8 @@ class StoryFragment : Fragment() {
         //any time the keyword is mentioned in the story, mark it as bold
         //we can use plain integer array to hold indexes instead of StoryFormat objects because indexes don't need adjustment
         val keywordSpanStarts = ArrayList<Int>()
-        val keywordPattern = Pattern.compile(if (userKeyword == null) originalKeyword!!.toLowerCase() else userKeyword!!.toLowerCase())
-        val keywordMatcher = keywordPattern.matcher(storyText.toLowerCase())
+        val keywordPattern = Pattern.compile((if (userKeyword.isNullOrBlank()) originalKeyword else userKeyword)!!.toLowerCase(Locale.getDefault()))
+        val keywordMatcher = keywordPattern.matcher(storyText.toLowerCase(Locale.getDefault()))
         while (keywordMatcher.find()) {
             keywordSpanStarts.add(keywordMatcher.start())
         }
@@ -227,8 +285,10 @@ class StoryFragment : Fragment() {
         for (i in italicSpanStarts.indices) {
             val indexStarts = italicSpanStarts[i].index - italicSpanStarts[i].order
             val indexEnds = italicSpanEnds[i].index - italicSpanEnds[i].order
-            formattedStory.setSpan(TextAppearanceSpan(activity, R.style.storyAsterix),
-                    indexStarts, indexEnds, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            context?.let {
+                formattedStory.setSpan(TextAppearanceSpan(context, R.style.storyAsterix),
+                        indexStarts, indexEnds, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
         }
 
         //mark bolds
@@ -240,8 +300,8 @@ class StoryFragment : Fragment() {
                 continue
             }
             //if the text to be bolded is a keyword, we'll do that in the next loop instead
-            if (!keywordSpanStarts.contains(indexStarts)) {
-                formattedStory.setSpan(TextAppearanceSpan(activity, R.style.storyHash),
+            if (!keywordSpanStarts.contains(indexStarts) && context != null) {
+                formattedStory.setSpan(TextAppearanceSpan(context, R.style.storyHash),
                         indexStarts, indexEnds, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
@@ -256,7 +316,7 @@ class StoryFragment : Fragment() {
             var uppercaseWord = storyText.substring(start, end)
 
             var matchingKeyword: Keyword? = null
-            var matchingUserKeyword: Keyword? = null
+            var matchingUserKeyword: UserKeyword? = null
 
             //start from the next word
             for (j in i + 1 until uppercaseSpanStarts.size) {
@@ -268,13 +328,13 @@ class StoryFragment : Fragment() {
                 //adjacentWord = PLANT
                 // RICE PLANT = match!
 
-                if (keywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null && userKeywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null) {
+                if (keywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null && userKeywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord") == null) {
                     //don't wipe out the non null matching keywords if the next adjacent word would cause a non-match
                     break
                 }
 
-                matchingKeyword = keywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord")
-                matchingUserKeyword = userKeywordDao.getKeywordStartingWith("$uppercaseWord $adjacentWord")
+                matchingKeyword = keywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord")
+                matchingUserKeyword = userKeywordDao?.getKeywordStartingWith("$uppercaseWord $adjacentWord")
 
                 if (matchingKeyword != null || matchingUserKeyword != null) {
                     uppercaseWord = "$uppercaseWord $adjacentWord"
@@ -319,8 +379,8 @@ class StoryFragment : Fragment() {
                 //ignore words of length 1 for example "I"
                 continue
             }
-            val matchingKeyword = keywordDao.getKeywordMatching(uppercaseWord)
-            val matchingUserKeyword = userKeywordDao.getKeywordMatching(uppercaseWord)
+            val matchingKeyword = keywordDao?.getKeywordMatching(uppercaseWord)
+            val matchingUserKeyword = userKeywordDao?.getKeywordMatching(uppercaseWord)
             var span: ClickableSpan? = null
             //prioritise user keyword
             if (matchingUserKeyword != null) {
@@ -345,19 +405,18 @@ class StoryFragment : Fragment() {
             }
         }
 
-        val keywordLength = if (userKeyword == null) originalKeyword!!.length else userKeyword!!.length
+        val keywordLength = if (userKeyword.isNullOrBlank()) originalKeyword!!.length else userKeyword!!.length
         //mark keyword occurances as bold
         for (start in keywordSpanStarts) {
             if (keywordLength < 2) {
                 //ignore words of length 1 for example "I"
                 continue
             }
-            formattedStory.setSpan(TextAppearanceSpan(activity, R.style.storyHash),
-                    start, start + keywordLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            context?.let {
+                formattedStory.setSpan(TextAppearanceSpan(context, R.style.storyHash),
+                        start, start + keywordLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
         }
-        keywordDao.close()
-        userKeywordDao.close()
-        heisigKanjiDataSource.close()
         return formattedStory
     }
 
@@ -368,7 +427,7 @@ class StoryFragment : Fragment() {
                 intent.putExtra("filteredListIndex", 0)
                 intent.putExtra("filteredIdList", arrayOf(heisigId.toString()))
                 //TODO : startActivityForResult just like in KanjiListAdapter so that any changes made is passed back to KanjiListActivity
-                activity!!.startActivity(intent)
+                activity?.startActivity(intent)
             }
         }
     }
@@ -377,61 +436,57 @@ class StoryFragment : Fragment() {
         return getSpanForHeisigId(matchingKeyword.heisigId)
     }
 
+    private fun getSpanForKeyword(matchingKeyword: UserKeyword): ClickableSpan {
+        return getSpanForHeisigId(matchingKeyword.heisigId)
+    }
+
     private fun submitKeyword(heisigId: Int, keywordText: String, update: Boolean) {
-        val dataSource = UserKeywordDataSource(activity!!)
-        dataSource.open()
-        var success = false
-        if (update) {
-            if (dataSource.updateKeyword(heisigId, keywordText))
-                success = true
-        } else {
-            if (dataSource.insertKeyword(heisigId, keywordText))
-                success = true
+        val dataSource = context?.let { AppDatabase.getDatabase(it).userKeywordDao() }
+        val keyword = UserKeyword(heisigId, keywordText)
+
+        launch(Dispatchers.IO) {
+            dataSource?.insertKeywords(keyword)
         }
 
-        Toast.makeText(activity!!, if (success) "Keyword Changed" else "Error! Keyword not Changed",
-                Toast.LENGTH_SHORT).show()
-        if (success) {
-            userKeyword = keywordText
-            updateWidgets()
-            updateParentActivity()
-        }
-        dataSource.close()
+        userKeyword = keywordText
+        updateKeywordButton()
+        updateParentActivity()
     }
 
     private fun deleteKeyword(heisigId: Int) {
-        val dataSource = UserKeywordDataSource(activity!!)
-        dataSource.open()
-        var success = false
-        if (dataSource.deleteKeyword(heisigId)) {
-            userKeyword = null
-            success = true
-            updateWidgets()
-            updateParentActivity()
+        val dataSource = context?.let { AppDatabase.getDatabase(it).userKeywordDao() }
+        launch(Dispatchers.IO) {
+            if (dataSource?.deleteKeyword(heisigId) != null) {
+                userKeyword = null
+                launch(Dispatchers.Main) {
+                    updateKeywordButton()
+                    updateParentActivity()
+                    Toast.makeText(context, "Keyword Reset", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, "Error! Keyword not Changed", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
-
-        Toast.makeText(activity!!, if (success) "Keyword Reset" else "Error! Keyword not Changed",
-                Toast.LENGTH_SHORT).show()
-        dataSource.close()
     }
 
-    private fun getStoryFromDatabase(heisigId: Int): String {
-        val dataSource = StoryDataSource(activity!!)
-        dataSource.open()
-        val story = dataSource.getStoryForHeisigKanjiId(heisigId)
-        dataSource.close()
-
-        return story?.storyText ?: ""
+    private fun getStoryFromDatabase(heisigId: Int): LiveData<String?> {
+        val data = MutableLiveData<String>()
+        launch(Dispatchers.IO) {
+            val dataSource = context?.let { AppDatabase.getDatabase(it).storyDao() }
+            data.postValue(dataSource?.getStoryForHeisigKanjiId(heisigId)?.storyText)
+        }
+        return data
     }
 
-    private fun updateWidgets() {
-        //update Keyword button text
-        if (userKeyword == null) {
-            buttonKeyword!!.text = originalKeyword
+    private fun updateKeywordButton() {
+        if (userKeyword.isNullOrBlank()) {
+            keyword_detail?.text = originalKeyword
         } else {
             val keywordText = SpannableString("$userKeyword ($originalKeyword)")
             keywordText.setSpan(TextAppearanceSpan(activity, R.style.GreyItalicSmallText), userKeyword!!.length, keywordText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            buttonKeyword!!.setText(keywordText, TextView.BufferType.SPANNABLE)
+            keyword_detail.setText(keywordText, TextView.BufferType.SPANNABLE)
         }
     }
 
@@ -440,12 +495,17 @@ class StoryFragment : Fragment() {
      */
     private fun updateParentActivity() {
         if (activity is KanjiDetailActivity) {
-            if (userKeyword == null) {
+            if (userKeyword.isNullOrBlank()) {
                 (activity as KanjiDetailActivity).setResult(heisigIdInt, originalKeyword!!)
             } else {
                 (activity as KanjiDetailActivity).setResult(heisigIdInt, userKeyword!!)
             }
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mContext.postValue(context)
     }
 
     private inner class StoryFormat

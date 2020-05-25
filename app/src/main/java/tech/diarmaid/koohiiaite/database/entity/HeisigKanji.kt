@@ -1,29 +1,18 @@
-package tech.diarmaid.koohiiaite.model
+package tech.diarmaid.koohiiaite.database.entity
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.*
 
 /**
  * Represent an entry in the heisig_kanji table
  */
-class HeisigKanji {
-    var id: Int = 0
-        private set
-    var kanji: String = ""
-        private set
-    var isJoyo: Boolean = false
-        private set
-
-    constructor(id: Int, kanji: String, joyo: Int) {
-        this.id = id
-        this.kanji = kanji
-        this.isJoyo = joyo != 0
-    }
-
-    constructor() {
-        this.id = 0
-        this.kanji = ""
-        this.isJoyo = false
-    }
+@Entity(tableName = "heisig_kanji")
+data class HeisigKanji(
+        @PrimaryKey @ColumnInfo(name = "id") var heisigId: Int = 0,
+        var kanji: String = "",
+        var joyo: Boolean = false) {
 
     companion object {
 
@@ -38,7 +27,7 @@ class HeisigKanji {
             val ids = ArrayList<String>()
 
             for (hk in list) {
-                ids.add(hk.id.toString())
+                ids.add(hk.heisigId.toString())
             }
 
             return ids
@@ -73,6 +62,11 @@ class HeisigKanji {
             }
 
             return prefixZeros + heisigId
+
+            // 1 - 0001
+            // 10 - 0010
+            // 100 - 0100
+            // 1000 - 1000
         }
     }
 }

@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
+import kotlinx.android.synthetic.main.fragment_detail.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.fragment.KanjiDetailFragment
 import tech.diarmaid.koohiiaite.utils.Utils
@@ -28,10 +29,10 @@ class KanjiDetailActivity : AppCompatActivity() {
     private val currentPagerIndex: Int
         get() {
             val fragmentList = supportFragmentManager.fragments
-            if (!fragmentList.isEmpty()) {
+            if (fragmentList.isNotEmpty()) {
                 val fragment = fragmentList[fragmentList.size - 1]
                 if (fragment is KanjiDetailFragment) {
-                    return fragment.currentPagerIndex
+                    return fragment.vpPager.currentItem
                 }
             }
 
@@ -96,9 +97,8 @@ class KanjiDetailActivity : AppCompatActivity() {
     }
 
     private fun swapFragment(newIndex: Int) {
-        val fragment = KanjiDetailFragment()
+        val fragment = KanjiDetailFragment(Integer.parseInt(filteredIdList!![newIndex]))
         val bundle = Bundle()
-        bundle.putInt("heisigId", Integer.parseInt(filteredIdList!![newIndex]))
         //preserve viewpager index during next/prev, else set to 0 if none exists
         bundle.putInt("currentPage", if (currentPagerIndex == -1) 0 else currentPagerIndex)
         fragment.arguments = bundle

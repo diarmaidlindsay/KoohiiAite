@@ -13,14 +13,12 @@ import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.ImportStoryAdapter
-import tech.diarmaid.koohiiaite.database.dao.KeywordDataSource
-import tech.diarmaid.koohiiaite.database.dao.StoryDataSource
-import tech.diarmaid.koohiiaite.database.dao.UserKeywordDataSource
+import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.database.entity.Story
+import tech.diarmaid.koohiiaite.database.entity.UserKeyword
 import tech.diarmaid.koohiiaite.interfaces.OnCSVParseCompleted
 import tech.diarmaid.koohiiaite.interfaces.OnDatabaseOperationCompleted
 import tech.diarmaid.koohiiaite.model.CSVEntry
-import tech.diarmaid.koohiiaite.model.Keyword
-import tech.diarmaid.koohiiaite.model.Story
 import tech.diarmaid.koohiiaite.utils.CSVLineReader
 import tech.diarmaid.koohiiaite.utils.Constants.REQUEST_CODE_FILE_CHOOSER
 import tech.diarmaid.koohiiaite.utils.Utils
@@ -34,8 +32,9 @@ import java.util.*
  */
 class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, OnCSVParseCompleted {
     private lateinit var listAdapter: ImportStoryAdapter
-    private var userKeywordDataSource: UserKeywordDataSource = UserKeywordDataSource(this)
-    private var storyDataSource: StoryDataSource = StoryDataSource(this)
+    private val userKeywordDataSource = AppDatabase.getDatabase(this).userKeywordDao()
+    private val storyDataSource = AppDatabase.getDatabase(this).storyDao()
+    private val keywordDataSource = AppDatabase.getDatabase(this).keywordDao()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,45 +108,39 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun writeToDatabase(databaseListener: OnDatabaseOperationCompleted) {
-        val keywordDataSource = KeywordDataSource(this)
-        keywordDataSource.open()
-        val originalKeywords = keywordDataSource.allKeywords
-        keywordDataSource.close()
-
-        val newStories = ArrayList<Story>()
-        val newKeywords = ArrayList<Keyword>()
-        val affectedIds = ArrayList<Int>()
-        //should be 3007
-        val lastHeisigId = originalKeywords[originalKeywords.size - 1].heisigId
-
-        for (entry in listAdapter.importedStories) {
-            val id = Integer.parseInt(entry.id)
-
-            if (id < 1 || id > lastHeisigId) {
-                Log.d(this.javaClass.simpleName, "Skipped id $id because its not in the standard Heisig ID set")
-                continue
-            }
-            affectedIds.add(id)
-            //only add keyword if it differs from original one
-            if (originalKeywords[id - 1].keywordText != entry.keyword) {
-                val keyword = Keyword(id, entry.keyword)
-                newKeywords.add(keyword)
-            }
-            val story = Story(id, entry.story)
-            newStories.add(story)
-        }
-
-        story_import_status.text = getText(R.string.progress_status_database)
-        setOperationInProgress(true)
         doAsync {
-            storyDataSource.open()
-            storyDataSource.use {
-                it.insertStories(newStories)
+            val originalKeywords = keywordDataSource.allKeywords()
+
+            val newStories = ArrayList<Story>()
+            val newKeywords = ArrayList<UserKeyword>()
+            val affectedIds = ArrayList<Int>()
+            //should be 3007
+            val lastHeisigId = originalKeywords[originalKeywords.size - 1].heisigId
+
+            for (entry in listAdapter.importedStories) {
+                val id = Integer.parseInt(entry.id)
+
+                if (id < 1 || id > lastHeisigId) {
+                    Log.d(this.javaClass.simpleName, "Skipped id $id because its not in the standard Heisig ID set")
+                    continue
+                }
+                affectedIds.add(id)
+                //only add keyword if it differs from original one
+                if (originalKeywords[id - 1].keywordText != entry.keyword) {
+                    val keyword = UserKeyword(id, entry.keyword)
+                    newKeywords.add(keyword)
+                }
+                val story = Story(id, entry.story)
+                newStories.add(story)
             }
-            userKeywordDataSource.open()
-            userKeywordDataSource.use {
-                it.insertKeywords(newKeywords)
+
+            uiThread {
+                story_import_status.text = getText(R.string.progress_status_database)
+                setOperationInProgress(true)
             }
+
+            storyDataSource.insertStories(*newStories.toTypedArray())
+            userKeywordDataSource.insertKeywords(*newKeywords.toTypedArray())
             uiThread {
                 databaseListener.onImportCompleted(affectedIds)
             }
@@ -161,10 +154,10 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun setOperationInProgress(progress: Boolean) {
-        story_import_button_cancel_import.visibility = if(progress) View.GONE else View.VISIBLE
-        story_import_button_choose_file.visibility = if(progress) View.GONE else View.VISIBLE
-        story_import_button_confirm_import.visibility = if(progress) View.GONE else View.VISIBLE
-        story_import_progress_bar.visibility = if(progress) View.VISIBLE else View.GONE
+        story_import_button_cancel_import.visibility = if (progress) View.GONE else View.VISIBLE
+        story_import_button_choose_file.visibility = if (progress) View.GONE else View.VISIBLE
+        story_import_button_confirm_import.visibility = if (progress) View.GONE else View.VISIBLE
+        story_import_progress_bar.visibility = if (progress) View.VISIBLE else View.GONE
     }
 
     override fun onImportCompleted(affectedIds: List<Int>) {

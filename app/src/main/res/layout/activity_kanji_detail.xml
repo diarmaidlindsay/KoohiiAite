@@ -7,6 +7,6 @@
     <FrameLayout
         android:id="@+id/detail_fragment_framelayout"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"></FrameLayout>
+        android:layout_width="match_parent" />
 
 </LinearLayout>

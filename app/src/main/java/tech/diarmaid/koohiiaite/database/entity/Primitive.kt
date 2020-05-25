@@ -1,11 +1,16 @@
-package tech.diarmaid.koohiiaite.model
+package tech.diarmaid.koohiiaite.database.entity
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.*
 
 /**
  * Represent an entry in the primitive table
  */
-class Primitive(val id: Int, val primitiveText: String) {
+@Entity(tableName = "primitive")
+data class Primitive(@PrimaryKey val id: Int,
+                     @ColumnInfo(name = "primitive_text") val primitiveText: String) {
     companion object {
 
         /**
