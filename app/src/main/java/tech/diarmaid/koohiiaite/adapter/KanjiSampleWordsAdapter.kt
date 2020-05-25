@@ -7,21 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-
 import tech.diarmaid.koohiiaite.R
-import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.database.entity.SampleWord
 
 /**
  * Adapter for the Sample words tab of the Kanji Detail view
  */
-class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle) : BaseAdapter() {
-
-    private var sampleWordList: List<SampleWord> = arrayListOf()
-    private val heisigId: Int = args.getInt("heisigId")
+class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle, val sampleWordList: List<SampleWord>) : BaseAdapter() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(mContext)
 
@@ -31,10 +23,6 @@ class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle) : Bas
         var english: TextView? = null
         var category: TextView? = null
         var frequency: TextView? = null
-    }
-
-    init {
-        initialiseDatasets()
     }
 
     override fun getCount(): Int {
@@ -75,13 +63,5 @@ class KanjiSampleWordsAdapter(private val mContext: Context, args: Bundle) : Bas
         viewHolder.frequency!!.text = sampleWord.frequency.toString()
 
         return convertView
-    }
-
-    private fun initialiseDatasets() {
-        GlobalScope.launch {
-            launch(Dispatchers.IO) {
-                sampleWordList = AppDatabase.getDatabase(mContext).sampleWordDao().getSampleWordsFor(heisigId)
-            }
-        }
     }
 }

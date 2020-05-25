@@ -108,34 +108,37 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun writeToDatabase(databaseListener: OnDatabaseOperationCompleted) {
-        val originalKeywords = keywordDataSource.allKeywords()
-
-        val newStories = ArrayList<Story>()
-        val newKeywords = ArrayList<UserKeyword>()
-        val affectedIds = ArrayList<Int>()
-        //should be 3007
-        val lastHeisigId = originalKeywords[originalKeywords.size - 1].heisigId
-
-        for (entry in listAdapter.importedStories) {
-            val id = Integer.parseInt(entry.id)
-
-            if (id < 1 || id > lastHeisigId) {
-                Log.d(this.javaClass.simpleName, "Skipped id $id because its not in the standard Heisig ID set")
-                continue
-            }
-            affectedIds.add(id)
-            //only add keyword if it differs from original one
-            if (originalKeywords[id - 1].keywordText != entry.keyword) {
-                val keyword = UserKeyword(id, entry.keyword)
-                newKeywords.add(keyword)
-            }
-            val story = Story(id, entry.story)
-            newStories.add(story)
-        }
-
-        story_import_status.text = getText(R.string.progress_status_database)
-        setOperationInProgress(true)
         doAsync {
+            val originalKeywords = keywordDataSource.allKeywords()
+
+            val newStories = ArrayList<Story>()
+            val newKeywords = ArrayList<UserKeyword>()
+            val affectedIds = ArrayList<Int>()
+            //should be 3007
+            val lastHeisigId = originalKeywords[originalKeywords.size - 1].heisigId
+
+            for (entry in listAdapter.importedStories) {
+                val id = Integer.parseInt(entry.id)
+
+                if (id < 1 || id > lastHeisigId) {
+                    Log.d(this.javaClass.simpleName, "Skipped id $id because its not in the standard Heisig ID set")
+                    continue
+                }
+                affectedIds.add(id)
+                //only add keyword if it differs from original one
+                if (originalKeywords[id - 1].keywordText != entry.keyword) {
+                    val keyword = UserKeyword(id, entry.keyword)
+                    newKeywords.add(keyword)
+                }
+                val story = Story(id, entry.story)
+                newStories.add(story)
+            }
+
+            uiThread {
+                story_import_status.text = getText(R.string.progress_status_database)
+                setOperationInProgress(true)
+            }
+
             storyDataSource.insertStories(*newStories.toTypedArray())
             userKeywordDataSource.insertKeywords(*newKeywords.toTypedArray())
             uiThread {
@@ -151,10 +154,10 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun setOperationInProgress(progress: Boolean) {
-        story_import_button_cancel_import.visibility = if(progress) View.GONE else View.VISIBLE
-        story_import_button_choose_file.visibility = if(progress) View.GONE else View.VISIBLE
-        story_import_button_confirm_import.visibility = if(progress) View.GONE else View.VISIBLE
-        story_import_progress_bar.visibility = if(progress) View.VISIBLE else View.GONE
+        story_import_button_cancel_import.visibility = if (progress) View.GONE else View.VISIBLE
+        story_import_button_choose_file.visibility = if (progress) View.GONE else View.VISIBLE
+        story_import_button_confirm_import.visibility = if (progress) View.GONE else View.VISIBLE
+        story_import_progress_bar.visibility = if (progress) View.VISIBLE else View.GONE
     }
 
     override fun onImportCompleted(affectedIds: List<Int>) {

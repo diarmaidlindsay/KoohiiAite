@@ -8,7 +8,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/unSet"
         android:id="@+id/csv_id" />
 
     <TextView
@@ -16,21 +15,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/unSet"
         android:id="@+id/csv_kanji" />
 
     <TextView
         android:layout_weight=".20"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/unSet"
         android:id="@+id/csv_keyword" />
 
     <TextView
         android:layout_weight=".60"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/unSet"
         android:id="@+id/csv_story" />
 
 </LinearLayout>

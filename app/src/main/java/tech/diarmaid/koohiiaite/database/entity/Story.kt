@@ -2,17 +2,18 @@ package tech.diarmaid.koohiiaite.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 /**
  * Represent an entry in the Story table
  */
-@Entity(tableName = "story")
+@Entity(tableName = "story",
+        foreignKeys = [ForeignKey(entity = HeisigKanji::class, parentColumns = ["id"], childColumns = ["id"])])
 data class Story(
         @PrimaryKey @ColumnInfo(name = "id") var heisigId: Int = 0,
-        @ColumnInfo(name = "story_text") var storyText: String = "",
-        @ColumnInfo(name = "last_edited") var lastEdited: Long = 0) {
-//        private set //primary key also foreign key to HeisigKanji table
+        @ColumnInfo(name = "story_text", defaultValue = "") var storyText: String? = "",
+        @ColumnInfo(name = "last_edited") var lastEdited: Long? = 0) {
 
     /**
      * Use when creating adding or updating story

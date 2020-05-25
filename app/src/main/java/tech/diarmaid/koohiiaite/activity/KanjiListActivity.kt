@@ -215,9 +215,8 @@ class KanjiListActivity : AppCompatActivity() {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
 
-        return when (id) {
+        return when (item.itemId) {
             R.id.action_settings -> true
             R.id.action_primitives -> {
                 showPrimitives()
@@ -281,18 +280,15 @@ class KanjiListActivity : AppCompatActivity() {
                 spinnerListener?.onSpinnerClosed()
             } else if (requestCode == RETURN_CODE_IMPORT_STORY_ACTIVITY) { //Import Stories Activity
                 val heisigIds: IntArray
-                if(data != null) {
-                    heisigIds = data.getIntArrayExtra("heisigIds")
-                } else {
-                    throw IllegalArgumentException("The Imported Heisig Ids are not allowed to be empty")
+                data?.getIntArrayExtra("heisigIds")?.let {
+                    heisigIds = it
+                    kanjiListAdapter.initialiseUserKeywordsAndStories()
+                    for (heisigId in heisigIds) {
+                        kanjiListAdapter.updateIndicatorVisibilityWithId(heisigId)
+                    }
+                    kanjiListAdapter.notifyDataSetChanged()
+                    spinnerListener?.onSpinnerClosed() //
                 }
-                kanjiListAdapter.initialiseUserKeywordsAndStories()
-                for (heisigId in heisigIds) {
-                    kanjiListAdapter.updateIndicatorVisibilityWithId(heisigId)
-                }
-
-                kanjiListAdapter.notifyDataSetChanged()
-                spinnerListener?.onSpinnerClosed() //trigger list view refresh
             }
         }
     }

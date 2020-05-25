@@ -1,10 +1,12 @@
 package tech.diarmaid.koohiiaite.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 
-class KanjiDetailViewModel : ViewModel() {
-    var heisigId: Int? = null
-    var keyword: String? = null
-    var userKeyword: String? = null
-    var kanji: String? = null
+class KanjiDetailViewModel(application: Application) : AndroidViewModel(application) {
+    var heisigId: MutableLiveData<Int> = MutableLiveData()
+    var keyword: MutableLiveData<String?> = MutableLiveData()
+    var userKeyword: MutableLiveData<String?> = MutableLiveData()
+    var kanji: MutableLiveData<String?> = MutableLiveData()
 }

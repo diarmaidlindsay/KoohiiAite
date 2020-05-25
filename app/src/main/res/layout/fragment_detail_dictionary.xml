@@ -16,7 +16,6 @@
         <TextView
             style="@style/DetailItem"
             android:textSize="50sp"
-            android:text="@string/unSet"
             android:id="@+id/kanji_detail" />
 
         <TextView
@@ -25,7 +24,6 @@
 
         <TextView
             style="@style/DetailItem"
-            android:text="@string/unSet"
             android:id="@+id/frequency_detail" />
 
         <TextView
@@ -34,7 +32,6 @@
 
         <TextView
             style="@style/DetailItem"
-            android:text="@string/unSet"
             android:id="@+id/onyomi_detail" />
 
         <TextView
@@ -43,7 +40,6 @@
 
         <TextView
             style="@style/DetailItem"
-            android:text="@string/unSet"
             android:id="@+id/kunyomi_detail" />
 
         <TextView
@@ -52,7 +48,6 @@
 
         <TextView
             style="@style/DetailItem"
-            android:text="@string/unSet"
             android:id="@+id/meanings_detail" />
 
     </LinearLayout>

@@ -10,7 +10,7 @@ interface KeywordDao {
     fun allKeywords(): List<Keyword>
 
     @Query("SELECT * FROM keyword where heisig_id = :heisigId limit 1")
-    fun getKeywordFor(heisigId: Int): Keyword
+    fun getKeywordFor(heisigId: Int): Keyword?
 
     @Query("SELECT * FROM keyword where keyword_text = :keywordText limit 1")
     fun getKeywordMatching(keywordText: String): Keyword?

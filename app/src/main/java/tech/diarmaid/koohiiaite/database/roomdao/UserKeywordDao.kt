@@ -1,9 +1,6 @@
 package tech.diarmaid.koohiiaite.database.roomdao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import tech.diarmaid.koohiiaite.database.entity.UserKeyword
 
 @Dao
@@ -20,7 +17,7 @@ interface UserKeywordDao {
     @Query("SELECT * FROM user_keyword where keyword_text LIKE :keywordText limit 1")
     fun getKeywordStartingWith(keywordText: String): UserKeyword?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertKeywords(vararg keywords: UserKeyword)
 
     @Update

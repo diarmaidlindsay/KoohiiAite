@@ -10,19 +10,24 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
 
 /**
  * For display of dictionary derived information
  * about a given kanji related to the heisigId provided
  */
 class DictionaryFragment : Fragment() {
+    private var viewModel: KanjiDetailViewModel? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_detail_dictionary, container, false)
+        viewModel = ViewModelProvider(parentFragment as KanjiDetailFragment).get(KanjiDetailViewModel::class.java)
 
         val textViewKanji = view.findViewById<TextView>(R.id.kanji_detail)
         val textViewFrequency = view.findViewById<TextView>(R.id.frequency_detail)
@@ -30,24 +35,23 @@ class DictionaryFragment : Fragment() {
         val textViewKunYomi = view.findViewById<TextView>(R.id.kunyomi_detail)
         val textViewMeanings = view.findViewById<TextView>(R.id.meanings_detail)
 
-        val args = arguments
-        val heisigIdInt = args!!.getInt("heisigId", 0)
-        val kanji = args.getString("kanji")
-        getFrequencyFromDatabase(heisigIdInt).observe(context as AppCompatActivity, Observer {
-            textViewFrequency.text = it
+        viewModel?.kanji?.observe(viewLifecycleOwner, Observer {
+            textViewKanji.text = it
         })
-        getReadingFromDatabase(heisigIdInt, 0).observe(context as AppCompatActivity, Observer {
-            textViewOnYomi.text = it //reading
+        viewModel?.heisigId?.observe(viewLifecycleOwner, Observer { heisigIdInt ->
+            getFrequencyFromDatabase(heisigIdInt).observe(context as AppCompatActivity, Observer {
+                textViewFrequency.text = it
+            })
+            getReadingFromDatabase(heisigIdInt, 0).observe(context as AppCompatActivity, Observer {
+                textViewOnYomi.text = it //reading
+            })
+            getReadingFromDatabase(heisigIdInt, 1).observe(context as AppCompatActivity, Observer {
+                textViewKunYomi.text = it //reading
+            })
+            getMeaningFromDatabase(heisigIdInt).observe(context as AppCompatActivity, Observer {
+                textViewMeanings.text = it //meaning
+            })
         })
-        getReadingFromDatabase(heisigIdInt, 1).observe(context as AppCompatActivity, Observer {
-            textViewKunYomi.text = it //reading
-        })
-        getMeaningFromDatabase(heisigIdInt).observe(context as AppCompatActivity, Observer {
-            textViewMeanings.text = it //meaning
-        })
-
-        // Load the results into the TextViews
-        textViewKanji.text = kanji
 
         return view
     }

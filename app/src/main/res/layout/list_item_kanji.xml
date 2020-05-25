@@ -7,7 +7,6 @@
 
     <TextView
         android:id="@+id/kanji_list_item"
-        android:text="@string/unSet"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingEnd="5dp"
@@ -33,7 +32,6 @@
             <TextView
                 android:id="@+id/heisig_id_list_item"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/unSet"
                 android:paddingStart="0dp"
                 android:paddingEnd="10dp"
                 android:background="@color/ka_dark2"
@@ -46,7 +44,6 @@
             <TextView
                 android:id="@+id/keyword_list_item"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/unSet"
                 android:background="@color/ka_dark2"
                 android:textColor="@color/ka_bright2"
                 android:layout_width="match_parent"
@@ -58,7 +55,6 @@
         <TextView
             android:id="@+id/primitives_list_item"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/unSet"
             android:background="@color/ka_neutral"
             android:textColor="@android:color/black"
             android:layout_width="match_parent"
