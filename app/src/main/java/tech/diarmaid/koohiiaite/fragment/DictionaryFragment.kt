@@ -11,19 +11,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
+import kotlin.coroutines.CoroutineContext
 
 /**
  * For display of dictionary derived information
  * about a given kanji related to the heisigId provided
  */
-class DictionaryFragment : Fragment() {
+class DictionaryFragment : Fragment(), CoroutineScope {
     private var viewModel: KanjiDetailViewModel? = null
+    override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_detail_dictionary, container, false)
@@ -58,12 +60,10 @@ class DictionaryFragment : Fragment() {
 
     private fun getReadingFromDatabase(heisigId: Int, type: Int): LiveData<String> {
         val data = MutableLiveData<String>()
-        GlobalScope.launch {
-            launch(Dispatchers.IO) {
-                val dataSource = context?.let { AppDatabase.getDatabase(it).readingDao() }
-                val reading = dataSource?.getMeaningForHeisigKanjiId(heisigId, type) //0 for onYomi, 1 for KunYomi
-                data.postValue(reading?.readingText ?: "")
-            }
+        launch(Dispatchers.IO) {
+            val dataSource = context?.let { AppDatabase.getDatabase(it).readingDao() }
+            val reading = dataSource?.getMeaningForHeisigKanjiId(heisigId, type) //0 for onYomi, 1 for KunYomi
+            data.postValue(reading?.readingText ?: "")
         }
         return data
     }
@@ -71,23 +71,21 @@ class DictionaryFragment : Fragment() {
     private fun getMeaningFromDatabase(heisigId: Int): LiveData<String> {
         val data = MutableLiveData<String>()
         val sb = StringBuilder()
-        GlobalScope.launch {
-            launch(Dispatchers.IO) {
-                val dataSource = context?.let { AppDatabase.getDatabase(it).meaningDao() }
-                dataSource?.getMeaningsForHeisigKanjiId(heisigId)
-                        ?.let { meanings ->
-                            for (meaning in meanings) {
-                                sb.append(meaning.meaningText)
-                                sb.append(", ")
-                            }
+        launch(Dispatchers.IO) {
+            val dataSource = context?.let { AppDatabase.getDatabase(it).meaningDao() }
+            dataSource?.getMeaningsForHeisigKanjiId(heisigId)
+                    ?.let { meanings ->
+                        for (meaning in meanings) {
+                            sb.append(meaning.meaningText)
+                            sb.append(", ")
                         }
+                    }
 
-                var meaningString = sb.toString()
-                if (meaningString.endsWith(", ")) {
-                    meaningString = meaningString.substring(0, meaningString.length - 2)
-                }
-                data.postValue(meaningString)
+            var meaningString = sb.toString()
+            if (meaningString.endsWith(", ")) {
+                meaningString = meaningString.substring(0, meaningString.length - 2)
             }
+            data.postValue(meaningString)
         }
 
         return data
@@ -95,12 +93,10 @@ class DictionaryFragment : Fragment() {
 
     private fun getFrequencyFromDatabase(heisigId: Int): LiveData<String> {
         val data = MutableLiveData<String>()
-        GlobalScope.launch {
-            launch(Dispatchers.IO) {
-                val kanjiFrequency = activity?.let { AppDatabase.getDatabase(it).kanjiFrequencyDao().getFrequencyFor(heisigId) }
-                val frequency = kanjiFrequency?.firstOrNull()?.frequency
-                data.postValue(if (frequency == 999999 || frequency == null) "-" else frequency.toString())
-            }
+        launch(Dispatchers.IO) {
+            val kanjiFrequency = activity?.let { AppDatabase.getDatabase(it).kanjiFrequencyDao().getFrequencyFor(heisigId) }
+            val frequency = kanjiFrequency?.firstOrNull()?.frequency
+            data.postValue(if (frequency == 999999 || frequency == null) "-" else frequency.toString())
         }
         return data
     }

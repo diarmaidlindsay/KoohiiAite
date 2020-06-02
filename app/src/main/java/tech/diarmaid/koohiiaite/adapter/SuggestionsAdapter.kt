@@ -11,38 +11,25 @@ import android.text.style.ForegroundColorSpan
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.cursoradapter.widget.SimpleCursorAdapter
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
-import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.database.entity.Keyword
 import tech.diarmaid.koohiiaite.database.entity.Primitive
 import java.text.Normalizer
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * For the suggestions list of the searchview inside the main kanji list activity
  */
-class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<String>, to: IntArray, flags: Int) : SimpleCursorAdapter(context, layout, c, from, to, flags) {
-    private var allKeywords: List<Keyword> = arrayListOf()
-    private var allPrimitives: List<Primitive> = arrayListOf()
+class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<String>, to: IntArray, flags: Int) : SimpleCursorAdapter(context, layout, c, from, to, flags), CoroutineScope {
+    var allKeywords: List<Keyword> = arrayListOf()
+    var allPrimitives: List<Primitive> = arrayListOf()
     private var suggestionsList: MutableList<String>? = arrayListOf()
     private var previousQuery: String? = null
     private var queryNow: String? = null //should never become null
-
-    init {
-        val primitiveDataSource = AppDatabase.getDatabase(context).primitiveDao()
-        val keywordDataSource = AppDatabase.getDatabase(context).keywordDao()
-        GlobalScope.launch {
-            val query = async(Dispatchers.IO) {
-                allKeywords = keywordDataSource.allKeywords()
-                allPrimitives = primitiveDataSource.allPrimitives()
-            }
-//            val blah = query.await()
-        }
-    }
+    override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     override fun setViewText(v: TextView, text: String) {
         v.text = highlight(text, queryNow!!)

@@ -2,7 +2,7 @@ package tech.diarmaid.koohiiaite.adapter
 
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
+import android.util.Log
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +10,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.activity.KanjiDetailActivity
 import tech.diarmaid.koohiiaite.activity.KanjiListActivity
@@ -27,70 +27,47 @@ import tech.diarmaid.koohiiaite.database.entity.Primitive
 import tech.diarmaid.koohiiaite.enumeration.FilterState
 import tech.diarmaid.koohiiaite.utils.Utils
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Adapter for Main Kanji ListView
  */
-class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle?) : BaseAdapter() {
+class KanjiListAdapter(private val mContext: Context) : BaseAdapter(), CoroutineScope {
     private var viewHolder: ViewHolderItem? = null
 
-    private var masterList: List<HeisigKanji> = ArrayList() //list of all HeisigKanjis
-    private var keywordList: List<Keyword> = ArrayList() //list of all Keywords
-    private var userKeywordMap: SparseArray<String> = SparseArray() //HashMap of User Keywords (id, text)
-    private var primitiveList: List<Primitive> = ArrayList() //list of all Primitives
+    var allHeisigKanji: List<HeisigKanji> = ArrayList() //list of all HeisigKanjis
+    var allKeywords: List<Keyword> = ArrayList() //list of all Keywords
+    var allPrimitives: List<Primitive> = ArrayList() //list of all Primitives
+    var primitivesForHeisigId: Map<Int, List<String>> = HashMap()
+    private var heisigKanjiToUserKeyword: SparseArray<String> = SparseArray() //HashMap of User Keywords (id, text)
 
     //to save memory, only story booleans to indicate whether a list item has a story
-    private var storyList: List<Boolean> = ArrayList()
+    private var storyList: MutableLiveData<List<Boolean>> = MutableLiveData()
 
     private val filteredHeisigKanjiSet = HashSet<Int>() //filtered heisig_ids
     private val filteredHeisigKanjiList = ArrayList<HeisigKanji>() //filtered HeisigKanjis for display
     private var filteredHeisigToPrimitiveList: MutableList<HeisigToPrimitive> = mutableListOf() //filtered list of Primitives for display
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(mContext)
-
-    init {
-        //only do this from a fresh state (not on screen rotation etc)
-        GlobalScope.launch {
-            launch(Dispatchers.IO) {
-                initialiseDatasets()
-            }
-        }.invokeOnCompletion {
-            if (savedInstanceState == null) {
-                search("")
-            }
-        }
-    }
-
-    private fun initialiseDatasets() {
-        val keywordDataSource = AppDatabase.getDatabase(mContext).keywordDao()
-        val heisigKanjiDataSource = AppDatabase.getDatabase(mContext).heisigKanjiDao()
-        val primitiveDataSource = AppDatabase.getDatabase(mContext).primitiveDao()
-
-        masterList = heisigKanjiDataSource.allKanji()
-        keywordList = keywordDataSource.allKeywords()
-        primitiveList = primitiveDataSource.allPrimitives()
-
-        initialiseUserKeywordsAndStories()
-    }
-
-    /*
-    fun showUserOrders(username: String, password: String) = GlobalScope.launch(Dispatchers.Main) {
-    val user = withContext(Dispatchers.Default) { login(username, password) }
-    val orders = withContext(Dispatchers.Default) { fetchUserOrders(user.userId) }
-    showUserOrders(orders)
-}
-     */
+    override val coroutineContext: CoroutineContext = Dispatchers.Default
 
     /**
      * Called after a CSV import
      */
     fun initialiseUserKeywordsAndStories() {
-        val userKeywordDataSource = AppDatabase.getDatabase(mContext).userKeywordDao()
-        userKeywordDataSource.allUserKeywords().forEach {
-            userKeywordMap.put(it.heisigId, it.keywordText)
+        launch(Dispatchers.IO) {
+            Log.d("KanjiListAdapter", "allHeisigKanji size ${allHeisigKanji.size}")
+            storyList.postValue(AppDatabase.getDatabase(mContext).storyDao().getStoryFlags(allHeisigKanji.size))
+            val allUserKeywords = AppDatabase.getDatabase(mContext).userKeywordDao().allUserKeywords()
+            launch(Dispatchers.Main) {
+                allUserKeywords.observe((mContext as AppCompatActivity), androidx.lifecycle.Observer { userKeywords ->
+                    userKeywords.forEach { heisigKanjiToUserKeyword.put(it.heisigId, it.keywordText) }
+                })
+            }
         }
-        val storyDataSource = AppDatabase.getDatabase(mContext).storyDao()
-        storyList = storyDataSource.getStoryFlags(masterList.size)
+        storyList.observe((mContext as AppCompatActivity), androidx.lifecycle.Observer {
+            search("")
+        })
     }
 
     override fun getCount(): Int {
@@ -128,23 +105,18 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
 
         val heisigId = theKanji.heisigId
 
-        val primitiveIds = HeisigToPrimitive.getPrimitiveIdsForHeisigId(filteredHeisigToPrimitiveList, heisigId)
-        val primitiveStrings = Primitive.getPrimitiveText(primitiveList, primitiveIds)
         val primitiveText = StringBuilder()
-
-        for (i in primitiveStrings.indices) {
-            val primitive = primitiveStrings[i]
+        primitivesForHeisigId[heisigId]?.forEachIndexed { idx, primitive ->
             primitiveText.append(primitive)
-            //append comma except last
-            if (i < primitiveStrings.size - 1) {
+            if (idx < primitivesForHeisigId[heisigId]?.size?.minus(1) ?: 0) {
                 primitiveText.append(", ")
             }
         }
 
         val kanji = theKanji.kanji
-        val userKeyword = userKeywordMap.get(heisigId)
+        val userKeyword = heisigKanjiToUserKeyword.get(heisigId)
         //if user entered their own keyword, use it, else use default keyword
-        val keyword = userKeyword ?: keywordList[heisigId - 1].keywordText
+        val keyword = userKeyword ?: allKeywords[heisigId - 1].keywordText
 
         viewHolder?.heisig?.text = HeisigKanji.getHeisigIdAsString(heisigId)
         viewHolder?.kanji?.text = kanji
@@ -197,10 +169,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
 
         updateFilteredList(searchString)
         applyFilters()
-        doAsync {
-            updatePrimitiveList()
-            uiThread { notifyDataSetChanged() }
-        }
+        notifyDataSetChanged()
     }
 
     private fun updateFilteredList(filterText: String) {
@@ -208,25 +177,11 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
 
         if (filterText.isEmpty()) {
             //if nothing is entered in search, display all
-            filteredHeisigKanjiList.addAll(masterList)
+            filteredHeisigKanjiList.addAll(allHeisigKanji)
 
         } else {
             filteredHeisigKanjiList.addAll(HeisigKanji.getHeisigKanjiMatchingIds(
-                    ArrayList(filteredHeisigKanjiSet), masterList))
-        }
-    }
-
-    /**
-     * Called every time there is a filter operation.
-     */
-    private fun updatePrimitiveList() {
-        if (filteredHeisigKanjiList.size > 0) {
-            filteredHeisigToPrimitiveList.clear()
-            val heisigToPrimitiveDataSource = AppDatabase.getDatabase(mContext).heisigToPrimitiveDao()
-            val heisigIds = HeisigKanji.getIds1Indexed(filteredHeisigKanjiList)
-            heisigIds.chunked(999).forEach {
-                filteredHeisigToPrimitiveList.addAll(heisigToPrimitiveDataSource.getHeisigToPrimitiveMatching(it))
-            }
+                    ArrayList(filteredHeisigKanjiSet), allHeisigKanji))
         }
     }
 
@@ -235,7 +190,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
      */
     private fun filterOnId(filterText: String) {
         //only run if string is number
-        for (kanji in masterList) {
+        for (kanji in allHeisigKanji) {
             val id = kanji.heisigId.toString()
 
             if (id.contains(filterText)) {
@@ -248,7 +203,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
      * Iterate over keywordList
      */
     private fun filterOnKeyword(filterText: String) {
-        for (keyword in keywordList) {
+        for (keyword in allKeywords) {
             if (keyword.keywordText.toLowerCase(Locale.getDefault()).contains(filterText)) {
                 filteredHeisigKanjiSet.add(keyword.heisigId)
             }
@@ -259,10 +214,10 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
      * Iterate over user keywords
      */
     private fun filterOnUserKeyword(filterText: String) {
-        val mapSize = userKeywordMap.size()
+        val mapSize = heisigKanjiToUserKeyword.size()
         for (i in 0 until mapSize) {
-            val kanjiIndex = userKeywordMap.keyAt(i)
-            val userKeyword = userKeywordMap.get(kanjiIndex)
+            val kanjiIndex = heisigKanjiToUserKeyword.keyAt(i)
+            val userKeyword = heisigKanjiToUserKeyword.get(kanjiIndex)
             if (userKeyword.toLowerCase(Locale.getDefault()).contains(filterText)) {
                 filteredHeisigKanjiSet.add(kanjiIndex)
             }
@@ -274,7 +229,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
      */
     private fun filterOnKanji(filterText: String) {
         for (kanjiCharacterFilter in filterText.toCharArray()) {
-            for (kanji in masterList) {
+            for (kanji in allHeisigKanji) {
                 val kanjiChar = kanji.kanji
 
                 if (kanjiChar == kanjiCharacterFilter.toString()) {
@@ -305,7 +260,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
                 //find primitive id which exactly matches string input
                 for (primitiveString in primitiveSearchStrings) {
                     val primitiveInput = primitiveString.trim { it <= ' ' }
-                    val primitiveIdMatched = Primitive.getPrimitiveIdWhichMatches(primitiveInput, primitiveList, true)
+                    val primitiveIdMatched = Primitive.getPrimitiveIdWhichMatches(primitiveInput, allPrimitives, true)
                     if (primitiveIdMatched == -1) {
                         //no exact match found for primitive string
                         return
@@ -318,9 +273,13 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
                 //we've found the primitive ids matching the strings the user entered
                 //which kanjis contain all these primitives?
 
-                for (match in primitiveMatches) {
-                    heisigIdsForPrimitiveIds.add(
-                            dataSource.getHeisigIdsMatching(arrayOf(match)))
+                runBlocking {
+                    launch(Dispatchers.IO) {
+                        for (match in primitiveMatches) {
+                            heisigIdsForPrimitiveIds.add(
+                                    dataSource.getHeisigIdsMatching(arrayOf(match)))
+                        }
+                    }
                 }
                 //only retain the intersection of these matches, kanji which contain ALL these primitives
                 heisigIds = intersection(heisigIdsForPrimitiveIds)
@@ -328,7 +287,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
                 //if no comma, assume we're fuzzy searching for 1 primitive
                 //ie night -> night, nightbreak
                 runBlocking {
-                    val primitiveIds = Primitive.getPrimitiveIdsContaining(filterText, primitiveList, true)
+                    val primitiveIds = Primitive.getPrimitiveIdsContaining(filterText, allPrimitives, true)
                     launch(Dispatchers.IO) {
                         heisigIds = dataSource.getHeisigIdsMatching(primitiveIds.toTypedArray())
                     }
@@ -387,7 +346,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
     private fun isKeywordMatch(state: FilterState, heisigKanji: HeisigKanji): Boolean {
         val heisigId = heisigKanji.heisigId
 
-        return !(userKeywordMap.get(heisigId) != null && state == FilterState.NO || userKeywordMap.get(heisigId) == null && state == FilterState.YES)
+        return !(heisigKanjiToUserKeyword.get(heisigId) != null && state == FilterState.NO || heisigKanjiToUserKeyword.get(heisigId) == null && state == FilterState.YES)
     }
 
     /**
@@ -397,7 +356,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
     private fun isStoryMatch(state: FilterState, heisigKanji: HeisigKanji): Boolean {
         val heisigId = heisigKanji.heisigId
 
-        return !(storyList[heisigId - 1] && state == FilterState.NO || !storyList[heisigId - 1] && state == FilterState.YES)
+        return !(storyList.value!![heisigId - 1] && state == FilterState.NO || !storyList.value!![heisigId - 1] && state == FilterState.YES)
     }
 
     private fun intersection(matches: List<List<Int>>): List<Int> {
@@ -415,10 +374,10 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
 
     fun updateKeyword(heisigId: Int, keywordText: String) {
         //if the "updated" keyword is equal to the orignal, assume a revert to default and remove from user map
-        if (keywordList[heisigId - 1].keywordText == keywordText) {
-            userKeywordMap.remove(heisigId)
+        if (allKeywords[heisigId - 1].keywordText == keywordText) {
+            heisigKanjiToUserKeyword.remove(heisigId)
         } else {
-            userKeywordMap.put(heisigId, keywordText)
+            heisigKanjiToUserKeyword.put(heisigId, keywordText)
         }
     }
 
@@ -438,7 +397,7 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
      */
     fun updateIndicatorVisibilityWithId(heisigId: Int) {
         if (viewHolder != null) {
-            val theKanji = masterList[heisigId - 1] //convert to 0-indexed
+            val theKanji = allHeisigKanji[heisigId - 1] //convert to 0-indexed
 
             if (theKanji.joyo) {
                 viewHolder?.joyoIndicator?.visibility = View.VISIBLE
@@ -446,13 +405,13 @@ class KanjiListAdapter(private val mContext: Context, savedInstanceState: Bundle
                 viewHolder?.joyoIndicator?.visibility = View.INVISIBLE
             }
 
-            if (userKeywordMap.get(heisigId) != null) {
+            if (heisigKanjiToUserKeyword.get(heisigId) != null) {
                 viewHolder?.keywordIndicator?.visibility = View.VISIBLE
             } else {
                 viewHolder?.keywordIndicator?.visibility = View.INVISIBLE
             }
 
-            if (storyList[heisigId - 1]) {
+            if (storyList.value!![heisigId - 1]) {
                 viewHolder?.storyIndicator?.visibility = View.VISIBLE
             } else {
                 viewHolder?.storyIndicator?.visibility = View.INVISIBLE

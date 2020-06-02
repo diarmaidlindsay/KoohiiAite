@@ -6,11 +6,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_import_story.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.toast
-import org.jetbrains.anko.uiThread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.ImportStoryAdapter
 import tech.diarmaid.koohiiaite.database.AppDatabase
@@ -25,16 +26,19 @@ import tech.diarmaid.koohiiaite.utils.Utils
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Import CSV and display result of import in a table, so the user can
  * confirm or cancel the changes.
  */
-class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, OnCSVParseCompleted {
+class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, OnCSVParseCompleted, CoroutineScope {
     private lateinit var listAdapter: ImportStoryAdapter
     private val userKeywordDataSource = AppDatabase.getDatabase(this).userKeywordDao()
     private val storyDataSource = AppDatabase.getDatabase(this).storyDao()
     private val keywordDataSource = AppDatabase.getDatabase(this).keywordDao()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +77,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_FILE_CHOOSER && resultCode == Activity.RESULT_OK) {
             readCSV(listAdapter, data?.data, this)
         }
@@ -81,7 +86,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     private fun readCSV(importStoryAdapter: ImportStoryAdapter, uri: Uri?, csvListener: OnCSVParseCompleted) {
         story_import_status.text = getText(R.string.progress_status_csv)
         setOperationInProgress(true)
-        doAsync {
+        launch(Dispatchers.IO) {
             val entries = ArrayList<CSVEntry>()
             val csvSplitBy = ","
             importStoryAdapter.clearStories()
@@ -101,16 +106,14 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
                 }
             }
 
-            uiThread {
+            launch(Dispatchers.Main) {
                 csvListener.onParsingCompleted(entries)
             }
         }
     }
 
     private fun writeToDatabase(databaseListener: OnDatabaseOperationCompleted) {
-        doAsync {
-            val originalKeywords = keywordDataSource.allKeywords()
-
+        keywordDataSource.allKeywords().observe(this@ImportStoryActivity, androidx.lifecycle.Observer { originalKeywords ->
             val newStories = ArrayList<Story>()
             val newKeywords = ArrayList<UserKeyword>()
             val affectedIds = ArrayList<Int>()
@@ -134,17 +137,20 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
                 newStories.add(story)
             }
 
-            uiThread {
+            launch(Dispatchers.Main) {
                 story_import_status.text = getText(R.string.progress_status_database)
                 setOperationInProgress(true)
             }
 
-            storyDataSource.insertStories(*newStories.toTypedArray())
-            userKeywordDataSource.insertKeywords(*newKeywords.toTypedArray())
-            uiThread {
-                databaseListener.onImportCompleted(affectedIds)
+            launch(Dispatchers.IO) {
+                storyDataSource.insertStories(*newStories.toTypedArray())
+                userKeywordDataSource.insertKeywords(*newKeywords.toTypedArray())
+            }.invokeOnCompletion {
+                launch(Dispatchers.Main) {
+                    databaseListener.onImportCompleted(affectedIds)
+                }
             }
-        }
+        })
     }
 
     private fun setResult(heisigIds: List<Int>) {
@@ -164,9 +170,9 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         setOperationInProgress(false)
         if (affectedIds.isNotEmpty()) {
             setResult(affectedIds)
-            toast(affectedIds.size.toString() + " Stories and Keywords updated")
+            Toast.makeText(this, affectedIds.size.toString() + " Stories and Keywords updated", Toast.LENGTH_SHORT).show()
         } else {
-            toast("Failed to write to database")
+            Toast.makeText(this, "Failed to write to database", Toast.LENGTH_SHORT).show()
             setResult(Activity.RESULT_CANCELED)
         }
         resetView()
@@ -180,11 +186,11 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
             listAdapter.notifyDataSetChanged()
             story_import_button_confirm_import.isEnabled = true
             story_import_button_cancel_import.isEnabled = true
-            toast("CSV file import successful")
+            Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show()
             story_import_progress_bar.visibility = View.GONE
             story_import_status.text = String.format(Locale.getDefault(), "%d stories found for import.", listAdapter.count)
         } else {
-            toast("Failed to read CSV file")
+            Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_SHORT).show()
         }
     }
 }

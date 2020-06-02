@@ -8,19 +8,21 @@ import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiSampleWordsAdapter
 import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.database.entity.SampleWord
 import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Display contents of sample_words table for given heisigId
  */
-class SampleWordsFragment : Fragment() {
+class SampleWordsFragment : Fragment(), CoroutineScope {
+    override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_detail_sample_words, container, false)
@@ -34,14 +36,12 @@ class SampleWordsFragment : Fragment() {
         var samplewords: List<SampleWord> = arrayListOf()
         context?.let { theContext ->
             viewModel.heisigId.observe(viewLifecycleOwner, Observer { value ->
-                GlobalScope.launch {
-                    launch(Dispatchers.IO) {
-                        samplewords = AppDatabase.getDatabase(theContext).sampleWordDao().getSampleWordsFor(value)
-                    }.invokeOnCompletion {
-                        launch(Dispatchers.Main) {
-                            val adapter = KanjiSampleWordsAdapter(theContext, arguments!!, samplewords)
-                            listView?.adapter = adapter
-                        }
+                launch(Dispatchers.IO) {
+                    samplewords = AppDatabase.getDatabase(theContext).sampleWordDao().getSampleWordsFor(value)
+                }.invokeOnCompletion {
+                    launch(Dispatchers.Main) {
+                        val adapter = KanjiSampleWordsAdapter(theContext, arguments!!, samplewords)
+                        listView?.adapter = adapter
                     }
                 }
             })

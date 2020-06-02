@@ -1,11 +1,15 @@
 package tech.diarmaid.koohiiaite.database.roomdao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import tech.diarmaid.koohiiaite.database.entity.HeisigToPrimitive
 
 @Dao
 interface HeisigToPrimitiveDao {
+    @Query("SELECT * FROM heisig_to_primitive")
+    fun getAllHeisigToPrimitive(): LiveData<List<HeisigToPrimitive>>
+
     @Query("SELECT * FROM heisig_to_primitive WHERE heisig_id IN(:heisigIds)")
     fun getHeisigToPrimitiveMatching(heisigIds: List<String>): List<HeisigToPrimitive>
 

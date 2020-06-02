@@ -19,6 +19,8 @@ import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiListAdapter
 import tech.diarmaid.koohiiaite.adapter.KanjiListFilterAdapter
 import tech.diarmaid.koohiiaite.adapter.SuggestionsAdapter
+import tech.diarmaid.koohiiaite.database.AppDatabase
+import tech.diarmaid.koohiiaite.database.entity.HeisigToPrimitive
 import tech.diarmaid.koohiiaite.enumeration.FilterState
 import tech.diarmaid.koohiiaite.utils.Constants.RETURN_CODE_IMPORT_STORY_ACTIVITY
 import tech.diarmaid.koohiiaite.widget.KanjiSearchView
@@ -43,14 +45,13 @@ class KanjiListActivity : AppCompatActivity() {
 
     private lateinit var kanjiListAdapter: KanjiListAdapter
     private lateinit var kanjiListFilterAdapter: KanjiListFilterAdapter
-    private lateinit var suggestionAdapter: SuggestionsAdapter
     private var searchView: KanjiSearchView? = null
     private var spinnerFilter: SpinnerFilter? = null
     private var spinnerListener: OnSpinnerEventsListener? = null
 
     private var savedInstanceState: Bundle? = null
 
-    private val cursorAdapter: SuggestionsAdapter
+    private val suggestionAdapter: SuggestionsAdapter
         get() {
             val from = arrayOf("keywordPrimitive")
             val to = intArrayOf(R.id.suggestion_item)
@@ -135,14 +136,13 @@ class KanjiListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //if onCreate was called after rotation, we need saved bundle for options menu
         this.savedInstanceState = savedInstanceState
-
         setContentView(R.layout.activity_kanji_list)
 
-        suggestionAdapter = cursorAdapter
         val spinnerValues = arrayOf("n/a, Yes, No")
         kanjiListFilterAdapter = KanjiListFilterAdapter(this, R.id.filter_spinner, spinnerValues)
-        kanjiListAdapter = KanjiListAdapter(this, savedInstanceState)
+        kanjiListAdapter = KanjiListAdapter(this)
         kanjiListView.adapter = kanjiListAdapter
+        initialiseDatasets()
         //created here because must be re-created if list activity is destroyed
         spinnerListener = object : OnSpinnerEventsListener {
             //if filter values changed, we should perform a search with new values
@@ -286,7 +286,7 @@ class KanjiListActivity : AppCompatActivity() {
                     for (heisigId in heisigIds) {
                         kanjiListAdapter.updateIndicatorVisibilityWithId(heisigId)
                     }
-                    kanjiListAdapter.notifyDataSetChanged()
+//                    kanjiListAdapter.notifyDataSetChanged()
                     spinnerListener?.onSpinnerClosed() //
                 }
             }
@@ -332,6 +332,41 @@ class KanjiListActivity : AppCompatActivity() {
             FilterState.YES -> story_filter_state?.text = String.format(story, yes)
             FilterState.NO -> story_filter_state?.text = String.format(story, no)
         }
+    }
+
+    private fun initialiseDatasets() {
+        val keywordDataSource = AppDatabase.getDatabase(this).keywordDao()
+        val heisigKanjiDataSource = AppDatabase.getDatabase(this).heisigKanjiDao()
+        val primitiveDataSource = AppDatabase.getDatabase(this).primitiveDao()
+        val heisigToPrimitiveDataSource = AppDatabase.getDatabase(this).heisigToPrimitiveDao()
+
+        val allHeisigKanji = heisigKanjiDataSource.allKanji()
+        val allKeywords = keywordDataSource.allKeywords()
+        val allPrimitives = primitiveDataSource.allPrimitives()
+        val allHeisigToPrimitives = heisigToPrimitiveDataSource.getAllHeisigToPrimitive()
+
+        allHeisigKanji.observe(this, androidx.lifecycle.Observer {
+            allKeywords.observe(this, androidx.lifecycle.Observer {
+                allPrimitives.observe(this, androidx.lifecycle.Observer {
+                    allHeisigToPrimitives.observe(this, androidx.lifecycle.Observer {
+                        kanjiListAdapter.allHeisigKanji = allHeisigKanji.value!!
+                        kanjiListAdapter.allKeywords = allKeywords.value!!
+                        kanjiListAdapter.allPrimitives = allPrimitives.value!!
+                        // Instead of using a database query, prepare this data in advance in a Map.
+                        // Running a database query for each row of the table was slow and caused a ConcurrentModificationException
+                        kanjiListAdapter.primitivesForHeisigId =
+                                allHeisigToPrimitives.value!!.groupByTo(mutableMapOf(),
+                                        { value: HeisigToPrimitive -> value.heisigId },
+                                        { value -> allPrimitives.value!![value.primitiveId - 1].primitiveText })
+
+                        kanjiListAdapter.initialiseUserKeywordsAndStories()
+                        suggestionAdapter.allKeywords = allKeywords.value!!
+                        suggestionAdapter.allPrimitives = allPrimitives.value!!
+                    })
+                })
+            })
+        })
+
     }
 
     /**

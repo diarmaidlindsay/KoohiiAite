@@ -1,12 +1,13 @@
 package tech.diarmaid.koohiiaite.database.roomdao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import tech.diarmaid.koohiiaite.database.entity.UserKeyword
 
 @Dao
 interface UserKeywordDao {
     @Query("SELECT * FROM user_keyword")
-    fun allUserKeywords(): List<UserKeyword>
+    fun allUserKeywords(): LiveData<List<UserKeyword>>
 
     @Query("SELECT * FROM user_keyword where heisig_id = :heisigId limit 1")
     fun getKeywordFor(heisigId: Int): UserKeyword?

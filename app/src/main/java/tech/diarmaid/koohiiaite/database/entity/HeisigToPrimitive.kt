@@ -4,8 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import java.util.*
-import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Represent an entry in the heisig_to_primitive table
@@ -18,18 +16,13 @@ data class HeisigToPrimitive(@PrimaryKey val id: Int,
                              @ColumnInfo(name = "primitive_id") val primitiveId: Int) {
     companion object {
 
-        fun getPrimitiveIdsForHeisigId(heisigToPrimitiveList: List<HeisigToPrimitive>, heisigId: Int): List<Int> {
-            val ids = ArrayList<Int>()
-            val listLock = ReentrantLock()
-
-            listLock.lock()
+        fun getPrimitiveIdsForHeisigId(heisigToPrimitiveList: List<HeisigToPrimitive>, heisigId: Int): Set<Int> {
+            val ids = HashSet<Int>()
             for (htp in heisigToPrimitiveList) {
                 if (htp.heisigId == heisigId) {
                     ids.add(htp.primitiveId)
                 }
             }
-            listLock.unlock()
-
             return ids
         }
     }

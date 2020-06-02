@@ -1,5 +1,8 @@
 package tech.diarmaid.koohiiaite.utils
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+
 /**
  * Utility class for my application
  */
@@ -19,5 +22,19 @@ object Utils {
 
     fun isKanji(value: Char): Boolean {
         return Character.UnicodeBlock.of(value) === Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+    }
+
+    fun zipLiveData(vararg liveItems: LiveData<*>): MediatorLiveData<ArrayList<Any>> {
+        return MediatorLiveData<ArrayList<Any>>().apply {
+            val zippedObjects = ArrayList<Any>()
+            liveItems.forEach {
+                addSource(it) { item ->
+                    if (!zippedObjects.contains(item as Any)) {
+                        zippedObjects.add(item)
+                    }
+                    value = zippedObjects
+                }
+            }
+        }
     }
 }

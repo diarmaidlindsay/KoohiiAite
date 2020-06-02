@@ -17,7 +17,7 @@ data class Primitive(@PrimaryKey val id: Int,
          * Given the complete ordered list of primitives, get the primitive text of
          * the ids which are in the HeisigToPrimitive objects
          */
-        fun getPrimitiveText(primitives: List<Primitive>, primitiveIds: List<Int>): List<String> {
+        fun getPrimitiveText(primitives: List<Primitive>, primitiveIds: Set<Int>): List<String> {
             val primitiveText = ArrayList<String>()
 
             for (id in primitiveIds) {

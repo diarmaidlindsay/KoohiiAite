@@ -10,8 +10,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.fragment.DictionaryFragment
 import tech.diarmaid.koohiiaite.fragment.KoohiiFragment
@@ -19,26 +20,29 @@ import tech.diarmaid.koohiiaite.fragment.SampleWordsFragment
 import tech.diarmaid.koohiiaite.fragment.StoryFragment
 import tech.diarmaid.koohiiaite.utils.Constants.KANJI_DETAIL_TABS
 import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Invoked when user clicks a list item in the KanjiListActivity
  */
-class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments: Bundle, private val mContext: Context, viewModel: KanjiDetailViewModel?, viewLifecycleOwner: LifecycleOwner) : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments: Bundle, private val mContext: Context, viewModel: KanjiDetailViewModel?, viewLifecycleOwner: LifecycleOwner) : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT), CoroutineScope {
     private var storyFragment: StoryFragment? = null
     private var dictionaryFragment: DictionaryFragment? = null
     private var sampleWordsFragment: SampleWordsFragment? = null
     private var koohiiFragment: KoohiiFragment? = null
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
 
     init {
         viewModel?.heisigId?.observe(viewLifecycleOwner, Observer { heisigId ->
             if (heisigId > 0) {
-                doAsync {
+                launch(Dispatchers.IO) {
                     val kanji = AppDatabase.getDatabase(mContext).heisigKanjiDao().getKanjiFor(heisigId)?.kanji
                     val keyword = AppDatabase.getDatabase(mContext).keywordDao().getKeywordFor(heisigId)?.keywordText
                     val userKeyword = AppDatabase.getDatabase(mContext).userKeywordDao().getKeywordFor(heisigId)?.keywordText
                             ?: ""
                     Log.d("KanjiDetailAdapter", "Async id: $heisigId, kanji $kanji, keyword : $keyword, userkeyword : $userKeyword")
-                    uiThread {
+                    launch(Dispatchers.Main) {
                         viewModel.kanji.value = kanji
                         viewModel.keyword.value = keyword
                         viewModel.userKeyword.value = userKeyword
@@ -51,7 +55,7 @@ class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments
 
     private fun getKanjiFromDatabase(heisigId: Int): LiveData<String> {
         val data = MutableLiveData<String>()
-        doAsync {
+        launch(Dispatchers.IO) {
             val dataSource = AppDatabase.getDatabase(mContext).heisigKanjiDao()
             data.postValue(dataSource.getKanjiFor(heisigId)?.kanji)
         }
@@ -60,7 +64,7 @@ class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments
 
     private fun getKeywordFromDatabase(heisigId: Int): LiveData<String> {
         val data = MutableLiveData<String>()
-        doAsync {
+        launch(Dispatchers.IO) {
             val dataSource = AppDatabase.getDatabase(mContext).keywordDao()
             data.postValue(dataSource.getKeywordFor(heisigId)?.keywordText)
         }
@@ -69,7 +73,7 @@ class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments
 
     private fun getUserKeywordFromDatabase(heisigId: Int): LiveData<String?> {
         val data = MutableLiveData<String>()
-        doAsync {
+        launch(Dispatchers.IO) {
             val dataSource = AppDatabase.getDatabase(mContext).userKeywordDao()
             data.postValue(dataSource.getKeywordFor(heisigId)?.keywordText)
         }
@@ -126,5 +130,4 @@ class KanjiDetailAdapter(fragmentManager: FragmentManager, private val arguments
             else -> "Undefined"
         }
     }
-
 }

@@ -1,5 +1,6 @@
 package tech.diarmaid.koohiiaite.database.roomdao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import tech.diarmaid.koohiiaite.database.entity.HeisigKanji
@@ -13,6 +14,6 @@ interface HeisigKanjiDao {
     fun getHeisigFor(theKanji: String): HeisigKanji?
 
     @Query("SELECT * FROM heisig_kanji")
-    fun allKanji(): List<HeisigKanji>
+    fun allKanji(): LiveData<List<HeisigKanji>>
 }
 
