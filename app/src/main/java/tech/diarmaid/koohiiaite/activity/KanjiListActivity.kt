@@ -7,6 +7,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -14,13 +15,13 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.cursoradapter.widget.CursorAdapter
-import kotlinx.android.synthetic.main.activity_kanji_list.*
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiListAdapter
 import tech.diarmaid.koohiiaite.adapter.KanjiListFilterAdapter
 import tech.diarmaid.koohiiaite.adapter.SuggestionsAdapter
 import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.database.entity.HeisigToPrimitive
+import tech.diarmaid.koohiiaite.databinding.ActivityKanjiListBinding
 import tech.diarmaid.koohiiaite.enumeration.FilterState
 import tech.diarmaid.koohiiaite.utils.Constants.RETURN_CODE_IMPORT_STORY_ACTIVITY
 import tech.diarmaid.koohiiaite.widget.KanjiSearchView
@@ -50,6 +51,7 @@ class KanjiListActivity : AppCompatActivity() {
     private var spinnerListener: OnSpinnerEventsListener? = null
 
     private var savedInstanceState: Bundle? = null
+    private lateinit var binding: ActivityKanjiListBinding
 
     private val suggestionAdapter: SuggestionsAdapter
         get() {
@@ -69,24 +71,25 @@ class KanjiListActivity : AppCompatActivity() {
             private var text: String = ""
             var mFilterTask: Runnable = Runnable {
                 kanjiListAdapter.search(text)
-                result.text = String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
+                binding.result.text =
+                    String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
             }
-            private val mHandler = Handler()
+            private val mHandler = Looper.myLooper()?.let { Handler(it) }
 
             override fun onQueryTextSubmit(query: String): Boolean {
                 text = query
-                mHandler.removeCallbacks(mFilterTask)
-                mHandler.postDelayed(mFilterTask, 0)
+                mHandler?.removeCallbacks(mFilterTask)
+                mHandler?.postDelayed(mFilterTask, 0)
                 hideKeyboard()
-                kanjiListView.requestFocus()
+                binding.kanjiListView.requestFocus()
                 return true
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
                 text = newText
                 suggestionAdapter.populateSuggestions(getLastPart(newText))
-                mHandler.removeCallbacks(mFilterTask)
-                mHandler.postDelayed(mFilterTask, 1000)
+                mHandler?.removeCallbacks(mFilterTask)
+                mHandler?.postDelayed(mFilterTask, 1000)
                 return true
             }
         }
@@ -136,12 +139,14 @@ class KanjiListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //if onCreate was called after rotation, we need saved bundle for options menu
         this.savedInstanceState = savedInstanceState
-        setContentView(R.layout.activity_kanji_list)
+        binding = ActivityKanjiListBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         val spinnerValues = arrayOf("n/a, Yes, No")
         kanjiListFilterAdapter = KanjiListFilterAdapter(this, R.id.filter_spinner, spinnerValues)
         kanjiListAdapter = KanjiListAdapter(this)
-        kanjiListView.adapter = kanjiListAdapter
+        binding.kanjiListView.adapter = kanjiListAdapter
         initialiseDatasets()
         //created here because must be re-created if list activity is destroyed
         spinnerListener = object : OnSpinnerEventsListener {
@@ -150,9 +155,10 @@ class KanjiListActivity : AppCompatActivity() {
 
             var mFilterTask: Runnable = Runnable {
                 kanjiListAdapter.search(searchView?.query.toString())
-                result?.text = String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
+                binding.result?.text =
+                    String.format(Locale.getDefault(), "%d items displayed", kanjiListAdapter.count)
             }
-            private val mHandler = Handler()
+            private val mHandler = Looper.myLooper()?.let { Handler(it) }
 
             override fun notifyContentsChange() {
                 changed = true
@@ -164,7 +170,7 @@ class KanjiListActivity : AppCompatActivity() {
 
             override fun onSpinnerClosed() {
                 if (changed) {
-                    mHandler.postDelayed(mFilterTask, 0)
+                    mHandler?.postDelayed(mFilterTask, 0)
                 }
             }
         }
@@ -316,21 +322,21 @@ class KanjiListActivity : AppCompatActivity() {
         val no = "X"
 
         when (joyoFilter) {
-            FilterState.UNSET -> joyo_filter_state?.text = String.format(joyo, unset)
-            FilterState.YES -> joyo_filter_state?.text = String.format(joyo, yes)
-            FilterState.NO -> joyo_filter_state?.text = String.format(joyo, no)
+            FilterState.UNSET -> binding.joyoFilterState.text = String.format(joyo, unset)
+            FilterState.YES -> binding.joyoFilterState.text = String.format(joyo, yes)
+            FilterState.NO -> binding.joyoFilterState.text = String.format(joyo, no)
         }
 
         when (keywordFilter) {
-            FilterState.UNSET -> keyword_filter_state?.text = String.format(keyword, unset)
-            FilterState.YES -> keyword_filter_state?.text = String.format(keyword, yes)
-            FilterState.NO -> keyword_filter_state?.text = String.format(keyword, no)
+            FilterState.UNSET -> binding.keywordFilterState.text = String.format(keyword, unset)
+            FilterState.YES -> binding.keywordFilterState.text = String.format(keyword, yes)
+            FilterState.NO -> binding.keywordFilterState.text = String.format(keyword, no)
         }
 
         when (storyFilter) {
-            FilterState.UNSET -> story_filter_state?.text = String.format(story, unset)
-            FilterState.YES -> story_filter_state?.text = String.format(story, yes)
-            FilterState.NO -> story_filter_state?.text = String.format(story, no)
+            FilterState.UNSET -> binding.storyFilterState.text = String.format(story, unset)
+            FilterState.YES -> binding.storyFilterState.text = String.format(story, yes)
+            FilterState.NO -> binding.storyFilterState.text = String.format(story, no)
         }
     }
 

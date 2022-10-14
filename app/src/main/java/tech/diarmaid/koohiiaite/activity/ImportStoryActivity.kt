@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_import_story.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,6 +16,7 @@ import tech.diarmaid.koohiiaite.adapter.ImportStoryAdapter
 import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.database.entity.Story
 import tech.diarmaid.koohiiaite.database.entity.UserKeyword
+import tech.diarmaid.koohiiaite.databinding.ActivityImportStoryBinding
 import tech.diarmaid.koohiiaite.interfaces.OnCSVParseCompleted
 import tech.diarmaid.koohiiaite.interfaces.OnDatabaseOperationCompleted
 import tech.diarmaid.koohiiaite.model.CSVEntry
@@ -37,33 +37,35 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     private val userKeywordDataSource = AppDatabase.getDatabase(this).userKeywordDao()
     private val storyDataSource = AppDatabase.getDatabase(this).storyDao()
     private val keywordDataSource = AppDatabase.getDatabase(this).keywordDao()
+    private lateinit var binding: ActivityImportStoryBinding
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityImportStoryBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        setContentView(R.layout.activity_import_story)
+        binding.storyImportButtonChooseFile.setOnClickListener { openFileChooser() }
 
-        story_import_button_choose_file.setOnClickListener { openFileChooser() }
-
-        story_import_button_cancel_import.setOnClickListener {
+        binding.storyImportButtonCancelImport.setOnClickListener {
             resetView()
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
 
         listAdapter = ImportStoryAdapter(this)
-        story_import_button_confirm_import.setOnClickListener { writeToDatabase(this) }
-        import_story_listView.adapter = listAdapter
-        story_import_button_cancel_import.isEnabled = listAdapter.count > 0
-        story_import_button_confirm_import.isEnabled = listAdapter.count > 0
+        binding.storyImportButtonConfirmImport.setOnClickListener { writeToDatabase(this) }
+        binding.importStoryListView.adapter = listAdapter
+        binding.storyImportButtonCancelImport.isEnabled = listAdapter.count > 0
+        binding.storyImportButtonConfirmImport.isEnabled = listAdapter.count > 0
     }
 
     private fun resetView() {
         listAdapter.clearStories()
-        story_import_button_confirm_import.isEnabled = false
-        story_import_button_cancel_import.isEnabled = false
+        binding.storyImportButtonConfirmImport.isEnabled = false
+        binding.storyImportButtonCancelImport.isEnabled = false
         listAdapter.notifyDataSetChanged()
     }
 
@@ -84,13 +86,13 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun readCSV(importStoryAdapter: ImportStoryAdapter, uri: Uri?, csvListener: OnCSVParseCompleted) {
-        story_import_status.text = getText(R.string.progress_status_csv)
+        binding.storyImportStatus.text = getText(R.string.progress_status_csv)
         setOperationInProgress(true)
         launch(Dispatchers.IO) {
             val entries = ArrayList<CSVEntry>()
             val csvSplitBy = ","
             importStoryAdapter.clearStories()
-            uri.let { it ->
+            uri.let {
                 contentResolver?.openInputStream(it as Uri).use { inputStream ->
                     BufferedReader(InputStreamReader(inputStream)).use { reader ->
                         val csvLineReader = CSVLineReader(reader)
@@ -138,7 +140,7 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
             }
 
             launch(Dispatchers.Main) {
-                story_import_status.text = getText(R.string.progress_status_database)
+                binding.storyImportStatus.text = getText(R.string.progress_status_database)
                 setOperationInProgress(true)
             }
 
@@ -160,10 +162,11 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
     }
 
     private fun setOperationInProgress(progress: Boolean) {
-        story_import_button_cancel_import.visibility = if (progress) View.GONE else View.VISIBLE
-        story_import_button_choose_file.visibility = if (progress) View.GONE else View.VISIBLE
-        story_import_button_confirm_import.visibility = if (progress) View.GONE else View.VISIBLE
-        story_import_progress_bar.visibility = if (progress) View.VISIBLE else View.GONE
+        binding.storyImportButtonCancelImport.visibility = if (progress) View.GONE else View.VISIBLE
+        binding.storyImportButtonChooseFile.visibility = if (progress) View.GONE else View.VISIBLE
+        binding.storyImportButtonConfirmImport.visibility =
+            if (progress) View.GONE else View.VISIBLE
+        binding.storyImportProgressBar.visibility = if (progress) View.VISIBLE else View.GONE
     }
 
     override fun onImportCompleted(affectedIds: List<Int>) {
@@ -184,11 +187,15 @@ class ImportStoryActivity : AppCompatActivity(), OnDatabaseOperationCompleted, O
         if (parsedEntries.isNotEmpty()) {
             listAdapter.setStories(parsedEntries)
             listAdapter.notifyDataSetChanged()
-            story_import_button_confirm_import.isEnabled = true
-            story_import_button_cancel_import.isEnabled = true
+            binding.storyImportButtonConfirmImport.isEnabled = true
+            binding.storyImportButtonCancelImport.isEnabled = true
             Toast.makeText(this, "CSV file import successful", Toast.LENGTH_SHORT).show()
-            story_import_progress_bar.visibility = View.GONE
-            story_import_status.text = String.format(Locale.getDefault(), "%d stories found for import.", listAdapter.count)
+            binding.storyImportProgressBar.visibility = View.GONE
+            binding.storyImportStatus.text = String.format(
+                Locale.getDefault(),
+                "%d stories found for import.",
+                listAdapter.count
+            )
         } else {
             Toast.makeText(this, "Failed to read CSV file", Toast.LENGTH_SHORT).show()
         }

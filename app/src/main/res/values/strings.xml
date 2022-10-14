@@ -3,7 +3,6 @@
 
     <string name="action_settings">Settings</string>
     <string name="search_hint">Primitives, Keyword, Kanji, Frame #</string>
-    <string name="unSet">unSet</string>
     <string name="default_results_text">All items displayed</string>
     <string name="fragment_kanji_label">Kanji</string>
     <string name="story_fragment_heisigid_label">Heisig Frame #</string>
@@ -42,15 +41,11 @@
     <string name="action_import_story">Import Stories</string>
     <string name="progress_status_csv">Please wait while importing CSV</string>
     <string name="progress_status_database">Please wait while adding to database</string>
-    <string name="title_choose_csv">Locate my_stories.csv</string>
     <string-array name="values_array_filter">
         <item>Unset</item>
         <item>Yes</item>
         <item>No</item>
     </string-array>
-    <string name="empty_directory">Empty Directory</string>
-    <string name="storage_removed">Storage was removed or unmounted.</string>
-    <string name="error_selecting_file">Error selecting File</string>
     <string name="button_koohii">Open %s in Koohii</string>
     <string name="description_primitive_image">Primitive Image</string>
     <string name="keyword_hint">New Keyword</string>

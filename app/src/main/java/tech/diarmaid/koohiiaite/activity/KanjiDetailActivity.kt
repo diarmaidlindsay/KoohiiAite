@@ -7,11 +7,10 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
-import kotlinx.android.synthetic.main.fragment_detail.*
+import androidx.viewpager.widget.ViewPager
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.fragment.KanjiDetailFragment
 import tech.diarmaid.koohiiaite.utils.Utils
-import java.util.*
 
 
 class KanjiDetailActivity : AppCompatActivity() {
@@ -32,10 +31,9 @@ class KanjiDetailActivity : AppCompatActivity() {
             if (fragmentList.isNotEmpty()) {
                 val fragment = fragmentList[fragmentList.size - 1]
                 if (fragment is KanjiDetailFragment) {
-                    return fragment.vpPager.currentItem
+                    return fragment.view?.findViewById<ViewPager>(R.id.vpPager)?.currentItem ?: -1
                 }
             }
-
             return -1
         }
 
@@ -73,10 +71,9 @@ class KanjiDetailActivity : AppCompatActivity() {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
 
-        when (id) {
-        // Respond to the action bar's Up/Home button
+        when (item.itemId) {
+            // Respond to the action bar's Up/Home button
             android.R.id.home -> {
                 NavUtils.navigateUpFromSameTask(this)
                 return true
@@ -138,7 +135,7 @@ class KanjiDetailActivity : AppCompatActivity() {
                 prevButton?.icon?.alpha = 255
             }
 
-            if (currentIndex == filteredIdList?.size?.minus(1) ?: 0) {
+            if (currentIndex == (filteredIdList?.size?.minus(1) ?: 0)) {
                 nextButton?.isEnabled = false
                 nextButton?.icon?.alpha = 130
 
