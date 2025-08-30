@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light">
         <item name="android:colorBackground">@color/ka_bright2</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:actionMenuTextColor">@android:color/black</item>
@@ -16,6 +16,9 @@
         <!-- it seems to be activated when I press a widget -->
         <item name="colorAccent">@android:color/holo_red_dark</item>
         <item name="colorControlNormal">@android:color/holo_blue_dark</item>
+        <!-- Material Design specific theme attributes -->
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.OutlinedButton
+        </item>
     </style>
 
     <style name="MyActionButtonStyle">

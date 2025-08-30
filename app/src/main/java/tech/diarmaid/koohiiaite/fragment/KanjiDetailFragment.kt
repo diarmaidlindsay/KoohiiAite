@@ -7,9 +7,8 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import kotlinx.android.synthetic.main.fragment_detail.*
-import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.adapter.KanjiDetailAdapter
+import tech.diarmaid.koohiiaite.databinding.FragmentDetailBinding
 import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
 
 /**
@@ -19,6 +18,8 @@ import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
  */
 class KanjiDetailFragment(val heisigId: Int) : Fragment() {
 
+    private var _binding: FragmentDetailBinding? = null
+    private val binding get() = _binding!!
     var currentPagerIndex: Int = 0
     private var adapterViewPager : KanjiDetailAdapter? = null
     private var viewModel: KanjiDetailViewModel? = null
@@ -29,20 +30,29 @@ class KanjiDetailFragment(val heisigId: Int) : Fragment() {
         viewModel?.heisigId?.postValue(heisigId)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         //fragment instance is retained across Activity re-creation (device rotation)
         retainInstance = true //may cause memory leaks according to stackoverflow
         val parent = activity as AppCompatActivity?
-        val view = inflater.inflate(R.layout.fragment_detail, container, false)
+        _binding = FragmentDetailBinding.inflate(inflater, container, false)
         adapterViewPager = KanjiDetailAdapter(childFragmentManager, arguments!!, parent!!, viewModel, viewLifecycleOwner)
-
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        currentPagerIndex = vpPager.currentItem
-        vpPager.adapter = adapterViewPager
-        vpPager.currentItem = arguments?.getInt("currentPage") ?:0  //preserve page between next/prev operations
+        currentPagerIndex = binding.vpPager.currentItem
+        binding.vpPager.adapter = adapterViewPager
+        binding.vpPager.currentItem =
+            arguments?.getInt("currentPage") ?: 0  //preserve page between next/prev operations
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

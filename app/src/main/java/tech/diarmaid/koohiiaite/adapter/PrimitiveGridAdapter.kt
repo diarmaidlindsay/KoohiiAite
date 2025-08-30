@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import tech.diarmaid.koohiiaite.R
 import java.io.IOException
+import java.util.Locale.getDefault
 
 /**
  * For Primitives Grid accessed from Main Activity Settings menu
@@ -76,14 +77,14 @@ class PrimitiveGridAdapter(private val mContext: Context) : BaseAdapter() {
             sb.append(" ")
         }
 
-        var spaced = sb.toString().trim { it <= ' ' }.toLowerCase()
+        var spaced = sb.toString().trim { it <= ' ' }.lowercase(getDefault())
         val uppercase = spaced[0].toString()
-        spaced = spaced.replaceFirst(uppercase.toRegex(), uppercase.toUpperCase())
+        spaced = spaced.replaceFirst(uppercase.toRegex(), uppercase.uppercase(getDefault()))
         return spaced
     }
 
     @Throws(IOException::class)
-    private fun getImage(fileName: String): Drawable {
+    private fun getImage(fileName: String): Drawable? {
         // get input stream
         val ims = mContext.assets.open("$imageFolder/$fileName")
         // load image as Drawable

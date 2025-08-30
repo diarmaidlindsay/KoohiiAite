@@ -2,10 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter() //required for multistatetogglebutton
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.12.2'
     }
 }
 apply plugin: 'com.android.application'
@@ -13,13 +12,20 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 33
-
     buildTypes {
         release {
             minifyEnabled false
             return true
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    kotlin {
+        jvmToolchain(21)
     }
 
     buildFeatures {
@@ -30,7 +36,8 @@ android {
     defaultConfig {
         applicationId "tech.diarmaid.koohiiaite"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
+        compileSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -48,24 +55,26 @@ android {
     }
     namespace 'tech.diarmaid.koohiiaite'
 
-    tasks.withType(Test) {
-        systemProperty "robolectric.logging", "stdout"
+    tasks.withType(Test).tap {
+        configureEach {
+            systemProperty "robolectric.logging", "stdout"
+        }
     }
 }
 dependencies {
-    implementation "androidx.room:room-runtime:2.4.3"
-    kapt "androidx.room:room-compiler:2.4.3"
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "androidx.room:room-runtime:2.7.2"
+    kapt "androidx.room:room-compiler:2.7.2"
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'org.honorato.multistatetogglebutton:multistatetogglebutton:0.2.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:3.5.13'
-    testImplementation "androidx.room:room-testing:2.4.3"
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'org.mockito:mockito-core:5.19.0'
+    testImplementation "androidx.room:room-testing:2.7.2"
+    testImplementation 'org.robolectric:robolectric:4.16'
     testImplementation 'com.android.support.test:rules:1.0.2'
     testImplementation 'com.android.support.test:runner:1.0.2'
     testImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

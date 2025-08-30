@@ -26,7 +26,6 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import kotlinx.android.synthetic.main.fragment_detail_story.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,9 +35,10 @@ import tech.diarmaid.koohiiaite.database.AppDatabase
 import tech.diarmaid.koohiiaite.database.entity.HeisigKanji
 import tech.diarmaid.koohiiaite.database.entity.Keyword
 import tech.diarmaid.koohiiaite.database.entity.UserKeyword
+import tech.diarmaid.koohiiaite.databinding.FragmentDetailStoryBinding
 import tech.diarmaid.koohiiaite.utils.Utils
 import tech.diarmaid.koohiiaite.viewmodel.KanjiDetailViewModel
-import java.util.*
+import java.util.Locale
 import java.util.regex.Pattern
 import kotlin.coroutines.CoroutineContext
 
@@ -48,6 +48,8 @@ import kotlin.coroutines.CoroutineContext
  * Follow links from stories to other Kanji detail pages.
  */
 class StoryFragment() : Fragment(), CoroutineScope {
+    private var _binding: FragmentDetailStoryBinding? = null
+    private val binding get() = _binding!!
     private var heisigIdInt: Int = 0
     private var userKeyword: String? = null
     private var originalKeyword: String? = null
@@ -57,8 +59,12 @@ class StoryFragment() : Fragment(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_detail_story, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentDetailStoryBinding.inflate(inflater, container, false)
         mContext.observe(viewLifecycleOwner, Observer { context ->
             keywordDialog = Dialog(context as AppCompatActivity)
             keywordDialog?.setContentView(R.layout.dialog_box_keyword)
@@ -68,7 +74,7 @@ class StoryFragment() : Fragment(), CoroutineScope {
         viewModel = ViewModelProvider(parentFragment as KanjiDetailFragment).get(KanjiDetailViewModel::class.java)
         viewModel?.kanji?.observe(viewLifecycleOwner, Observer {
             it?.let {
-                kanji_detail?.text = it
+                binding.kanjiDetail.text = it
             }
         })
         viewModel?.keyword?.observe(viewLifecycleOwner, Observer {
@@ -80,7 +86,7 @@ class StoryFragment() : Fragment(), CoroutineScope {
         viewModel?.heisigId?.observe(viewLifecycleOwner, Observer {
             it?.let {
                 heisigIdInt = it
-                heisig_id_detail?.text = HeisigKanji.getHeisigIdAsString(heisigIdInt)
+                binding.heisigIdDetail.text = HeisigKanji.getHeisigIdAsString(heisigIdInt)
             }
         })
 
@@ -97,7 +103,10 @@ class StoryFragment() : Fragment(), CoroutineScope {
                                         formattedStory = formatStory(story)
                                     }.invokeOnCompletion {
                                         (context as? AppCompatActivity)?.runOnUiThread(Runnable {
-                                            story_detail?.setText(formattedStory, TextView.BufferType.SPANNABLE)
+                                            binding.storyDetail.setText(
+                                                formattedStory,
+                                                TextView.BufferType.SPANNABLE
+                                            )
                                         })
                                     }
                                 }
@@ -126,7 +135,7 @@ class StoryFragment() : Fragment(), CoroutineScope {
             })
         }
 
-        view.findViewById<Button>(R.id.keyword_detail).setOnClickListener {
+        binding.keywordDetail.setOnClickListener {
             val keywordEditText = keywordDialog?.findViewById<EditText>(R.id.keyword_dialog_edittext)
             val submitButton = keywordDialog?.findViewById<Button>(R.id.keyword_dialog_submit_button)
             val buttonDefault = keywordDialog?.findViewById<Button>(R.id.keyword_dialog_default_button)
@@ -156,8 +165,8 @@ class StoryFragment() : Fragment(), CoroutineScope {
             keywordDialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
         }
 
-        story_detail?.movementMethod = LinkMovementMethod.getInstance()
-        return view
+        binding.storyDetail.movementMethod = LinkMovementMethod.getInstance()
+        return binding.root
     }
 
     /**
@@ -262,8 +271,12 @@ class StoryFragment() : Fragment(), CoroutineScope {
         //any time the keyword is mentioned in the story, mark it as bold
         //we can use plain integer array to hold indexes instead of StoryFormat objects because indexes don't need adjustment
         val keywordSpanStarts = ArrayList<Int>()
-        val keywordPattern = Pattern.compile((if (userKeyword.isNullOrBlank()) originalKeyword else userKeyword)!!.toLowerCase(Locale.getDefault()))
-        val keywordMatcher = keywordPattern.matcher(storyText.toLowerCase(Locale.getDefault()))
+        val keywordPattern = Pattern.compile(
+            (if (userKeyword.isNullOrBlank()) originalKeyword else userKeyword)!!.lowercase(
+                Locale.getDefault()
+            )
+        )
+        val keywordMatcher = keywordPattern.matcher(storyText.lowercase(Locale.getDefault()))
         while (keywordMatcher.find()) {
             keywordSpanStarts.add(keywordMatcher.start())
         }
@@ -482,12 +495,17 @@ class StoryFragment() : Fragment(), CoroutineScope {
 
     private fun updateKeywordButton() {
         if (userKeyword.isNullOrBlank()) {
-            keyword_detail?.text = originalKeyword
+            binding.keywordDetail.text = originalKeyword
         } else {
             val keywordText = SpannableString("$userKeyword ($originalKeyword)")
             keywordText.setSpan(TextAppearanceSpan(activity, R.style.GreyItalicSmallText), userKeyword!!.length, keywordText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            keyword_detail.setText(keywordText, TextView.BufferType.SPANNABLE)
+            binding.keywordDetail.setText(keywordText, TextView.BufferType.SPANNABLE)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     /**

@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-
-import org.honorato.multistatetogglebutton.MultiStateToggleButton
-
+import com.google.android.material.button.MaterialButtonToggleGroup
 import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.activity.KanjiListActivity
 import tech.diarmaid.koohiiaite.enumeration.FilterState
@@ -39,36 +37,62 @@ class KanjiListFilterAdapter(private val mContext: Context, resource: Int, objec
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.spinner_filter, parent, false)
             viewHolder = ViewHolderItem()
-            viewHolder.joyoButton = convertView!!.findViewById(R.id.toggle_joyo)
-            viewHolder.keywordButton = convertView.findViewById(R.id.toggle_keyword)
-            viewHolder.storyButton = convertView.findViewById(R.id.toggle_story)
-            viewHolder.joyoButton!!.value = joyoFilter.stateNum
-            viewHolder.keywordButton!!.value = keywordFilter.stateNum
-            viewHolder.storyButton!!.value = storyFilter.stateNum
+            viewHolder.joyoGroup = convertView!!.findViewById(R.id.toggle_joyo)
+            viewHolder.keywordGroup = convertView.findViewById(R.id.toggle_keyword)
+            viewHolder.storyGroup = convertView.findViewById(R.id.toggle_story)
+
+            // Set initial states
+            setToggleGroupState(viewHolder.joyoGroup, joyoFilter.stateNum)
+            setToggleGroupState(viewHolder.keywordGroup, keywordFilter.stateNum)
+            setToggleGroupState(viewHolder.storyGroup, storyFilter.stateNum)
 
             convertView.tag = viewHolder
         } else {
             viewHolder = convertView.tag as ViewHolderItem
         }
 
-        viewHolder.joyoButton!!.setOnValueChangedListener { i ->
-            joyoFilter = FilterState.getStateFor(i)
-            if (mContext is KanjiListActivity) {
-                mContext.notifyFilterChanged()
+        viewHolder.joyoGroup!!.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val state = when (checkedId) {
+                    R.id.toggle_joyo_all -> FilterState.UNSET
+                    R.id.toggle_joyo_yes -> FilterState.YES
+                    R.id.toggle_joyo_no -> FilterState.NO
+                    else -> FilterState.UNSET
+                }
+                joyoFilter = state
+                if (mContext is KanjiListActivity) {
+                    mContext.notifyFilterChanged()
+                }
             }
         }
 
-        viewHolder.keywordButton!!.setOnValueChangedListener { i ->
-            keywordFilter = FilterState.getStateFor(i)
-            if (mContext is KanjiListActivity) {
-                mContext.notifyFilterChanged()
+        viewHolder.keywordGroup!!.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val state = when (checkedId) {
+                    R.id.toggle_keyword_all -> FilterState.UNSET
+                    R.id.toggle_keyword_yes -> FilterState.YES
+                    R.id.toggle_keyword_no -> FilterState.NO
+                    else -> FilterState.UNSET
+                }
+                keywordFilter = state
+                if (mContext is KanjiListActivity) {
+                    mContext.notifyFilterChanged()
+                }
             }
         }
 
-        viewHolder.storyButton!!.setOnValueChangedListener { i ->
-            storyFilter = FilterState.getStateFor(i)
-            if (mContext is KanjiListActivity) {
-                mContext.notifyFilterChanged()
+        viewHolder.storyGroup!!.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val state = when (checkedId) {
+                    R.id.toggle_story_all -> FilterState.UNSET
+                    R.id.toggle_story_yes -> FilterState.YES
+                    R.id.toggle_story_no -> FilterState.NO
+                    else -> FilterState.UNSET
+                }
+                storyFilter = state
+                if (mContext is KanjiListActivity) {
+                    mContext.notifyFilterChanged()
+                }
             }
         }
 
@@ -87,9 +111,20 @@ class KanjiListFilterAdapter(private val mContext: Context, resource: Int, objec
         storyFilter = FilterState.getStateFor(value!!)
     }
 
+    private fun setToggleGroupState(group: MaterialButtonToggleGroup?, state: Int) {
+        if (group == null) return
+        val buttonId = when (state) {
+            0 -> group.getChildAt(0).id // All
+            1 -> group.getChildAt(1).id // Yes
+            2 -> group.getChildAt(2).id // No
+            else -> group.getChildAt(0).id
+        }
+        group.check(buttonId)
+    }
+
     internal class ViewHolderItem {
-        var joyoButton: MultiStateToggleButton? = null
-        var keywordButton: MultiStateToggleButton? = null
-        var storyButton: MultiStateToggleButton? = null
+        var joyoGroup: MaterialButtonToggleGroup? = null
+        var keywordGroup: MaterialButtonToggleGroup? = null
+        var storyGroup: MaterialButtonToggleGroup? = null
     }
 }

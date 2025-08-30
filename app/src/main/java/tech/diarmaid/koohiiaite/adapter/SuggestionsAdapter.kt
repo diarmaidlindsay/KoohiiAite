@@ -17,7 +17,9 @@ import tech.diarmaid.koohiiaite.R
 import tech.diarmaid.koohiiaite.database.entity.Keyword
 import tech.diarmaid.koohiiaite.database.entity.Primitive
 import java.text.Normalizer
-import java.util.*
+import java.util.Collections
+import java.util.Locale
+import java.util.Locale.getDefault
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -43,10 +45,10 @@ class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<
         // ignore case and accents
         // the same thing should have been done for the search text
         val normalizedText = Normalizer
-                .normalize(originalText, Normalizer.Form.NFD)
-                .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
-                .toLowerCase(Locale.getDefault())
-        var start = normalizedText.indexOf(search.toLowerCase(Locale.getDefault()))
+            .normalize(originalText, Normalizer.Form.NFD)
+            .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+            .lowercase(Locale.getDefault())
+        var start = normalizedText.indexOf(search.lowercase(Locale.getDefault()))
         if (start < 0) {
             // not found, nothing to to
             return originalText
@@ -76,7 +78,7 @@ class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<
             val queries = query.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             query = queries[queries.size - 1]
         }
-        query = query.toLowerCase().trim { it <= ' ' }
+        query = query.lowercase(getDefault()).trim { it <= ' ' }
         queryNow = query
 
         if (query.length < 2) {
@@ -90,19 +92,19 @@ class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<
         //some text was deleted so we should fall back to suggest from all primitives and keywords
         if (previousQuery == null || query.length < previousQuery!!.length) {
             for (primitive in allPrimitives) {
-                if (primitive.primitiveText.toLowerCase().contains(query)) {
+                if (primitive.primitiveText.lowercase(getDefault()).contains(query)) {
                     suggestionsSet.add(primitive.primitiveText)
                 }
             }
 
             for (keyword in allKeywords) {
-                if (keyword.keywordText.toLowerCase().contains(query)) {
+                if (keyword.keywordText.lowercase(getDefault()).contains(query)) {
                     suggestionsSet.add(keyword.keywordText)
                 }
             }
         } else {
             for (text in suggestionsList!!) {
-                if (text.toLowerCase().contains(query)) {
+                if (text.lowercase(getDefault()).contains(query)) {
                     suggestionsSet.add(text)
                 }
             }
@@ -121,7 +123,7 @@ class SuggestionsAdapter(context: Context, layout: Int, c: Cursor?, from: Array<
         override fun compare(o1: Any, o2: Any): Int {
             val s1 = o1 as String
             val s2 = o2 as String
-            return s1.toLowerCase().compareTo(s2.toLowerCase())
+            return s1.lowercase(getDefault()).compareTo(s2.lowercase(getDefault()))
         }
     }
 }

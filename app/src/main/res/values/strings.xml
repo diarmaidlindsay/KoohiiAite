@@ -41,11 +41,9 @@
     <string name="action_import_story">Import Stories</string>
     <string name="progress_status_csv">Please wait while importing CSV</string>
     <string name="progress_status_database">Please wait while adding to database</string>
-    <string-array name="values_array_filter">
-        <item>Unset</item>
-        <item>Yes</item>
-        <item>No</item>
-    </string-array>
+    <string name="filter_all">All</string>
+    <string name="filter_yes">Yes</string>
+    <string name="filter_no">No</string>
     <string name="button_koohii">Open %s in Koohii</string>
     <string name="description_primitive_image">Primitive Image</string>
     <string name="keyword_hint">New Keyword</string>

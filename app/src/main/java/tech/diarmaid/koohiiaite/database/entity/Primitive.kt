@@ -3,7 +3,7 @@ package tech.diarmaid.koohiiaite.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.*
+import java.util.Locale.getDefault
 
 /**
  * Represent an entry in the primitive table
@@ -32,10 +32,12 @@ data class Primitive(@PrimaryKey val id: Int,
         fun getPrimitiveIdsContaining(aPrimitiveTextQuery: String, primitives: List<Primitive>, ignoreCase: Boolean): List<Int> {
             var primitiveTextQuery = aPrimitiveTextQuery
             val primitiveIds = ArrayList<Int>()
-            primitiveTextQuery = if (ignoreCase) primitiveTextQuery.toLowerCase() else primitiveTextQuery
+            primitiveTextQuery =
+                if (ignoreCase) primitiveTextQuery.lowercase(getDefault()) else primitiveTextQuery
 
             for (primitive in primitives) {
-                val primitiveListText = if (ignoreCase) primitive.primitiveText.toLowerCase() else primitive.primitiveText
+                val primitiveListText =
+                    if (ignoreCase) primitive.primitiveText.lowercase(getDefault()) else primitive.primitiveText
                 if (primitiveListText.contains(primitiveTextQuery)) {
                     primitiveIds.add(primitive.id)
                 }
@@ -46,10 +48,12 @@ data class Primitive(@PrimaryKey val id: Int,
 
         fun getPrimitiveIdWhichMatches(aPrimitiveTextQuery: String, primitives: List<Primitive>, ignoreCase: Boolean): Int {
             var primitiveTextQuery = aPrimitiveTextQuery
-            primitiveTextQuery = if (ignoreCase) primitiveTextQuery.toLowerCase() else primitiveTextQuery
+            primitiveTextQuery =
+                if (ignoreCase) primitiveTextQuery.lowercase(getDefault()) else primitiveTextQuery
 
             for (primitive in primitives) {
-                val primitiveListText = if (ignoreCase) primitive.primitiveText.toLowerCase() else primitive.primitiveText
+                val primitiveListText =
+                    if (ignoreCase) primitive.primitiveText.lowercase(getDefault()) else primitive.primitiveText
                 if (primitiveListText == primitiveTextQuery) {
                     return primitive.id
                 }

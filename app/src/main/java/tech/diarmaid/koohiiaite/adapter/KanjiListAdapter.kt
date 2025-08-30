@@ -26,7 +26,7 @@ import tech.diarmaid.koohiiaite.database.entity.Keyword
 import tech.diarmaid.koohiiaite.database.entity.Primitive
 import tech.diarmaid.koohiiaite.enumeration.FilterState
 import tech.diarmaid.koohiiaite.utils.Utils
-import java.util.*
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -148,7 +148,7 @@ class KanjiListAdapter(private val mContext: Context) : BaseAdapter(), Coroutine
      */
     fun search(aSearchString: String) {
         var searchString = aSearchString
-        searchString = searchString.toLowerCase(Locale.getDefault())
+        searchString = searchString.lowercase(Locale.getDefault())
         filteredHeisigKanjiSet.clear()
 
         if (searchString.isNotEmpty()) {
@@ -204,7 +204,7 @@ class KanjiListAdapter(private val mContext: Context) : BaseAdapter(), Coroutine
      */
     private fun filterOnKeyword(filterText: String) {
         for (keyword in allKeywords) {
-            if (keyword.keywordText.toLowerCase(Locale.getDefault()).contains(filterText)) {
+            if (keyword.keywordText.lowercase(Locale.getDefault()).contains(filterText)) {
                 filteredHeisigKanjiSet.add(keyword.heisigId)
             }
         }
@@ -218,7 +218,7 @@ class KanjiListAdapter(private val mContext: Context) : BaseAdapter(), Coroutine
         for (i in 0 until mapSize) {
             val kanjiIndex = heisigKanjiToUserKeyword.keyAt(i)
             val userKeyword = heisigKanjiToUserKeyword.get(kanjiIndex)
-            if (userKeyword.toLowerCase(Locale.getDefault()).contains(filterText)) {
+            if (userKeyword.lowercase(Locale.getDefault()).contains(filterText)) {
                 filteredHeisigKanjiSet.add(kanjiIndex)
             }
         }
