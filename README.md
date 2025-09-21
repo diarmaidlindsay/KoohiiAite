@@ -20,3 +20,100 @@ Besides that, the website is lacking features such as the ability to look up kan
 
 This has motivated me to create a companion application, KoohiiAite, to address these shortcomings, and make it
 simple for Heisig students to quickly lookup kanji and read/write stories wherever they happen to be.
+
+## Features
+
+### 1. Kanji List and Search
+
+- View all kanji in a scrollable list
+- Search functionality supporting:
+  - Primitives
+  - Keywords
+  - Kanji characters
+  - Frame numbers (Heisig Index)
+- Advanced filtering options:
+  - Jōyō kanji filter
+  - Custom keyword filter
+  - Story filter
+
+### 2. Kanji Detail View
+
+The app provides detailed information about each kanji character through four main tabs:
+
+#### Kanji Tab
+
+- Displays the kanji character
+- Shows the Heisig frame number
+- Lists associated primitives used in the kanji
+
+#### Dictionary Tab
+
+- Displays On'yomi (音読み) readings
+- Displays Kun'yomi (訓読み) readings
+- Shows various meanings of the kanji
+- Includes frequency information
+
+#### Story Tab
+
+- View and edit your custom stories for remembering kanji
+- Links to primitives within stories for quick reference
+- Last edited timestamp for stories
+- Support for importing stories from CSV files
+
+#### Koohii Tab
+
+- Direct integration with Koohii.com
+- View top 20 stories from the community
+- Access to favorited stories (when signed in)
+
+### 3. Primitive Management
+
+- Grid view of all primitive elements
+- View primitive images
+- Custom naming/labeling of primitives
+- Reference system linking primitives to kanji
+
+### 4. Data Import/Export
+
+- Import stories from CSV files
+- Preview imported data before confirming
+- Progress tracking for import operations
+
+### 5. Database Features
+
+The app uses a local SQLite database (Room) with the following main entities:
+
+- HeisigKanji: Base kanji information and Jōyō status
+- Primitive: Fundamental elements used in kanji
+- Keyword: Default keywords for kanji
+- UserKeyword: Custom user-defined keywords
+- Story: User-created memory stories
+- Reading: On'yomi and Kun'yomi readings
+- Meaning: Various meanings of kanji
+- SampleWord: Example words using the kanji
+- KanjiFrequency: Usage frequency data
+
+## Technical Details
+
+### Implementation
+
+- Written in Kotlin
+- Uses Android Architecture Components (Room, ViewModel, LiveData)
+- Material Design UI components
+- ViewPager for detail view navigation
+- Coroutines for asynchronous operations
+
+### Database Structure
+
+- Pre-populated database with kanji information
+- Support for user-generated content (stories, custom keywords)
+- Foreign key relationships maintaining data integrity
+- Efficient querying for search and filtering operations
+
+## Usage
+
+1. **Main Screen**: Browse through the kanji list or use the search bar to find specific characters
+2. **Detail View**: Tap any kanji to view detailed information
+3. **Story Creation**: Add your own stories to help remember kanji
+4. **Primitive Reference**: Access the primitive list from the main menu to study basic elements
+5. **Import Stories**: Use the import feature to bulk-load stories from CSV files
