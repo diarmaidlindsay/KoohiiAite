@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="ka_bright2" type="color">#BAE397</item>
-    <item name="ka_bright1" type="color">#8ABD5F</item>
-    <item name="ka_neutral" type="color">#609732</item>
-    <item name="ka_dark1" type="color">#3E7213</item>
-    <item name="ka_dark2" type="color">#224C00</item>
-</resources>

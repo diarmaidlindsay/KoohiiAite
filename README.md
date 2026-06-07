@@ -40,11 +40,13 @@ simple for Heisig students to quickly lookup kanji and read/write stories wherev
 
 The app provides detailed information about each kanji character through four main tabs:
 
-#### Kanji Tab
+#### Story Tab
 
-- Displays the kanji character
-- Shows the Heisig frame number
-- Lists associated primitives used in the kanji
+- Displays the kanji character and Heisig frame number
+- Custom keyword support with dialog editing
+- View and edit your custom stories for remembering kanji
+- Rich text formatting with `*italic*`, `**bold**`, and `[[kanji]]` links
+- Clickable keyword links to other kanji detail pages
 
 #### Dictionary Tab
 
@@ -53,18 +55,15 @@ The app provides detailed information about each kanji character through four ma
 - Shows various meanings of the kanji
 - Includes frequency information
 
-#### Story Tab
+#### Sample Words Tab
 
-- View and edit your custom stories for remembering kanji
-- Links to primitives within stories for quick reference
-- Last edited timestamp for stories
-- Support for importing stories from CSV files
+- Example vocabulary words containing the kanji
+- Shows kanji reading, hiragana, English meaning, and frequency
 
 #### Koohii Tab
 
 - Direct integration with Koohii.com
-- View top 20 stories from the community
-- Access to favorited stories (when signed in)
+- Opens the kanji page on kanji.koohii.com for community stories
 
 ### 3. Primitive Management
 
@@ -78,6 +77,7 @@ The app provides detailed information about each kanji character through four ma
 - Import stories from CSV files
 - Preview imported data before confirming
 - Progress tracking for import operations
+- Supports Koohii.com CSV export format
 
 ### 5. Database Features
 
@@ -98,10 +98,13 @@ The app uses a local SQLite database (Room) with the following main entities:
 ### Implementation
 
 - Written in Kotlin
-- Uses Android Architecture Components (Room, ViewModel, LiveData)
-- Material Design UI components
-- ViewPager for detail view navigation
-- Coroutines for asynchronous operations
+- Jetpack Compose with Material 3 for UI
+- Single Activity architecture with Navigation Compose
+- Room database with `createFromAsset()` for pre-populated DB
+- Hilt for dependency injection
+- Coroutines and Flow for asynchronous operations
+- Kotlin Serialization for type-safe navigation arguments
+- Coil for image loading
 
 ### Database Structure
 

@@ -1,11 +1,7 @@
 package tech.diarmaid.koohiiaite
 
 import android.app.Application
-import tech.diarmaid.koohiiaite.database.DatabaseCopier
+import dagger.hilt.android.HiltAndroidApp
 
-class KoohiiApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        DatabaseCopier().init(this)
-    }
-}
+@HiltAndroidApp
+class KoohiiApplication : Application()
