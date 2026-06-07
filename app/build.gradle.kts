@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt.android)
@@ -10,12 +9,12 @@ plugins {
 
 android {
     namespace = "tech.diarmaid.koohiiaite"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "tech.diarmaid.koohiiaite"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -35,10 +34,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -90,7 +85,6 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit.jupiter)
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
     testImplementation(libs.turbine)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
