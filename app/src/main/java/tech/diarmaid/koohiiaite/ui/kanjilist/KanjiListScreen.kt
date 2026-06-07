@@ -1,10 +1,8 @@
 package tech.diarmaid.koohiiaite.ui.kanjilist
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -140,28 +137,12 @@ fun KanjiListScreen(
                 }
             }
 
-            // Result count and filter indicators
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${uiState.filteredItems.size} items displayed",
-                    style = MaterialTheme.typography.labelLarge
-                )
-                Text(
-                    text = buildFilterIndicatorText(
-                        uiState.joyoFilter,
-                        uiState.keywordFilter,
-                        uiState.storyFilter
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            // Result count
+            Text(
+                text = "${uiState.filteredItems.size} items displayed",
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
 
             // Filter chips
             FilterChips(
@@ -201,17 +182,4 @@ fun KanjiListScreen(
             }
         }
     }
-}
-
-private fun buildFilterIndicatorText(
-    joyo: FilterState,
-    keyword: FilterState,
-    story: FilterState
-): String {
-    fun icon(state: FilterState) = when (state) {
-        FilterState.UNSET -> "  "
-        FilterState.YES -> "O"
-        FilterState.NO -> "X"
-    }
-    return "Joyo[${icon(joyo)}] Keyword[${icon(keyword)}] Story[${icon(story)}]"
 }
