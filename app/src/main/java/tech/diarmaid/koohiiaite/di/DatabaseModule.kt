@@ -33,6 +33,7 @@ object DatabaseModule {
             "koohii.sqlite3.db"
         )
             .createFromAsset("databases/koohii.sqlite3.db")
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 

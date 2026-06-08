@@ -36,7 +36,7 @@ import tech.diarmaid.koohiiaite.data.local.entity.UserKeywordEntity
         StoryEntity::class,
         UserKeywordEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

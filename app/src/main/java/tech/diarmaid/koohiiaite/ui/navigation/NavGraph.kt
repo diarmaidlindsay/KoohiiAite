@@ -53,10 +53,18 @@ fun NavGraph(
                 filteredIds = args.filteredIds,
                 initialTabIndex = args.initialTabIndex,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToKanji = { heisigId ->
+                onNavigateToKanji = { heisigId, initialTabIndex ->
                     navController.navigate(
-                        KanjiDetailRoute(heisigId = heisigId, filteredIds = listOf(heisigId))
-                    )
+                        KanjiDetailRoute(
+                            heisigId = heisigId,
+                            filteredIds = args.filteredIds,
+                            initialTabIndex = initialTabIndex
+                        )
+                    ) {
+                        popUpTo<KanjiDetailRoute> {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }

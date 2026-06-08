@@ -44,7 +44,7 @@ fun KanjiDetailScreen(
     filteredIds: List<Int>,
     initialTabIndex: Int = 0,
     onNavigateBack: () -> Unit,
-    onNavigateToKanji: (Int) -> Unit,
+    onNavigateToKanji: (Int, Int) -> Unit,
     viewModel: KanjiDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -82,7 +82,7 @@ fun KanjiDetailScreen(
                         onClick = {
                             if (currentIndex > 0) {
                                 val prevId = filteredIds[currentIndex - 1]
-                                onNavigateToKanji(prevId)
+                                onNavigateToKanji(prevId, pagerState.currentPage)
                             }
                         },
                         enabled = !isFirst
@@ -101,7 +101,7 @@ fun KanjiDetailScreen(
                         onClick = {
                             if (currentIndex < filteredIds.size - 1) {
                                 val nextId = filteredIds[currentIndex + 1]
-                                onNavigateToKanji(nextId)
+                                onNavigateToKanji(nextId, pagerState.currentPage)
                             }
                         },
                         enabled = !isLast
@@ -169,7 +169,9 @@ fun KanjiDetailScreen(
                                 onSaveKeyword = viewModel::saveKeyword,
                                 onResetToDefault = viewModel::resetToDefaultKeyword,
                                 onSaveStory = viewModel::saveStory,
-                                onNavigateToKanji = onNavigateToKanji
+                                onNavigateToKanji = { id ->
+                                    onNavigateToKanji(id, pagerState.currentPage)
+                                }
                             )
                         }
                         1 -> detail?.let { DictionaryTab(detail = it) }

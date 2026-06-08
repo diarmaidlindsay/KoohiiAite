@@ -1,0 +1,517 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "66379b021b875a2d429cb5af3450462e",
+    "entities": [
+      {
+        "tableName": "heisig_kanji",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `kanji` TEXT NOT NULL, `joyo` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kanji",
+            "columnName": "kanji",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "joyo",
+            "columnName": "joyo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "heisig_to_primitive",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `heisig_id` INTEGER NOT NULL, `primitive_id` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`primitive_id`) REFERENCES `primitive`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "primitiveId",
+            "columnName": "primitive_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_heisig_to_primitive_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_heisig_to_primitive_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          },
+          {
+            "name": "index_heisig_to_primitive_primitive_id",
+            "unique": false,
+            "columnNames": [
+              "primitive_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_heisig_to_primitive_primitive_id` ON `${TABLE_NAME}` (`primitive_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "primitive",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "primitive_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "kanji_frequency",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`heisig_id` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, PRIMARY KEY(`heisig_id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "heisig_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_kanji_frequency_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_kanji_frequency_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "keyword",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`heisig_id` INTEGER NOT NULL, `keyword_text` TEXT NOT NULL, PRIMARY KEY(`heisig_id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keywordText",
+            "columnName": "keyword_text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "heisig_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_keyword_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_keyword_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "meaning",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `heisig_id` INTEGER NOT NULL, `meaning_text` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "meaningText",
+            "columnName": "meaning_text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_meaning_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_meaning_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "primitive",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `primitive_text` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "primitiveText",
+            "columnName": "primitive_text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "reading",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `heisig_id` INTEGER NOT NULL, `reading_text` TEXT, `type` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "readingText",
+            "columnName": "reading_text",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_reading_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reading_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sample_words",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `heisig_id` INTEGER NOT NULL, `kanji_word` TEXT NOT NULL, `hiragana_reading` TEXT NOT NULL, `english_meaning` TEXT NOT NULL, `category` TEXT, `frequency` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kanjiWord",
+            "columnName": "kanji_word",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hiraganaReading",
+            "columnName": "hiragana_reading",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "englishMeaning",
+            "columnName": "english_meaning",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sample_words_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sample_words_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "story",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `story_text` TEXT DEFAULT '', `last_edited` INTEGER, PRIMARY KEY(`id`), FOREIGN KEY(`id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storyText",
+            "columnName": "story_text",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "lastEdited",
+            "columnName": "last_edited",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "user_keyword",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`heisig_id` INTEGER NOT NULL, `keyword_text` TEXT NOT NULL, PRIMARY KEY(`heisig_id`), FOREIGN KEY(`heisig_id`) REFERENCES `heisig_kanji`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "heisigId",
+            "columnName": "heisig_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keywordText",
+            "columnName": "keyword_text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "heisig_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_user_keyword_heisig_id",
+            "unique": false,
+            "columnNames": [
+              "heisig_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_user_keyword_heisig_id` ON `${TABLE_NAME}` (`heisig_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "heisig_kanji",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "heisig_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '66379b021b875a2d429cb5af3450462e')"
+    ]
+  }
+}
