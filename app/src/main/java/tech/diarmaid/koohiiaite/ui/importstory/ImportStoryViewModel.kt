@@ -14,8 +14,14 @@ import tech.diarmaid.koohiiaite.data.local.dao.StoryDao
 import tech.diarmaid.koohiiaite.data.local.dao.UserKeywordDao
 import tech.diarmaid.koohiiaite.data.local.entity.StoryEntity
 import tech.diarmaid.koohiiaite.data.local.entity.UserKeywordEntity
+import tech.diarmaid.koohiiaite.data.remote.KoohiiApiClient
+import tech.diarmaid.koohiiaite.data.remote.KoohiiAuthException
+import tech.diarmaid.koohiiaite.data.remote.KoohiiSessionStore
 import tech.diarmaid.koohiiaite.data.repository.KanjiRepository
 import tech.diarmaid.koohiiaite.domain.model.CsvEntry
+import tech.diarmaid.koohiiaite.util.CsvParser
+import java.io.BufferedReader
+import java.io.StringReader
 import javax.inject.Inject
 
 data class ImportStoryUiState(
@@ -24,25 +30,90 @@ data class ImportStoryUiState(
     val isProcessing: Boolean = false,
     val showPreview: Boolean = false,
     val importComplete: Boolean = false,
-    val affectedCount: Int = 0
+    val affectedCount: Int = 0,
+    val needsLogin: Boolean = false
 )
 
 @HiltViewModel
 class ImportStoryViewModel @Inject constructor(
     private val storyDao: StoryDao,
     private val userKeywordDao: UserKeywordDao,
-    private val kanjiRepository: KanjiRepository
+    private val kanjiRepository: KanjiRepository,
+    private val koohiiApiClient: KoohiiApiClient,
+    val koohiiSessionStore: KoohiiSessionStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ImportStoryUiState())
     val uiState: StateFlow<ImportStoryUiState> = _uiState.asStateFlow()
 
+    private val csvParser = CsvParser()
+
+    /**
+     * Returns whether the user has stored Koohii session cookies.
+     */
+    fun isLoggedInToKoohii(): Boolean = koohiiSessionStore.isLoggedIn()
+
+    /**
+     * Called when Koohii login succeeds (from the WebView).
+     * Immediately triggers the CSV download.
+     */
+    fun onKoohiiLoginSuccess() {
+        _uiState.update { it.copy(needsLogin = false) }
+        downloadFromKoohii()
+    }
+
+    /**
+     * Initiates download of stories from Koohii.
+     * If no session cookie is stored, sets needsLogin = true to show the WebView.
+     */
+    fun downloadFromKoohii() {
+        if (!koohiiSessionStore.isLoggedIn()) {
+            _uiState.update { it.copy(needsLogin = true) }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessing = true, statusText = "Downloading stories from Koohii...") }
+
+            val result = koohiiApiClient.downloadStoriesCsv()
+
+            result.fold(
+                onSuccess = { csvText ->
+                    val parseResult = withContext(Dispatchers.IO) {
+                        csvParser.parse(BufferedReader(StringReader(csvText)))
+                    }
+                    parseResult.fold(
+                        onSuccess = { entries -> setParsedEntries(entries) },
+                        onFailure = { error -> setParsingError(error.message ?: "Unknown error") }
+                    )
+                },
+                onFailure = { error ->
+                    if (error is KoohiiAuthException) {
+                        _uiState.update {
+                            it.copy(
+                                isProcessing = false,
+                                needsLogin = true,
+                                statusText = "Session expired. Please log in again."
+                            )
+                        }
+                    } else {
+                        setParsingError(error.message ?: "Download failed")
+                    }
+                }
+            )
+        }
+    }
+
+    /**
+     * Called when the user selects a local CSV file.
+     */
     fun setParsedEntries(entries: List<CsvEntry>) {
         _uiState.update {
             it.copy(
                 parsedEntries = entries,
                 isProcessing = false,
                 showPreview = true,
+                needsLogin = false,
                 statusText = "${entries.size} stories found for import."
             )
         }
@@ -108,6 +179,16 @@ class ImportStoryViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Clears stored Koohii session cookies (logout).
+     */
+    fun logoutFromKoohii() {
+        koohiiSessionStore.clear()
+        _uiState.update {
+            it.copy(statusText = "Logged out of Koohii.")
         }
     }
 }

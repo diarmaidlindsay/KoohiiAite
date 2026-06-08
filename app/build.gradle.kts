@@ -83,6 +83,12 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // OkHttp
+    implementation(libs.okhttp)
+
+    // Security (EncryptedSharedPreferences)
+    implementation(libs.security.crypto)
+
     // Testing
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.turbine)

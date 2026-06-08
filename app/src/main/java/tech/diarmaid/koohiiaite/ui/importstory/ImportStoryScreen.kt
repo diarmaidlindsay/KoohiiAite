@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,13 +25,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +50,18 @@ import tech.diarmaid.koohiiaite.util.CsvParser
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+/**
+ * Import source selection — the user can either:
+ * 1. Download directly from Koohii (with stored or fresh login)
+ * 2. Pick a local CSV file
+ */
+private enum class ImportSource {
+    CHOOSING,
+    KOOHII_WEBVIEW,
+    KOOHII_DOWNLOADING,
+    FILE_PICKER
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportStoryScreen(
@@ -59,6 +73,15 @@ fun ImportStoryScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val csvParser = remember { CsvParser() }
+
+    var importSource by remember { mutableStateOf(ImportSource.CHOOSING) }
+
+    // Watch for needsLogin — switch to WebView if the ViewModel requests it
+    LaunchedEffect(uiState.needsLogin) {
+        if (uiState.needsLogin) {
+            importSource = ImportSource.KOOHII_WEBVIEW
+        }
+    }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -104,6 +127,20 @@ fun ImportStoryScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
+                actions = {
+                    // Show logout button if logged into Koohii
+                    if (viewModel.isLoggedInToKoohii() && !uiState.showPreview) {
+                        TextButton(onClick = {
+                            viewModel.logoutFromKoohii()
+                            importSource = ImportSource.CHOOSING
+                        }) {
+                            Text(
+                                "Logout Koohii",
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -116,26 +153,64 @@ fun ImportStoryScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            if (!uiState.showPreview) {
-                Box(
+            // --- Source chooser (only when not showing preview or login) ---
+            if (!uiState.showPreview && importSource == ImportSource.CHOOSING) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    contentAlignment = Alignment.Center
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text(
+                        text = "Choose import source:",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+
                     Button(
-                        onClick = { filePickerLauncher.launch("text/*") }
+                        onClick = {
+                            importSource = ImportSource.KOOHII_DOWNLOADING
+                            viewModel.downloadFromKoohii()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
                     ) {
-                        Text("Choose CSV File")
+                        Text("Import from Koohii")
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            importSource = ImportSource.FILE_PICKER
+                            filePickerLauncher.launch("text/*")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Import from File")
                     }
                 }
             }
 
+            // --- Koohii WebView login ---
+            if (importSource == ImportSource.KOOHII_WEBVIEW) {
+                KoohiiLoginWebView(
+                    sessionStore = viewModel.koohiiSessionStore,
+                    onLoginSuccess = {
+                        importSource = ImportSource.KOOHII_DOWNLOADING
+                        viewModel.onKoohiiLoginSuccess()
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            // --- Processing indicator ---
             if (uiState.isProcessing) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.padding(8.dp))
             }
 
+            // --- Status text ---
             if (uiState.statusText.isNotBlank()) {
                 Text(
                     text = uiState.statusText,
@@ -145,6 +220,7 @@ fun ImportStoryScreen(
                 )
             }
 
+            // --- Preview & confirm ---
             if (uiState.showPreview && uiState.parsedEntries.isNotEmpty()) {
                 Text(
                     text = "Preview:",
@@ -166,7 +242,10 @@ fun ImportStoryScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     OutlinedButton(
-                        onClick = onBack,
+                        onClick = {
+                            // Go back to source chooser
+                            importSource = ImportSource.CHOOSING
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Cancel")
