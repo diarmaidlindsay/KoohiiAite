@@ -3,25 +3,36 @@ package tech.diarmaid.koohiiaite.ui.kanjilist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,6 +73,7 @@ fun KanjiListScreen(
         topBar = {
             TopAppBar(
                 title = { Text("KoohiiAite") },
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -95,88 +108,145 @@ fun KanjiListScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search bar
-            DockedSearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = uiState.searchQuery,
-                        onQueryChange = viewModel::onSearchQueryChanged,
-                        onSearch = { searchExpanded = false },
-                        expanded = searchExpanded,
-                        onExpandedChange = { searchExpanded = it },
-                        placeholder = { Text("Primitives, Keyword, Kanji, Frame #") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                        colors = SearchBarDefaults.inputFieldColors()
-                    )
-                },
-                expanded = searchExpanded,
-                onExpandedChange = { searchExpanded = it },
-                modifier = Modifier.fillMaxWidth(),
-                colors = SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                if (uiState.suggestions.isNotEmpty()) {
-                    LazyColumn {
-                        items(uiState.suggestions) { suggestion ->
-                            Text(
-                                text = suggestion,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { viewModel.onSuggestionSelected(suggestion) }
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                style = MaterialTheme.typography.bodyLarge
+                // Search bar
+                TextField(
+                    value = uiState.searchQuery,
+                    onValueChange = {
+                        viewModel.onSearchQueryChanged(it)
+                        searchExpanded = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Primitives, Keyword, Kanji, Frame #") },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
+                    },
+                    trailingIcon = {
+                        Row {
+                            if (uiState.searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                    Icon(
+                                        Icons.Default.Clear,
+                                        contentDescription = "Clear search"
+                                    )
+                                }
+                            }
+                            IconButton(onClick = { searchExpanded = !searchExpanded }) {
+                                Icon(
+                                    imageVector = if (searchExpanded) {
+                                        Icons.Default.KeyboardArrowUp
+                                    } else {
+                                        Icons.Default.KeyboardArrowDown
+                                    },
+                                    contentDescription = if (searchExpanded) {
+                                        "Collapse search"
+                                    } else {
+                                        "Expand search"
+                                    }
+                                )
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(28.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
+                )
+
+                // Result count
+                Text(
+                    text = "${uiState.filteredItems.size} items displayed",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+
+                // Filter chips
+                FilterChips(
+                    joyoFilter = uiState.joyoFilter,
+                    keywordFilter = uiState.keywordFilter,
+                    storyFilter = uiState.storyFilter,
+                    onJoyoFilterChange = viewModel::setJoyoFilter,
+                    onKeywordFilterChange = viewModel::setKeywordFilter,
+                    onStoryFilterChange = viewModel::setStoryFilter
+                )
+
+                // Content
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(
+                            items = uiState.filteredItems,
+                            key = { it.heisigId }
+                        ) { item ->
+                            KanjiListItem(
+                                item = item,
+                                onClick = {
+                                    onKanjiClick(
+                                        item.heisigId,
+                                        uiState.filteredItems.map { it.heisigId }
+                                    )
+                                }
                             )
                         }
                     }
                 }
             }
 
-            // Result count
-            Text(
-                text = "${uiState.filteredItems.size} items displayed",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
-
-            // Filter chips
-            FilterChips(
-                joyoFilter = uiState.joyoFilter,
-                keywordFilter = uiState.keywordFilter,
-                storyFilter = uiState.storyFilter,
-                onJoyoFilterChange = viewModel::setJoyoFilter,
-                onKeywordFilterChange = viewModel::setKeywordFilter,
-                onStoryFilterChange = viewModel::setStoryFilter
-            )
-
-            // Content
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+            // Floating dropdown overlay
+            if (searchExpanded && uiState.suggestions.isNotEmpty()) {
+                Card(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset(y = 52.dp)
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .heightIn(max = 132.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(
-                        items = uiState.filteredItems,
-                        key = { it.heisigId }
-                    ) { item ->
-                        KanjiListItem(
-                            item = item,
-                            onClick = {
-                                onKanjiClick(
-                                    item.heisigId,
-                                    uiState.filteredItems.map { it.heisigId }
+                    LazyColumn {
+                        items(uiState.suggestions) { suggestion ->
+                            Text(
+                                text = suggestion,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.onSuggestionSelected(suggestion)
+                                        searchExpanded = false
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            if (suggestion != uiState.suggestions.last()) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant
                                 )
                             }
-                        )
+                        }
                     }
                 }
             }
